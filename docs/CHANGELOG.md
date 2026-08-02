@@ -20,6 +20,25 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ---
 
+## [0.1.2] — 2026-08-02
+
+### Añadido
+
+**Fase 0 — Husky: pre-commit hooks y validación de commits:**
+- `package.json` (raíz) — package de herramientas de desarrollo del monorepo. Incluye `prepare: husky`, dependencias `husky@9`, `lint-staged@15`, `@commitlint/cli@19`, `@commitlint/config-conventional@19` y configuración `lint-staged` para archivos TypeScript del backend.
+- `commitlint.config.js` — configuración de commitlint: extiende `@commitlint/config-conventional`, define `type-enum` con los 10 tipos del proyecto, `scope-enum` con los 20 alcances del proyecto, `subject-case` (sin mayúsculas de título) y `header-max-length: 100`.
+- `.husky/pre-commit` — hook ejecutado antes de cada commit: corre `lint-staged` sobre archivos staged. Si ESLint o Prettier fallan, el commit se cancela.
+- `.husky/commit-msg` — hook ejecutado al escribir el mensaje de commit: valida el formato Conventional Commits con `commitlint`. Mensajes fuera del estándar son rechazados automáticamente.
+- `package-lock.json` (raíz) — lock file para reproducibilidad de herramientas de desarrollo.
+
+### Modificado
+- `.gitignore` — agregada exclusión de `.husky/_/` (directorio interno generado por `husky init`).
+- `.claude/TASKS.md` — Husky marcado como `[x]`, progreso 11/12.
+- `.claude/ROADMAP.md` — Fase 0: 11/12 tareas completadas.
+- `.claude/SESSION.md` — estado actualizado con nueva tarea completada.
+
+---
+
 ## [0.1.1] — 2026-08-02
 
 ### Añadido

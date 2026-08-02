@@ -26,38 +26,41 @@ Estado: En progreso
 ✓ Logger estructurado (Pino) configurado
 ✓ README.md con instrucciones de setup local
 ✓ Docker Compose: PostgreSQL 15 + Redis 7 + MinIO + Backend NestJS
+✓ Husky: pre-commit hooks (lint-staged + commitlint)
 
 ---
 
 ## Tareas pendientes
 
 □ Frontend Next.js: scaffolding base con App Router y TailwindCSS
-□ Husky (pre-commit hooks)
 
 ---
 
 ## Próxima tarea sugerida
 
-Husky — pre-commit hooks con lint-staged y commitlint
+Frontend Next.js — scaffolding base con App Router y TailwindCSS
 
 ---
 
 ## Observaciones
 
 - PR #2 (`feature/fase-0-backend-nestjs` → `develop`) publicado en GitHub. Pendiente de revisión y merge.
-- Al completar Husky y Frontend Next.js, Fase 0 queda en 12/12 tareas y puede marcarse como completada.
+- Al completar Frontend Next.js, Fase 0 queda en 12/12 tareas y puede marcarse como completada.
 - Antes de iniciar Fase 1 resolver los `[~]` M-04 y M-03 (estructura ciudadanos + historial_contraseñas).
 
 ---
 
 ## Decisiones Técnicas (sesión activa)
 
-- Docker Compose Specification sin atributo `version` (compatibilidad con Docker Engine actual).
-- Dockerfile multi-stage único: una sola imagen, tres targets (development/build/production).
-- `createbuckets` como servicio `on-failure` de un solo uso: crea buckets en MinIO al iniciar.
-- `CHOKIDAR_USEPOLLING=true` para hot reload en entornos Windows/WSL con volúmenes montados.
-- `$$REDIS_PASSWORD` en healthcheck Redis: `$$` en compose = `$` literal dentro del contenedor.
-- Progreso del proyecto expresado como conteo de tareas (`N / Total`), sin porcentajes fijos.
+- Husky instalado en raíz del repositorio (donde vive `.git`), no dentro de `backend/`.
+- `package.json` raíz creado exclusivamente para herramientas de desarrollo del monorepo.
+- Hook `pre-commit`: lint-staged sobre `backend/src/**/*.ts` y `backend/test/**/*.ts`.
+  ESLint y Prettier se ejecutan con la config de `backend/` (la detectan subiendo desde la ruta del archivo).
+- Hook `commit-msg`: commitlint valida formato Conventional Commits antes de aceptar el commit.
+- `commitlint.config.js` define `type-enum` (tipos permitidos) y `scope-enum` (alcances del proyecto)
+  como advertencia, no error — permite alcances no listados sin bloquear el commit.
+- `.husky/_/` excluido del repositorio (generado por husky init, no es código de la app).
+- `--max-warnings=0` en ESLint dentro de lint-staged: cualquier warning bloquea el commit.
 
 ---
 

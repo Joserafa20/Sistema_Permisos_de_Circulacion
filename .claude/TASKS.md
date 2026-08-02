@@ -33,7 +33,7 @@
 **Semana:** 1
 **Dependencia:** Ninguna. Punto de partida.
 **Estado:** 🟡 En progreso
-**Progreso:** 10 / 12 tareas completadas
+**Progreso:** 11 / 12 tareas completadas
 
 - [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
 - [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
@@ -42,7 +42,7 @@
 - [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
 - [x] Archivo `.env.example` completo con todas las variables
 - [x] ESLint + Prettier configurados
-- [ ] Husky (pre-commit hooks)
+- [x] Husky (pre-commit hooks) ✅ 2026-08-02
 - [x] Swagger configurado y accesible en `/api/docs`
 - [x] Endpoint `/api/v1/health` operativo
 - [x] Logger estructurado (Pino) configurado
@@ -326,19 +326,18 @@ Fase 0 — Fundamentos
 ### Tareas pendientes en la fase activa
 
 - [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
-- [ ] Husky (pre-commit hooks)
 
 ### Última tarea terminada
 
-Docker Compose desarrollo (2026-08-02):
-`backend/Dockerfile` multi-stage (development/build/production), `docker/docker-compose.yml`
-con PostgreSQL 15 + Redis 7 + MinIO + Backend NestJS, healthchecks en todos los servicios,
-bucket auto-creation (`createbuckets`), volúmenes nombrados, red `picoyplaca-network`,
-`restart: unless-stopped`, logging json-file, `.env.example` documentado, `postgres/init.sql`.
+Husky — pre-commit hooks (2026-08-02):
+`package.json` raíz con husky 9, lint-staged 15 y @commitlint/cli 19.
+Hook `pre-commit`: ejecuta lint-staged sobre archivos TypeScript staged.
+Hook `commit-msg`: valida Conventional Commits con commitlint.
+`commitlint.config.js` con tipos y alcances del proyecto definidos.
 
 ### Próxima tarea
 
-Continuar Fase 0: Husky (pre-commit hooks: lint-staged + commitlint) — aguardando autorización.
+Continuar Fase 0: Frontend Next.js scaffolding (App Router + TailwindCSS) — aguardando autorización.
 
 ---
 
