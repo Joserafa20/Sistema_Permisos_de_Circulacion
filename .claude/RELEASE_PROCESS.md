@@ -5,6 +5,26 @@
 Este documento define el flujo obligatorio de Git, Pull Requests, Versionado y Releases del proyecto.
 
 ---
+# Documentos Relacionados
+
+Este proceso forma parte del framework de desarrollo del proyecto y debe ejecutarse en conjunto con los siguientes documentos:
+
+1. START.md
+2. WORKFLOW.md
+3. SESSION.md
+4. QUALITY_GATE.md
+
+## Orden de prioridad
+
+En caso de existir conflicto entre documentos, Claude Code deberá seguir el siguiente orden de prioridad:
+
+1. START.md
+2. WORKFLOW.md
+3. SESSION.md
+4. QUALITY_GATE.md
+5. RELEASE_PROCESS.md
+
+Nunca deberá ignorar las reglas establecidas en los documentos de mayor prioridad.
 
 # Estrategia Git
 

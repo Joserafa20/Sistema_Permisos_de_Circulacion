@@ -20,6 +20,24 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ---
 
+## [0.1.4] — 2026-08-02
+
+### Añadido
+
+**Fase 0 — Limpieza previa al merge (cierre definitivo):**
+- `.claude/DECISION_LOG.md` — reescrito con formato ADR estándar. Documenta ADR-001 a ADR-014 con todas las decisiones arquitectónicas de la Fase 0, más hallazgos HAL-001 (baseUrl deprecated), HAL-002 (Next.js 14 CVEs) y HAL-003 (28 vulnerabilidades NestJS backend — 0 críticas).
+- `.claude/RELEASE_PROCESS.md` — proceso oficial de versionado y releases versionado en la rama.
+- `.claude/START.md` — punto de entrada de sesiones versionado en la rama.
+- `backend/package-lock.json` — lock file del backend generado para reproducibilidad del entorno. npm audit: 28 vulnerabilidades (0 críticas, 8 altas, 17 moderadas, 3 bajas — todas requieren breaking changes de NestJS para corregirse, ver HAL-003).
+
+### Pendiente (diferido a Fase 1)
+- HAL-001: corrección de `baseUrl` deprecated en `backend/tsconfig.json` (TS5102 — no bloqueante).
+- HAL-002: actualización de Next.js 14 → 15 (5 CVEs altas, 0 críticas — scaffolding sin lógica de negocio).
+- HAL-003: revisión de vulnerabilidades en dependencias de producción de NestJS (`lodash`, `js-yaml`, `multer`) — evaluación de upgrade a NestJS v11 antes de despliegue a producción (Fase 8).
+- HAL-004: migración de `backend/.eslintrc.json` a flat config ESLint v9 (`eslint.config.js`) — ESLint v9 no reconoce `.eslintrc.json` por defecto (exit 0 sin lintear). TypeScript y build pasan correctamente.
+
+---
+
 ## [0.1.3] — 2026-08-02
 
 ### Añadido
@@ -186,6 +204,10 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 | Versión | Fecha | Descripción |
 |---------|-------|-------------|
+| 0.1.4 | 2026-08-02 | Limpieza previa al merge: DECISION_LOG (ADR-001–014, HAL-001–003), lockfile backend, archivos de contexto. |
+| 0.1.3 | 2026-08-02 | Frontend Next.js 14: scaffolding base, Dockerfile, TailwindCSS, tipos compartidos. Fase 0 completada. |
+| 0.1.2 | 2026-08-02 | Husky: pre-commit hooks (lint-staged), commitlint, Conventional Commits. |
+| 0.1.1 | 2026-08-02 | Docker Compose: PostgreSQL, Redis, MinIO, NestJS dev. Healthchecks, red y volúmenes dedicados. |
 | 0.1.0 | 2026-08-02 | Documentación fundacional completa. Inicio del proyecto. |
 
 ---
