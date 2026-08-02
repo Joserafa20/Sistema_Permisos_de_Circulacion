@@ -8,6 +8,14 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
+Fase: Fase 1 — Base de Datos y Migraciones
+
+Estado: 🔵 Activa — Rama: `feature/fase-1-base-datos`
+
+---
+
+## Fase anterior
+
 Fase: Fase 0 — Fundamentos
 
 Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit 33d6990)
