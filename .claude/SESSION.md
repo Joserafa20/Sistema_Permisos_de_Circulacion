@@ -10,7 +10,7 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 Fase: Fase 0 — Fundamentos
 
-Estado: Completada
+Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit 33d6990)
 
 ---
 
@@ -45,11 +45,17 @@ Fase 1 — Base de Datos: resolver primero los Pendientes de Diseño [~] M-04 y 
 
 ## Observaciones
 
-- PR #2 (`feature/fase-0-backend-nestjs` → `develop`) pendiente de merge en GitHub.
+- PR #2 mergeado a `develop` el 2026-08-02 (merge commit `33d6990`).
+- Rama `feature/fase-0-backend-nestjs` eliminada (remota y local).
+- Rama activa actual: `develop`.
 - Antes de iniciar Fase 1 se deben resolver:
   - [~] M-04: estructura de ciudadanos (tabla separada vs. campos embebidos en `solicitudes`)
   - [~] M-03: confirmar tabla `historial_contrasenas` en `MODELO_DATOS.md`
-- Al hacer merge del PR #2 y crear nueva rama `feature/fase-1-base-datos`, se cierra formalmente la Fase 0.
+- Hallazgos técnicos diferidos a Fase 1:
+  - HAL-001: `baseUrl` deprecated en `backend/tsconfig.json` (TS5102)
+  - HAL-002: Next.js 14 → 15 (5 CVEs altas, 0 críticas)
+  - HAL-003: NestJS 28 vulns (0 críticas) — evaluación NestJS v11 en Fase 8
+  - HAL-004: ESLint v9 flat config — migrar `backend/.eslintrc.json` a `eslint.config.js`
 
 ---
 
@@ -67,4 +73,4 @@ Fase 1 — Base de Datos: resolver primero los Pendientes de Diseño [~] M-04 y 
 
 ## Última actualización
 
-2026-08-02
+2026-08-02 — Cierre oficial Fase 0: merge PR #2 a develop, ramas limpiadas.
