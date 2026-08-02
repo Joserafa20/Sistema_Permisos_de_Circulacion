@@ -11,7 +11,7 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Añadido
 - `ADR-016` — Jerarquía de autoridad entre artefactos del modelo de datos (MODELO_DATOS.md > Entidades > Migraciones > schema.sql). Prohibición de corrección automática de inconsistencias estructurales.
-- `DATABASE.md` — sección "Regla de Consistencia del Modelo" derivada de ADR-016.
+- `DATABASE.md` — sección "Regla de consistencia del modelo" actualizada a versión definitiva: agrega descripción de cada artefacto, regla de no modificación sin autorización, y sección "Regla de propagación de cambios" con secuencia obligatoria de 7 pasos.
 - `DECISION_LOG.md` — HAL-004 actualizado con impacto en lint-staged y fecha límite de resolución (antes de Fase 2).
 
 ### Por Hacer
