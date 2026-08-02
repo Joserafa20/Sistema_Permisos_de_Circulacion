@@ -1,0 +1,44 @@
+# ── Node / npm ─────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Compilados ──────────────────────────────────────────────────
+dist/
+build/
+.next/
+out/
+
+# ── Variables de entorno ────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+# .env.example se sube al repo (es la plantilla documentada)
+
+# ── Cobertura de tests ──────────────────────────────────────────
+coverage/
+
+# ── IDE ─────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ──────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Docker volumes locales ──────────────────────────────────────
+docker/volumes/
+
+# ── Archivos de memoria de Claude (no son código del proyecto) ──
+memory/
+
+# ── Obsidian (notas personales, no son código del proyecto) ─────
+.obsidian/
