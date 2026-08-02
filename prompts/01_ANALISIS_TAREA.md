@@ -1,18 +1,34 @@
-Vamos a trabajar únicamente en la siguiente tarea:
+# ANALISIS DE LA SIGUIENTE TAREA
 
-[NOMBRE DE LA TAREA]
+Actúa como Tech Lead del proyecto.
+
+Antes de realizar cualquier análisis:
+
+1. Lee START.md.
+2. Lee TASKS.md.
+3. Lee ROADMAP.md.
+4. Identifica automáticamente la siguiente tarea pendiente con mayor prioridad.
+5. Verifica que pertenezca a la fase activa del ROADMAP.
+
+No me preguntes cuál tarea desarrollar.
+
+Selecciona automáticamente la siguiente tarea pendiente.
+
+Después genera un análisis técnico que incluya:
+
+- Nombre de la tarea.
+- Objetivo.
+- Justificación.
+- Archivos que crearás.
+- Archivos que modificarás.
+- Dependencias.
+- Riesgos.
+- Impacto en otros módulos.
+- Estrategia de implementación.
+- Criterios de aceptación.
 
 No escribas código.
 
-Presenta:
+Finaliza preguntando únicamente:
 
-- Objetivo
-- Alcance
-- Archivos que crearás
-- Archivos que modificarás
-- Riesgos
-- Dependencias
-- Buenas prácticas
-- Impacto sobre otros módulos
-
-Espera mi aprobación.
+"¿Apruebas este plan para comenzar la implementación?"
