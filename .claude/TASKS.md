@@ -32,8 +32,8 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.
 **Semana:** 1
 **Dependencia:** Ninguna. Punto de partida.
-**Estado:** 🟡 En progreso
-**Progreso:** 11 / 12 tareas completadas
+**Estado:** ✅ Completada
+**Progreso:** 12 / 12 tareas completadas
 
 - [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
 - [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
@@ -43,6 +43,7 @@
 - [x] Archivo `.env.example` completo con todas las variables
 - [x] ESLint + Prettier configurados
 - [x] Husky (pre-commit hooks) ✅ 2026-08-02
+- [x] Frontend Next.js: scaffolding base con App Router y TailwindCSS ✅ 2026-08-02
 - [x] Swagger configurado y accesible en `/api/docs`
 - [x] Endpoint `/api/v1/health` operativo
 - [x] Logger estructurado (Pino) configurado
@@ -325,19 +326,22 @@ Fase 0 — Fundamentos
 
 ### Tareas pendientes en la fase activa
 
-- [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
+Ninguna. Fase 0 completada (12/12).
 
 ### Última tarea terminada
 
-Husky — pre-commit hooks (2026-08-02):
-`package.json` raíz con husky 9, lint-staged 15 y @commitlint/cli 19.
-Hook `pre-commit`: ejecuta lint-staged sobre archivos TypeScript staged.
-Hook `commit-msg`: valida Conventional Commits con commitlint.
-`commitlint.config.js` con tipos y alcances del proyecto definidos.
+Frontend Next.js scaffolding (2026-08-02):
+`frontend/` con Next.js 14, App Router, TailwindCSS 3, TypeScript estricto.
+`src/app/` con layout.tsx, page.tsx, not-found.tsx, error.tsx.
+`src/lib/` con api-client.ts y constants.ts.
+`src/types/index.ts` con contratos de ApiResponse.
+`frontend/Dockerfile` multi-stage (development/build/production).
+Servicio `frontend` agregado a docker-compose.yml.
+lint-staged actualizado para cubrir archivos del frontend.
 
 ### Próxima tarea
 
-Continuar Fase 0: Frontend Next.js scaffolding (App Router + TailwindCSS) — aguardando autorización.
+Fase 1 — Base de Datos (resolver primero los [~] M-04 y M-03) — aguardando autorización.
 
 ---
 

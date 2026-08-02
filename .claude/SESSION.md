@@ -10,7 +10,7 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 Fase: Fase 0 — Fundamentos
 
-Estado: En progreso
+Estado: Completada
 
 ---
 
@@ -25,42 +25,43 @@ Estado: En progreso
 ✓ Endpoint `/api/v1/health` operativo
 ✓ Logger estructurado (Pino) configurado
 ✓ README.md con instrucciones de setup local
-✓ Docker Compose: PostgreSQL 15 + Redis 7 + MinIO + Backend NestJS
+✓ Docker Compose: PostgreSQL 15 + Redis 7 + MinIO + Backend NestJS + Frontend Next.js
 ✓ Husky: pre-commit hooks (lint-staged + commitlint)
+✓ Frontend Next.js: scaffolding base con App Router y TailwindCSS
 
 ---
 
 ## Tareas pendientes
 
-□ Frontend Next.js: scaffolding base con App Router y TailwindCSS
+Ninguna en Fase 0. Fase completada (12/12).
 
 ---
 
 ## Próxima tarea sugerida
 
-Frontend Next.js — scaffolding base con App Router y TailwindCSS
+Fase 1 — Base de Datos: resolver primero los Pendientes de Diseño [~] M-04 y M-03, luego implementar modelo de datos.
 
 ---
 
 ## Observaciones
 
-- PR #2 (`feature/fase-0-backend-nestjs` → `develop`) publicado en GitHub. Pendiente de revisión y merge.
-- Al completar Frontend Next.js, Fase 0 queda en 12/12 tareas y puede marcarse como completada.
-- Antes de iniciar Fase 1 resolver los `[~]` M-04 y M-03 (estructura ciudadanos + historial_contraseñas).
+- PR #2 (`feature/fase-0-backend-nestjs` → `develop`) pendiente de merge en GitHub.
+- Antes de iniciar Fase 1 se deben resolver:
+  - [~] M-04: estructura de ciudadanos (tabla separada vs. campos embebidos en `solicitudes`)
+  - [~] M-03: confirmar tabla `historial_contrasenas` en `MODELO_DATOS.md`
+- Al hacer merge del PR #2 y crear nueva rama `feature/fase-1-base-datos`, se cierra formalmente la Fase 0.
 
 ---
 
-## Decisiones Técnicas (sesión activa)
+## Decisiones Técnicas (Fase 0)
 
-- Husky instalado en raíz del repositorio (donde vive `.git`), no dentro de `backend/`.
-- `package.json` raíz creado exclusivamente para herramientas de desarrollo del monorepo.
-- Hook `pre-commit`: lint-staged sobre `backend/src/**/*.ts` y `backend/test/**/*.ts`.
-  ESLint y Prettier se ejecutan con la config de `backend/` (la detectan subiendo desde la ruta del archivo).
-- Hook `commit-msg`: commitlint valida formato Conventional Commits antes de aceptar el commit.
-- `commitlint.config.js` define `type-enum` (tipos permitidos) y `scope-enum` (alcances del proyecto)
-  como advertencia, no error — permite alcances no listados sin bloquear el commit.
-- `.husky/_/` excluido del repositorio (generado por husky init, no es código de la app).
-- `--max-warnings=0` en ESLint dentro de lint-staged: cualquier warning bloquea el commit.
+- `next.config.ts` no soportado en Next.js 14 (es Next.js 15+) → convertido a `next.config.js`.
+- `@typescript-eslint/no-unused-vars` no declarado explícitamente en `.eslintrc.json` del frontend —
+  ya viene incluido transitivamente por `eslint-config-next`; declararlo sin el plugin instalado genera error.
+- Frontend en lint-staged cubre solo `prettier --write` (Next.js tiene su propio linter con `next lint`).
+- `output: 'standalone'` en next.config.js para build optimizado en Docker (copia solo lo necesario).
+- Servicio `frontend` en docker-compose depende de `backend` con `condition: service_healthy`.
+- Inter desde `next/font/google` — Next.js la descarga en build time y la sirve localmente en runtime (sin petición a Google en producción).
 
 ---
 

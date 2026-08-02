@@ -20,6 +20,41 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ---
 
+## [0.1.3] — 2026-08-02
+
+### Añadido
+
+**Fase 0 — Frontend Next.js: scaffolding base (cierre de Fase 0):**
+- `frontend/Dockerfile` — multi-stage: `base`, `development` (hot reload), `build` (Next.js standalone), `production` (imagen mínima con usuario no-root `nextjs`).
+- `frontend/package.json` — Next.js 14, React 18, TypeScript 5, TailwindCSS 3, ESLint, Prettier.
+- `frontend/tsconfig.json` — TypeScript estricto (`strict`, `noImplicitAny`, `strictNullChecks`, `noUnusedLocals`), path alias `@/*`.
+- `frontend/next.config.js` — `output: 'standalone'` para Docker optimizado.
+- `frontend/tailwind.config.ts` — `darkMode: 'class'`, colores institucionales via variables CSS, content paths configurados.
+- `frontend/postcss.config.js` — TailwindCSS + autoprefixer.
+- `frontend/.eslintrc.json` — extiende `next/core-web-vitals` + `prettier`.
+- `frontend/.prettierrc` — mismas convenciones que el backend (singleQuote, trailingComma, printWidth 100).
+- `frontend/.env.example` — `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`.
+- `frontend/src/styles/globals.css` — directivas Tailwind + variables CSS institucionales (`--color-primary-*`).
+- `frontend/src/lib/constants.ts` — `API_URL`, `SITE_URL`, `SYSTEM_NAME`, `SYSTEM_SHORT_NAME`.
+- `frontend/src/lib/api-client.ts` — función `apiFetch<T>` con manejo de errores y clase `ApiError`.
+- `frontend/src/types/index.ts` — contratos `ApiResponse<T>`, `ApiListResponse<T>`, `ApiErrorResponse`, `PaginationMeta` (espejo del backend).
+- `frontend/src/app/layout.tsx` — Root layout con Inter (`next/font/google`), metadatos base, `lang="es"`.
+- `frontend/src/app/page.tsx` — Página de inicio placeholder (pantallas reales en Fase 5).
+- `frontend/src/app/not-found.tsx` — Página 404 global.
+- `frontend/src/app/error.tsx` — Error boundary global (`'use client'`).
+- `frontend/src/components/ui/.gitkeep` — reserva la carpeta para componentes de Fases 5–7.
+
+### Modificado
+- `docker/docker-compose.yml` — servicio `frontend` agregado (Next.js dev server, puerto 3000, `depends_on: backend`).
+- `docker/.env.example` — variables `FRONTEND_PORT`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`.
+- `package.json` (raíz) — `lint-staged` extendido para `frontend/src/**/*.{ts,tsx}`.
+- `README.md` — estado Fase 0 actualizado a ✅ Completada; descripción de carpeta `frontend/` actualizada.
+- `.claude/TASKS.md` — Frontend marcado `[x]`, Fase 0: 12/12 Completada.
+- `.claude/ROADMAP.md` — Fase 0: ✅ Completada; Fase 1: 🔵 Siguiente.
+- `.claude/SESSION.md` — estado actualizado, Fase 0 cerrada.
+
+---
+
 ## [0.1.2] — 2026-08-02
 
 ### Añadido

@@ -43,9 +43,9 @@ src/módulo/
 ├── .claude/         ← Contexto permanente del proyecto (ROADMAP, TASKS, SECURITY...)
 ├── docs/            ← PRD, Análisis Técnico, Modelo de Datos, API, Manuales
 ├── backend/         ← API REST NestJS
-├── frontend/        ← Interfaz Next.js (pendiente Fase 5)
-├── database/        ← Migraciones TypeORM y seeds (pendiente Fase 1)
-└── docker/          ← Docker Compose, Dockerfile, init scripts
+├── frontend/        ← Portal Web Next.js 14 (pantallas en Fase 5–7)
+├── database/        ← Migraciones TypeORM y seeds (Fase 1)
+└── docker/          ← Docker Compose, Dockerfiles, init scripts
 ```
 
 ---
@@ -55,7 +55,7 @@ src/módulo/
 | Fase | Descripción | Estado |
 |------|-------------|--------|
 | Documentación | PRD, API, Modelo de Datos, Manuales, Auditoría | ✅ Completa |
-| Fase 0 | Fundamentos e infraestructura base | 🟡 En progreso — 10/12 tareas |
+| Fase 0 | Fundamentos e infraestructura base | ✅ Completada — 12/12 tareas |
 | Fase 1 | Base de datos y migraciones | ⬜ Pendiente |
 | Fase 2 | Autenticación y seguridad | ⬜ Pendiente |
 | Fase 3 | Módulo de Solicitudes (backend) | ⬜ Pendiente |

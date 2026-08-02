@@ -15,7 +15,7 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.  
 **Duración estimada:** Semana 1  
 **Dependencia:** Ninguna. Es el punto de partida.
-**Estado:** 🟡 En progreso — 11 / 12 tareas completadas
+**Estado:** ✅ Completada — 12 / 12 tareas completadas
 
 - [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
 - [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
@@ -259,8 +259,8 @@
 
 | Fase | Descripción | Completadas | Total | Estado |
 |------|-------------|:-----------:|:-----:|--------|
-| Fase 0 | Fundamentos | 11 | 12 | 🟡 En progreso ← |
-| Fase 1 | Base de Datos | 0 | 7 | ⬜ No iniciada |
+| Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
+| Fase 1 | Base de Datos | 0 | 7 | 🔵 Siguiente ← |
 | Fase 2 | Auth y Seguridad | 0 | 15 | ⬜ No iniciada |
 | Fase 3 | Solicitudes Backend | 0 | 16 | ⬜ No iniciada |
 | Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |
