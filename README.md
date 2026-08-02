@@ -1,39 +1,105 @@
-# 🏍️ Sistema Web de Permisos de Circulación (Pico y Placa)
+# Sistema Web de Permisos de Circulación (Pico y Placa)
 
-## 📖 Descripción del Proyecto
-Plataforma web diseñada para digitalizar, optimizar y automatizar el proceso de solicitud y expedición de salvoconductos o permisos de circulación para motocicletas durante los días de restricción de "Pico y Placa". 
+Sistema institucional para la gestión digital de permisos de circulación de motocicletas durante la restricción Pico y Placa, desarrollado para una Alcaldía de Colombia.
 
-Este sistema facilita la interacción entre la ciudadanía y la administración de tránsito municipal, reduciendo los tiempos de trámite presencial y centralizando la validación documental en un entorno digital seguro y auditable.
+---
 
-## ✨ Características Principales
+## Descripción
 
-* **Portal de Ciudadanos (Frontend):** 
-  * Registro de usuarios y autenticación.
-  * Formulario de solicitud de permisos con carga de soportes (SOAT, revisión técnico-mecánica, tarjeta de propiedad, justificación laboral).
-  * Panel de seguimiento para consultar el estado del trámite (En revisión, Aprobado, Rechazado).
-* **Módulo Administrativo (Dashboard):** 
-  * Bandeja de entrada para funcionarios de tránsito.
-  * Herramientas de verificación documental.
-  * Aprobación o rechazo de solicitudes con capacidad de añadir observaciones.
-* **Generación y Validación:**
-  * Emisión automatizada del permiso en formato PDF descargable.
-  * Integración de un código QR único en cada permiso para que los agentes de tránsito validen su autenticidad en tiempo real mediante dispositivos móviles.
+Permite que los ciudadanos soliciten permisos de circulación especiales en línea. Un funcionario revisa la solicitud y los documentos adjuntos, y al aprobarla el sistema genera automáticamente un permiso en PDF con código QR único y verificable por autoridades de tránsito.
 
-## 🛠️ Stack Tecnológico
+---
 
-Este proyecto está construido utilizando tecnologías web modernas para garantizar escalabilidad, rapidez y un mantenimiento sencillo:
+## Stack Tecnológico
 
-* **Framework Principal:** [Next.js](https://nextjs.org/)
-* **Lenguaje:** JavaScript
-* **Estilos:** Tailwind CSS
-* **Base de Datos:** [Insertar aquí tu motor preferido, ej: PostgreSQL / MongoDB]
-* **Autenticación:** [Insertar aquí, ej: NextAuth.js]
-* **Almacenamiento de Archivos:** [Insertar aquí, ej: AWS S3 / Cloudinary]
+| Capa | Tecnología |
+|------|-----------|
+| Backend | NestJS 10 + Node.js 20 LTS + TypeScript 5 |
+| Frontend | Next.js 14 + React 18 + TailwindCSS 3 |
+| Base de Datos | PostgreSQL 15 + TypeORM 0.3 |
+| Caché / Colas | Redis 7 + BullMQ |
+| Storage | MinIO (S3-compatible) |
+| Autenticación | JWT (Access 15 min + Refresh 7 días) |
+| Contenedores | Docker + Docker Compose + Nginx |
 
-## 🚀 Instalación y Despliegue Local
+---
 
-Sigue estos pasos para levantar el entorno de desarrollo en tu máquina local:
+## Arquitectura
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone [https://github.com/tu-usuario/nombre-del-repo.git](https://github.com/tu-usuario/nombre-del-repo.git)
+Arquitectura Hexagonal (Ports & Adapters) + principios de Clean Architecture.
+
+```
+src/módulo/
+├── domain/          ← Entidades, value-objects, interfaces de repositorios
+├── application/     ← Casos de uso, DTOs
+└── infrastructure/  ← Controllers, TypeORM, adapters (PDF, QR, Email, Storage)
+```
+
+---
+
+## Estructura del Repositorio
+
+```
+├── .claude/         ← Contexto permanente del proyecto (ROADMAP, TASKS, SECURITY...)
+├── docs/            ← PRD, Análisis Técnico, Modelo de Datos, API, Manuales
+├── backend/         ← API REST NestJS
+├── frontend/        ← Interfaz Next.js (pendiente Fase 5)
+├── database/        ← Migraciones TypeORM y seeds (pendiente Fase 1)
+└── docker/          ← Dockerfiles y configuración Nginx (pendiente Fase 0)
+```
+
+---
+
+## Estado del Proyecto
+
+| Fase | Descripción | Estado |
+|------|-------------|--------|
+| Documentación | PRD, API, Modelo de Datos, Manuales, Auditoría | ✅ Completa |
+| Fase 0 | Fundamentos e infraestructura base | 🟡 En progreso (55%) |
+| Fase 1 | Base de datos y migraciones | ⬜ Pendiente |
+| Fase 2 | Autenticación y seguridad | ⬜ Pendiente |
+| Fase 3 | Módulo de Solicitudes (backend) | ⬜ Pendiente |
+| Fase 4 | Generación de Permiso (PDF + QR) | ⬜ Pendiente |
+| Fase 5 | Frontend Portal Ciudadano | ⬜ Pendiente |
+| Fase 6 | Frontend Panel Funcionario | ⬜ Pendiente |
+| Fase 7 | Frontend Panel Administrador | ⬜ Pendiente |
+| Fase 8 | Calidad y Producción | ⬜ Pendiente |
+
+---
+
+## Inicio Rápido (Backend)
+
+```bash
+cd backend
+cp .env.example .env
+# Completar variables en .env
+
+npm install
+npm run start:dev
+```
+
+Servidor: `http://localhost:3001/api/v1`
+Swagger UI: `http://localhost:3001/api/docs`
+
+---
+
+## Documentación
+
+| Documento | Ruta |
+|-----------|------|
+| PRD (requerimientos) | `docs/PRD_Sistema_Permisos_de_Circulacion.md` |
+| Análisis Técnico | `docs/ANALISIS_TECNICO.md` |
+| Modelo de Datos | `docs/MODELO_DATOS.md` |
+| API REST (56 endpoints) | `docs/API_FUNCIONAL.md` |
+| Reglas de Negocio (100 RN) | `docs/REGLAS_NEGOCIO.md` |
+| Plan de Pruebas | `docs/PLAN_PRUEBAS.md` |
+| Plan de Despliegue | `docs/PLAN_DESPLIEGUE.md` |
+| Manual Técnico | `docs/MANUAL_TECNICO.md` |
+| Manual de Usuario | `docs/MANUAL_USUARIO.md` |
+| Roadmap | `.claude/ROADMAP.md` |
+
+---
+
+## Marco Legal
+
+Ley 527/1999 · Ley 1581/2012 · Decreto 1377/2013 · Ley 1712/2014 · CONPES 3854/2016 · NTC 5854
