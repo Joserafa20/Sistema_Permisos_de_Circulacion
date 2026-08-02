@@ -51,6 +51,23 @@ Fase 1 — Base de Datos: resolver primero los Pendientes de Diseño [~] M-04 y 
 
 ---
 
+## Política — Framework del Proyecto Congelado
+
+> **Vigente desde:** 2026-08-02
+>
+> A partir de este momento el framework del proyecto está congelado.
+>
+> No deberán proponerse modificaciones a la metodología, herramientas de desarrollo,
+> flujo Git, documentación base o estándares del proyecto, salvo que exista:
+>
+> - un **bloqueo crítico** que impida continuar el desarrollo funcional,
+> - una **vulnerabilidad crítica** (CVSS ≥ 9.0) que requiera acción inmediata, o
+> - una **decisión arquitectónica aprobada** mediante un nuevo ADR registrado en DECISION_LOG.md.
+>
+> Las fases 1 a 8 deberán enfocarse exclusivamente en el desarrollo funcional del sistema.
+
+---
+
 ## Observaciones
 
 - PR #2 mergeado a `develop` el 2026-08-02 (merge commit `33d6990`).
