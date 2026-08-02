@@ -6,103 +6,58 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ---
 
-## Estado General
+## Fase actual
 
-Proyecto:
-Sistema Web para Solicitud y Generación de Permisos de Circulación de Motocicletas
+Fase: Fase 0 — Fundamentos
 
-Versión:
-0.1.0
-
-Estado:
-En Desarrollo — Fase 0 en progreso (75%)
+Estado: En progreso
 
 ---
 
-## Última tarea completada
+## Tareas completadas
 
-Docker Compose — Entorno de Desarrollo (2026-08-02)
-
-Archivos creados:
-- `backend/Dockerfile` — multi-stage: development / build / production
-- `docker/docker-compose.yml` — orquestación completa con 5 servicios
-- `docker/docker-compose.override.yml` — sobrescrituras locales opcionales
-- `docker/.env.example` — plantilla documentada de variables Docker
-- `docker/postgres/init.sql` — extensiones uuid-ossp y pgcrypto
-
-Archivos modificados:
-- `.gitignore` — agregado `docker/.env.docker`
-- `README.md` — sección "Inicio Rápido" actualizada con Docker
-- `.claude/TASKS.md` — tarea Docker marcada `[x]`, GitFlow y .gitignore corregidos
-- `.claude/ROADMAP.md` — Fase 0 actualizada al 75%
-- `docs/CHANGELOG.md` — entrada v0.1.1 agregada
+✓ Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*)
+✓ `.gitignore` completo (Node, env, build)
+✓ Backend NestJS: scaffolding base con ConfigModule tipado
+✓ Archivo `.env.example` completo con todas las variables
+✓ ESLint + Prettier configurados
+✓ Swagger configurado y accesible en `/api/docs`
+✓ Endpoint `/api/v1/health` operativo
+✓ Logger estructurado (Pino) configurado
+✓ README.md con instrucciones de setup local
+✓ Docker Compose: PostgreSQL 15 + Redis 7 + MinIO + Backend NestJS
 
 ---
 
-## Tarea en curso
+## Tareas pendientes
 
-Ninguna.
+□ Frontend Next.js: scaffolding base con App Router y TailwindCSS
+□ Husky (pre-commit hooks)
 
 ---
 
 ## Próxima tarea sugerida
 
-Fase 0 — Husky (pre-commit hooks: lint-staged + commitlint)
-Luego: Frontend Next.js scaffolding (App Router + TailwindCSS)
+Husky — pre-commit hooks con lint-staged y commitlint
 
 ---
 
-## Sprint / Fase Actual
+## Observaciones
 
-Fase 0 — Fundamentos (75%)
-Pendientes: Husky, Frontend Next.js
-
----
-
-## Decisiones Técnicas
-
-- Docker Compose Specification sin atributo `version` (compatibilidad con Docker Engine actual)
-- Dockerfile multi-stage único: una sola imagen, tres targets (development/build/production)
-- `createbuckets` como servicio `on-failure` de un solo uso: crea buckets en MinIO al iniciar
-- `CHOKIDAR_USEPOLLING=true` para hot reload en entornos Windows/WSL con volúmenes montados
-- `restart: unless-stopped` en todos los servicios de infraestructura
-- Healthchecks en los 4 servicios principales; backend espera los 3 de infraestructura + createbuckets
-- `$$REDIS_PASSWORD` en healthcheck Redis: `$$` en compose = `$` literal dentro del contenedor
-- Volúmenes nombrados para postgres/redis/minio — datos persisten con `down`, se eliminan con `down -v`
-- Red `picoyplaca-network` dedicada — comunicación por nombre de servicio, nunca IPs
+- PR #2 (`feature/fase-0-backend-nestjs` → `develop`) publicado en GitHub. Pendiente de revisión y merge.
+- Al completar Husky y Frontend Next.js, Fase 0 queda en 12/12 tareas y puede marcarse como completada.
+- Antes de iniciar Fase 1 resolver los `[~]` M-04 y M-03 (estructura ciudadanos + historial_contraseñas).
 
 ---
 
-## Riesgos Detectados
+## Decisiones Técnicas (sesión activa)
 
-- Puerto 5432 puede estar ocupado si el usuario tiene PostgreSQL nativo instalado.
-  Solución: usar `docker-compose.override.yml` para mapear a 5433:5432.
-- Puerto 9000/9001 pueden estar ocupados por otras instancias de MinIO.
-  Solución: ajustar `MINIO_PORT` / `MINIO_CONSOLE_PORT` en `.env.docker`.
-
----
-
-## Pendientes
-
-- Resolver 5 `[~]` Pendientes de Diseño antes de sus respectivas fases (ver TASKS.md).
-- PR #2 pendiente de aprobación y merge en GitHub.
-
----
-
-## Errores Encontrados
-
-- Ninguno en esta sesión.
-
----
-
-## Notas para la siguiente sesión
-
-1. Leer START.md.
-2. Verificar estado del PR #2 en GitHub.
-3. Si fue aprobado y mergeado: crear nueva rama `feature/fase-0-husky-frontend`.
-4. Siguiente tarea: Husky + commitlint + lint-staged.
-5. Luego: Frontend Next.js scaffolding.
-6. Al completar Husky + Frontend: Fase 0 = 100%.
+- Docker Compose Specification sin atributo `version` (compatibilidad con Docker Engine actual).
+- Dockerfile multi-stage único: una sola imagen, tres targets (development/build/production).
+- `createbuckets` como servicio `on-failure` de un solo uso: crea buckets en MinIO al iniciar.
+- `CHOKIDAR_USEPOLLING=true` para hot reload en entornos Windows/WSL con volúmenes montados.
+- `$$REDIS_PASSWORD` en healthcheck Redis: `$$` en compose = `$` literal dentro del contenedor.
+- Progreso del proyecto expresado como conteo de tareas (`N / Total`), sin porcentajes fijos.
 
 ---
 

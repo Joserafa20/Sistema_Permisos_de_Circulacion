@@ -7,11 +7,13 @@
 **Proyecto:** En desarrollo
 **Versión:** 0.1.0
 **Última actualización:** 2026-08-02
-**Estado:** 🟢 Fase 0 en progreso — Infraestructura base del Backend completada
 **Fuente de verdad del roadmap:** `.claude/ROADMAP.md`
 
 > **Nota:** Este archivo es el tracking granular de la fase activa. La estructura de fases (0–8)
 > es idéntica a `ROADMAP.md`. Ante cualquier divergencia, prevalece `ROADMAP.md`.
+>
+> **Progreso:** Se calcula automáticamente contando `[x]` vs total de tareas en la fase activa.
+> No se usan porcentajes fijos. Ver ROADMAP.md para el resumen por fase.
 
 ---
 
@@ -30,7 +32,8 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.
 **Semana:** 1
 **Dependencia:** Ninguna. Punto de partida.
-**Estado:** 🟡 En progreso — Backend base + Docker Compose completados
+**Estado:** 🟡 En progreso
+**Progreso:** 10 / 12 tareas completadas
 
 - [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
 - [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
@@ -316,9 +319,14 @@
 
 ## Estado Actual
 
-### Tarea Activa
+### Fase Activa
 
-Fase 0 — Pendientes: Frontend Next.js, Husky.
+Fase 0 — Fundamentos
+
+### Tareas pendientes en la fase activa
+
+- [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
+- [ ] Husky (pre-commit hooks)
 
 ### Última tarea terminada
 
@@ -330,7 +338,7 @@ bucket auto-creation (`createbuckets`), volúmenes nombrados, red `picoyplaca-ne
 
 ### Próxima tarea
 
-Continuar Fase 0: Frontend Next.js scaffolding (App Router + TailwindCSS) — aguardando autorización.
+Continuar Fase 0: Husky (pre-commit hooks: lint-staged + commitlint) — aguardando autorización.
 
 ---
 

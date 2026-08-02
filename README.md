@@ -55,7 +55,7 @@ src/módulo/
 | Fase | Descripción | Estado |
 |------|-------------|--------|
 | Documentación | PRD, API, Modelo de Datos, Manuales, Auditoría | ✅ Completa |
-| Fase 0 | Fundamentos e infraestructura base | 🟡 En progreso (75%) |
+| Fase 0 | Fundamentos e infraestructura base | 🟡 En progreso — 10/12 tareas |
 | Fase 1 | Base de datos y migraciones | ⬜ Pendiente |
 | Fase 2 | Autenticación y seguridad | ⬜ Pendiente |
 | Fase 3 | Módulo de Solicitudes (backend) | ⬜ Pendiente |
