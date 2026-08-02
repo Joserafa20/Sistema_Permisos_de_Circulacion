@@ -24,6 +24,7 @@ Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit
 
 ## Tareas completadas
 
+### Fase 0 (cerrada)
 ✓ Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*)
 ✓ `.gitignore` completo (Node, env, build)
 ✓ Backend NestJS: scaffolding base con ConfigModule tipado
@@ -37,17 +38,34 @@ Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit
 ✓ Husky: pre-commit hooks (lint-staged + commitlint)
 ✓ Frontend Next.js: scaffolding base con App Router y TailwindCSS
 
+### Fase 1 (en progreso)
+✓ **ENUMs TypeORM** — 11 archivos en `backend/src/common/enums/`: 5 tipos PostgreSQL nativos
+  (`EstadoSolicitud`, `EstadoPermiso`, `TipoDocumentoAdjunto`, `TipoConfig`, `AccionAuditoria`) +
+  5 VARCHAR TypeScript-only + barrel `index.ts`. ✅ 2026-08-02
+✓ **Entidades TypeORM** — 16 archivos en `backend/src/modules/**/infrastructure/persistence/`:
+  `RoleEntity`, `MunicipioEntity`, `DependenciaEntity`, `UsuarioEntity`, `TokenEntity`,
+  `CiudadanoEntity`, `MotocicletaEntity`, `MotivoEntity`, `SolicitudEntity`,
+  `HistorialEstadoEntity`, `DocumentoEntity`, `PermisoEntity`, `QrValidacionEntity`,
+  `NotificacionEntity`, `AuditoriaRegistroEntity`, `ConfiguracionEntity`. ✅ 2026-08-02
+✓ **M-04 resuelto** — tabla `ciudadanos` separada con FK en `solicitudes`. ✅ 2026-08-02
+✓ **M-03 resuelto** — `historial_contrasenas JSONB DEFAULT '[]'` en `usuarios`. ✅ 2026-08-02
+✓ **Quality Gate** — `tsc --noEmit` (backend + frontend) exit 0, `nest build` exit 0. ✅ 2026-08-02
+
 ---
 
-## Tareas pendientes
+## Tareas pendientes — Fase 1
 
-Ninguna en Fase 0. Fase completada (12/12).
+- [ ] Script SQL completo (`database/schema.sql`)
+- [ ] Migraciones TypeORM para todas las tablas
+- [ ] Índices de rendimiento aplicados desde el inicio
+- [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
+- [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
 
 ---
 
 ## Próxima tarea sugerida
 
-Fase 1 — Base de Datos: resolver primero los Pendientes de Diseño [~] M-04 y M-03, luego implementar modelo de datos.
+Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
 
 ---
 
@@ -73,9 +91,8 @@ Fase 1 — Base de Datos: resolver primero los Pendientes de Diseño [~] M-04 y 
 - PR #2 mergeado a `develop` el 2026-08-02 (merge commit `33d6990`).
 - Rama `feature/fase-0-backend-nestjs` eliminada (remota y local).
 - Rama activa actual: `develop`.
-- Antes de iniciar Fase 1 se deben resolver:
-  - [~] M-04: estructura de ciudadanos (tabla separada vs. campos embebidos en `solicitudes`)
-  - [~] M-03: confirmar tabla `historial_contrasenas` en `MODELO_DATOS.md`
+- M-04 ✅ Resuelto — tabla `ciudadanos` separada con FK en `solicitudes`.
+- M-03 ✅ Resuelto — campo `historial_contrasenas JSONB DEFAULT '[]'` en tabla `usuarios`.
 - Hallazgos técnicos diferidos a Fase 1:
   - HAL-001: `baseUrl` deprecated en `backend/tsconfig.json` (TS5102)
   - HAL-002: Next.js 14 → 15 (5 CVEs altas, 0 críticas)
@@ -98,4 +115,4 @@ Fase 1 — Base de Datos: resolver primero los Pendientes de Diseño [~] M-04 y 
 
 ## Última actualización
 
-2026-08-02 — Cierre oficial Fase 0: merge PR #2 a develop, ramas limpiadas.
+2026-08-02 — Fase 1: ENUMs TypeORM (11 archivos) y entidades TypeORM (16 archivos) implementados. Quality Gate pasado. M-04 y M-03 resueltos.

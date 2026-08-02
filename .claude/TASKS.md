@@ -77,28 +77,23 @@
 **Objetivo:** Modelo de datos completo, normalizado y versionado antes de escribir lógica de negocio.
 **Semanas:** 1–2
 **Dependencia:** Fase 0 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔵 En progreso — 2 / 7 tareas completadas
 
-- [ ] Tipos ENUM de PostgreSQL definidos
+- [x] Tipos ENUM de PostgreSQL definidos ✅ 2026-08-02
 - [ ] Script SQL completo (`database/schema.sql`)
 - [ ] Migraciones TypeORM para todas las tablas
 - [ ] Índices de rendimiento aplicados desde el inicio
 - [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
-- [ ] Entidades TypeORM con relaciones
+- [x] Entidades TypeORM con relaciones ✅ 2026-08-02
 - [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
 
 ### Pendientes de Diseño — Fase 1
 
-- [~] **[AUDITORÍA M-04]** Confirmar si los datos del ciudadano se almacenan en tabla separada
-  `ciudadanos` (con FK en `solicitudes`) o embebidos en la tabla `solicitudes` (campos `ciudadano_*`).
-  Decisión afecta el esquema SQL, las migraciones y los endpoints de la Fase 3.
-  _Referencia: `docs/AUDITORIA_DOCUMENTACION.md` §9.2_
+- [x] **[AUDITORÍA M-04]** ✅ Resuelto 2026-08-02 — Tabla `ciudadanos` separada con FK en `solicitudes`.
+  Implementado en `CiudadanoEntity` y `SolicitudEntity`.
 
-- [~] **[AUDITORÍA M-03]** Confirmar si existe tabla `historial_contrasenas(id, usuario_id,
-  hash_contrasena, created_at)` o mecanismo equivalente en `MODELO_DATOS.md`.
-  Requerido por `SECURITY.md` (últimas 5 contraseñas no reutilizables).
-  Si no está contemplado, agregar antes de ejecutar las migraciones.
-  _Referencia: `docs/AUDITORIA_DOCUMENTACION.md` §9.3_
+- [x] **[AUDITORÍA M-03]** ✅ Resuelto 2026-08-02 — Campo `historial_contrasenas JSONB DEFAULT '[]'`
+  en tabla `usuarios` (no tabla separada). Implementado en `UsuarioEntity`.
 
 ---
 

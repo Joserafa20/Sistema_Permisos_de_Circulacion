@@ -37,23 +37,18 @@
 **Duración estimada:** Semanas 1–2  
 **Dependencia:** Fase 0 completada.
 
-- [ ] Tipos ENUM de PostgreSQL definidos
+- [x] Tipos ENUM de PostgreSQL definidos ✅ 2026-08-02
 - [ ] Script SQL completo (`database/schema.sql`)
 - [ ] Migraciones TypeORM para todas las tablas
 - [ ] Índices de rendimiento aplicados desde el inicio
 - [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
-- [ ] Entidades TypeORM con relaciones
+- [x] Entidades TypeORM con relaciones ✅ 2026-08-02
 - [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
 
 ### Pendientes de Diseño — Fase 1
 
-- [~] **[M-04]** Confirmar estructura de ciudadanos: tabla separada `ciudadanos` vs. campos
-  embebidos `ciudadano_*` en `solicitudes`. Afecta esquema SQL, migraciones y Fase 3.
-  _Ver `docs/AUDITORIA_DOCUMENTACION.md` §9.2_
-
-- [~] **[M-03]** Confirmar existencia de tabla `historial_contrasenas` en `MODELO_DATOS.md`.
-  Requerida por `SECURITY.md` (no reutilizar últimas 5 contraseñas). Agregar antes de migraciones.
-  _Ver `docs/AUDITORIA_DOCUMENTACION.md` §9.3_
+- [x] **[M-04]** ✅ Resuelto 2026-08-02 — Tabla separada `ciudadanos` con FK en `solicitudes`.
+- [x] **[M-03]** ✅ Resuelto 2026-08-02 — Campo `historial_contrasenas JSONB DEFAULT '[]'` en `usuarios`.
 
 ---
 
@@ -260,7 +255,7 @@
 | Fase | Descripción | Completadas | Total | Estado |
 |------|-------------|:-----------:|:-----:|--------|
 | Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
-| Fase 1 | Base de Datos | 0 | 7 | 🔵 Siguiente ← |
+| Fase 1 | Base de Datos | 2 | 7 | 🔵 En progreso ← |
 | Fase 2 | Auth y Seguridad | 0 | 15 | ⬜ No iniciada |
 | Fase 3 | Solicitudes Backend | 0 | 16 | ⬜ No iniciada |
 | Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |

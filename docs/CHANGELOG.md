@@ -10,13 +10,57 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin Publicar]
 
 ### Por Hacer
-- Implementación del frontend (Next.js) — Fase 0 pendiente.
-- Scripts SQL y migraciones TypeORM — Fase 1.
+- Script SQL completo y migraciones TypeORM — Fase 1 (en progreso).
+- Seeds: roles, motivos, configuración, municipio, usuario admin — Fase 1.
+- Diagrama entidad-relación — Fase 1.
 - Autenticación JWT — Fase 2.
 - Módulo de solicitudes — Fase 3.
 - PDF + QR — Fase 4.
 - Configuración de Docker para producción — Fase 8.
 - Pruebas unitarias, de integración y E2E — Fase 8.
+
+---
+
+## [0.2.0] — 2026-08-02
+
+### Añadido
+
+**Fase 1 — Modelo de datos: ENUMs y entidades TypeORM:**
+
+**ENUMs (`backend/src/common/enums/`) — 11 archivos:**
+- `estado-solicitud.enum.ts` — PostgreSQL ENUM `estado_solicitud` (6 valores: recibida → vencida).
+- `estado-permiso.enum.ts` — PostgreSQL ENUM `estado_permiso` (vigente, vencido, revocado).
+- `tipo-documento-adjunto.enum.ts` — PostgreSQL ENUM `tipo_documento_adjunto` (cedula, licencia, soat, rtm, carta_laboral, otro).
+- `tipo-config.enum.ts` — PostgreSQL ENUM `tipo_config` (texto, numero, booleano, json, imagen_base64).
+- `accion-auditoria.enum.ts` — PostgreSQL ENUM `accion_auditoria` (13 valores: login → exportar_reporte).
+- `tipo-token.enum.ts` — TypeScript-only VARCHAR (refresh, reset_contrasena).
+- `tipo-documento-identidad.enum.ts` — TypeScript-only VARCHAR (CC, CE, PAS, NIT).
+- `tipo-notificacion.enum.ts` — TypeScript-only VARCHAR (4 tipos de notificación).
+- `estado-envio-notificacion.enum.ts` — TypeScript-only VARCHAR (pendiente, enviado, error).
+- `resultado-qr-validacion.enum.ts` — TypeScript-only VARCHAR (vigente, vencido, revocado, no_encontrado).
+- `index.ts` — barrel export de todos los enums.
+
+**Entidades TypeORM (`backend/src/modules/**/infrastructure/persistence/`) — 16 archivos:**
+- `roles/` → `RoleEntity` (tabla `roles`).
+- `ciudadanos/` → `MunicipioEntity` (tabla `municipios`), `CiudadanoEntity` (tabla `ciudadanos`, Ley 1581/2012), `MotocicletaEntity` (tabla `motocicletas`).
+- `dependencias/` → `DependenciaEntity` (tabla `dependencias`).
+- `usuarios/` → `UsuarioEntity` (tabla `usuarios`, campo `historial_contrasenas JSONB`).
+- `auth/` → `TokenEntity` (tabla `tokens`, índice compuesto usuario+tipo+revocado).
+- `motivos/` → `MotivoEntity` (tabla `motivos`).
+- `solicitudes/` → `SolicitudEntity` (tabla `solicitudes`, ENUM `estado_solicitud`), `HistorialEstadoEntity` (tabla `historial_estados`).
+- `documentos/` → `DocumentoEntity` (tabla `documentos`, `storage_key` nunca expuesto en API).
+- `permisos/` → `PermisoEntity` (tabla `permisos`, snapshots JSONB, `storage_key_pdf`), `QrValidacionEntity` (tabla `qr_validaciones`).
+- `notificaciones/` → `NotificacionEntity` (tabla `notificaciones`).
+- `auditoria/` → `AuditoriaRegistroEntity` (tabla `auditoria`, append-only, retención 5 años Ley 1712/2014).
+- `configuracion/` → `ConfiguracionEntity` (tabla `configuracion`).
+
+### Decisiones técnicas
+- **M-04 resuelto:** tabla `ciudadanos` separada con FK en `solicitudes` (según DATABASE.md).
+- **M-03 resuelto:** `historial_contrasenas JSONB DEFAULT '[]'` en `usuarios` (no tabla separada).
+- `enumName` explícito en todos los `@Column({ type: 'enum' })` para forzar nombres exactos de PostgreSQL.
+- `Relation<T>` de TypeORM usado para todas las referencias de tipo en relaciones (evita dependencias circulares).
+- Columnas `date` tipadas como `string` (comportamiento de TypeORM 0.3 con PostgreSQL `date`).
+- Columnas `decimal`/`numeric` tipadas como `string` (TypeORM retorna string para evitar pérdida de precisión float).
 
 ---
 
