@@ -77,10 +77,10 @@
 **Objetivo:** Modelo de datos completo, normalizado y versionado antes de escribir lógica de negocio.
 **Semanas:** 1–2
 **Dependencia:** Fase 0 completada.
-**Estado:** 🔵 En progreso — 2 / 7 tareas completadas
+**Estado:** 🔵 En progreso — 3 / 7 tareas completadas
 
 - [x] Tipos ENUM de PostgreSQL definidos ✅ 2026-08-02
-- [ ] Script SQL completo (`database/schema.sql`)
+- [x] Script SQL completo (`database/schema.sql`) ✅ 2026-08-02
 - [ ] Migraciones TypeORM para todas las tablas
 - [ ] Índices de rendimiento aplicados desde el inicio
 - [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal

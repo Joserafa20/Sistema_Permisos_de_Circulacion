@@ -50,12 +50,15 @@ Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit
 ✓ **M-04 resuelto** — tabla `ciudadanos` separada con FK en `solicitudes`. ✅ 2026-08-02
 ✓ **M-03 resuelto** — `historial_contrasenas JSONB DEFAULT '[]'` en `usuarios`. ✅ 2026-08-02
 ✓ **Quality Gate** — `tsc --noEmit` (backend + frontend) exit 0, `nest build` exit 0. ✅ 2026-08-02
+✓ **Script SQL completo** — `database/schema.sql` (5 ENUMs, 1 secuencia, 16 tablas, 30 FKs,
+  11 CHECKs, 27 índices regulares, 4 índices parciales, 1 índice único parcial). ✅ 2026-08-02
+  Inconsistencias detectadas y documentadas (INC-001, INC-002, INC-003) — no bloqueantes.
 
 ---
 
 ## Tareas pendientes — Fase 1
 
-- [ ] Script SQL completo (`database/schema.sql`)
+- [ ] Script SQL completo (`database/schema.sql`) — ✅ COMPLETADO
 - [ ] Migraciones TypeORM para todas las tablas
 - [ ] Índices de rendimiento aplicados desde el inicio
 - [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
@@ -115,4 +118,4 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
 
 ## Última actualización
 
-2026-08-02 — Fase 1: ENUMs TypeORM (11 archivos) y entidades TypeORM (16 archivos) implementados. Quality Gate pasado. M-04 y M-03 resueltos.
+2026-08-02 — Fase 1: `database/schema.sql` completado (16 tablas, 5 ENUMs, 30 FKs, 11 CHECKs, 32 índices). 3 inconsistencias ORM↔MODELO_DATOS detectadas y reportadas al usuario.
