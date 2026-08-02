@@ -4,7 +4,7 @@
 
 **Proyecto:** Sistema Web de Permisos de Circulación de Motocicletas (Pico y Placa)  
 **Versión:** 0.1.0  
-**Progreso Total:** 0%  
+**Progreso Total:** Calculado automáticamente desde TASKS.md  
 **Última actualización:** 2026-08-02
 **Auditoría documental:** `docs/AUDITORIA_DOCUMENTACION.md` (2026-08-02 — 93/100 ✅)  
 **Análisis técnico:** `docs/ANALISIS_TECNICO.md`
@@ -15,11 +15,11 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.  
 **Duración estimada:** Semana 1  
 **Dependencia:** Ninguna. Es el punto de partida.
-**Estado:** 🟡 En progreso (55%)
+**Estado:** ✅ Completada — 12 / 12 tareas completadas
 
-- [ ] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*)
-- [ ] `.gitignore` completo (Node, env, build)
-- [ ] Docker Compose: PostgreSQL + Redis + MinIO
+- [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
+- [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
+- [x] Docker Compose: PostgreSQL + Redis + MinIO ✅ 2026-08-02
 - [x] Backend NestJS: scaffolding base con ConfigModule tipado ✅ 2026-08-02
 - [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
 - [x] Archivo `.env.example` completo con todas las variables ✅ 2026-08-02
@@ -254,17 +254,20 @@
 
 ## Progreso por Fase
 
-```
-Fase 0: Fundamentos          █████░░░░░  55%  Semana 1  ← EN PROGRESO
-Fase 1: Base de Datos        ░░░░░░░░░░  0%   Semanas 1-2
-Fase 2: Auth y Seguridad     ░░░░░░░░░░  0%   Semanas 2-3
-Fase 3: Solicitudes Backend  ░░░░░░░░░░  0%   Semanas 3-4
-Fase 4: Permisos PDF/QR      ░░░░░░░░░░  0%   Semanas 4-5
-Fase 5: Frontend Ciudadano   ░░░░░░░░░░  0%   Semanas 5-6
-Fase 6: Frontend Funcionario ░░░░░░░░░░  0%   Semanas 6-7
-Fase 7: Panel Admin          ░░░░░░░░░░  0%   Semanas 7-8
-Fase 8: Calidad y Producción ░░░░░░░░░░  0%   Semanas 8-10
-```
+> El progreso se calcula automáticamente contando tareas `[x]` completadas
+> sobre el total de tareas de cada fase en `TASKS.md`. Sin porcentajes fijos.
+
+| Fase | Descripción | Completadas | Total | Estado |
+|------|-------------|:-----------:|:-----:|--------|
+| Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
+| Fase 1 | Base de Datos | 0 | 7 | 🔵 Siguiente ← |
+| Fase 2 | Auth y Seguridad | 0 | 15 | ⬜ No iniciada |
+| Fase 3 | Solicitudes Backend | 0 | 16 | ⬜ No iniciada |
+| Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |
+| Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
+| Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
+| Fase 7 | Panel Admin | 0 | 12 | ⬜ No iniciada |
+| Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
 
 **Duración total estimada:** 10 semanas para un equipo de 2–3 desarrolladores.
 

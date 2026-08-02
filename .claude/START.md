@@ -2,7 +2,7 @@
 
 # Inicio del Proyecto
 
-Este proyecto se desarrolla utilizando una metodología incremental y controlada.
+Este proyecto se desarrolla utilizando una metodología incremental, controlada y orientada a arquitectura empresarial.
 
 Claude Code debe utilizar este archivo como punto de entrada en cada nueva sesión.
 
@@ -10,7 +10,7 @@ Claude Code debe utilizar este archivo como punto de entrada en cada nueva sesi�
 
 # Paso 1 - Inicialización
 
-Antes de realizar cualquier acción debes leer únicamente los siguientes archivos:
+Antes de realizar cualquier acción debes leer obligatoriamente los siguientes archivos:
 
 1. CLAUDE.md
 2. WORKFLOW.md
@@ -18,7 +18,21 @@ Antes de realizar cualquier acción debes leer únicamente los siguientes archiv
 4. TASKS.md
 5. ROADMAP.md
 
-No leas documentación adicional todavía.
+No cargues ningún otro documento en esta etapa.
+
+Los siguientes documentos deberán consultarse únicamente cuando la tarea lo requiera:
+
+- QUALITY_GATE.md → Antes de finalizar una tarea.
+- RELEASE_PROCESS.md → Antes de crear ramas, commits, Pull Requests, Releases o realizar merges.
+- CODING_STANDARDS.md → Antes de comenzar la implementación.
+- SECURITY.md → Si la tarea involucra autenticación, autorización, manejo de usuarios o seguridad.
+- DATABASE.md → Si la tarea modifica la base de datos.
+- API.md → Si la tarea modifica o crea endpoints.
+- ARCHITECTURE.md → Si la tarea afecta la arquitectura del sistema.
+- PROJECT_CONTEXT.md → Si la tarea requiere contexto funcional adicional.
+- docs/PRD_Sistema_Permisos_de_Circulacion.md → Solo cuando sea necesario validar reglas de negocio o requisitos funcionales.
+
+Evita cargar documentación innecesaria para optimizar el uso del contexto.
 
 ---
 
@@ -32,6 +46,7 @@ Para ello:
 - Verificar la fase activa en ROADMAP.md.
 - Seleccionar automáticamente la tarea pendiente con mayor prioridad.
 - Nunca preguntes al usuario cuál tarea desarrollar.
+- Si existen inconsistencias entre TASKS.md y ROADMAP.md, detente e infórmalo antes de continuar.
 
 ---
 
@@ -39,39 +54,11 @@ Para ello:
 
 Antes de escribir código:
 
-Analiza únicamente la tarea seleccionada.
+- Analiza únicamente la tarea seleccionada.
+- Consulta solamente la documentación necesaria para esa tarea.
+- No cargues documentos que no sean relevantes.
 
-Consulta solamente la documentación necesaria.
-
-Ejemplos:
-
-Si la tarea requiere Base de Datos:
-
-→ Leer DATABASE.md
-
-Si requiere APIs:
-
-→ Leer API.md
-
-Si requiere Arquitectura:
-
-→ Leer ARCHITECTURE.md
-
-Si requiere Seguridad:
-
-→ Leer SECURITY.md
-
-Si requiere reglas funcionales:
-
-→ Leer docs/PRD_Sistema_Permisos_de_Circulacion.md
-
-No cargues documentación innecesaria.
-
----
-
-# Paso 4 - Plan Técnico
-
-Presenta siempre:
+Presenta siempre un plan técnico con:
 
 - Objetivo.
 - Alcance.
@@ -88,30 +75,35 @@ Espera la aprobación del usuario.
 
 ---
 
-# Paso 5 - Desarrollo
+# Paso 4 - Desarrollo
 
 Una vez aprobado el plan:
 
-Implementa únicamente la tarea seleccionada.
+- Implementa únicamente la tarea seleccionada.
+- No desarrolles funcionalidades adicionales.
+- No modifiques módulos ajenos salvo que sea estrictamente necesario.
+- Mantén la arquitectura definida para el proyecto.
 
-No desarrolles otras funcionalidades.
-
-Mantén la arquitectura.
-
-Respeta:
+Respeta siempre:
 
 - CLAUDE.md
+- PROMPT_RULES.md
+
+Consulta cuando aplique:
+
 - CODING_STANDARDS.md
 - SECURITY.md
-- PROMPT_RULES.md
+- DATABASE.md
+- API.md
+- ARCHITECTURE.md
 
 ---
 
-# Paso 6 - Auto Revisión
+# Paso 5 - Auto Revisión
 
 Al terminar la implementación:
 
-Realiza una revisión técnica del código.
+Realiza una revisión técnica completa.
 
 Verifica:
 
@@ -123,13 +115,16 @@ Verifica:
 - Código duplicado.
 - Posibles mejoras.
 
-Corrige únicamente errores encontrados.
+Consulta QUALITY_GATE.md.
 
-No agregues funcionalidades nuevas.
+Si detectas errores críticos:
+
+- Corrígelos antes de finalizar.
+- No agregues funcionalidades nuevas.
 
 ---
 
-# Paso 7 - Actualización
+# Paso 6 - Actualización
 
 Al finalizar debes actualizar:
 
@@ -137,6 +132,8 @@ Al finalizar debes actualizar:
 - ROADMAP.md
 - CHANGELOG.md
 - SESSION.md
+
+Actualizar además la documentación técnica afectada cuando corresponda.
 
 Registrar:
 
@@ -148,16 +145,38 @@ Registrar:
 
 ---
 
+# Paso 7 - Git y Versionado
+
+Antes de realizar cualquier acción relacionada con Git:
+
+Consultar RELEASE_PROCESS.md.
+
+Seguir obligatoriamente:
+
+- GitFlow.
+- Conventional Commits.
+- Pull Requests.
+- Versionado Semántico.
+
+Nunca trabajar directamente sobre main.
+
+---
+
 # Paso 8 - Finalización
 
-Cuando todo termine:
+Cuando la tarea termine:
 
-No continúes automáticamente.
+- No continúes automáticamente con la siguiente tarea.
+- Espera la autorización del usuario.
+- Nunca desarrolles dos tareas principales en una misma sesión.
+- Nunca avances de Sprint o Fase sin autorización.
 
-Espera la autorización del usuario para comenzar una nueva tarea.
+El objetivo es priorizar:
 
-Nunca desarrolles dos tareas principales en una misma sesión.
-
-Nunca avances de Sprint sin autorización.
+1. Calidad.
+2. Arquitectura.
+3. Seguridad.
+4. Documentación.
+5. Código.
 
 Fin del proceso.

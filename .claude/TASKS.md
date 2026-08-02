@@ -7,11 +7,13 @@
 **Proyecto:** En desarrollo
 **Versión:** 0.1.0
 **Última actualización:** 2026-08-02
-**Estado:** 🟢 Fase 0 en progreso — Infraestructura base del Backend completada
 **Fuente de verdad del roadmap:** `.claude/ROADMAP.md`
 
 > **Nota:** Este archivo es el tracking granular de la fase activa. La estructura de fases (0–8)
 > es idéntica a `ROADMAP.md`. Ante cualquier divergencia, prevalece `ROADMAP.md`.
+>
+> **Progreso:** Se calcula automáticamente contando `[x]` vs total de tareas en la fase activa.
+> No se usan porcentajes fijos. Ver ROADMAP.md para el resumen por fase.
 
 ---
 
@@ -30,16 +32,18 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.
 **Semana:** 1
 **Dependencia:** Ninguna. Punto de partida.
-**Estado:** 🟡 En progreso — Backend base completado
+**Estado:** ✅ Completada
+**Progreso:** 12 / 12 tareas completadas
 
-- [ ] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*)
-- [ ] `.gitignore` completo (Node, env, build)
-- [ ] Docker Compose: PostgreSQL + Redis + MinIO
+- [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
+- [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
+- [x] Docker Compose: PostgreSQL + Redis + MinIO ✅ 2026-08-02
 - [x] Backend NestJS: scaffolding base con ConfigModule tipado
 - [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
 - [x] Archivo `.env.example` completo con todas las variables
 - [x] ESLint + Prettier configurados
-- [ ] Husky (pre-commit hooks)
+- [x] Husky (pre-commit hooks) ✅ 2026-08-02
+- [x] Frontend Next.js: scaffolding base con App Router y TailwindCSS ✅ 2026-08-02
 - [x] Swagger configurado y accesible en `/api/docs`
 - [x] Endpoint `/api/v1/health` operativo
 - [x] Logger estructurado (Pino) configurado
@@ -316,20 +320,28 @@
 
 ## Estado Actual
 
-### Tarea Activa
+### Fase Activa
 
-Fase 0 — Pendientes: Docker Compose, Frontend Next.js, Husky, Git.
+Fase 0 — Fundamentos
+
+### Tareas pendientes en la fase activa
+
+Ninguna. Fase 0 completada (12/12).
 
 ### Última tarea terminada
 
-Infraestructura base del Backend NestJS (2026-08-02):
-scaffolding completo, ConfigModule con validación Joi, TypeOrmModule, Logger Pino,
-Helmet, CORS, ValidationPipe global, HttpExceptionFilter, interceptores, HealthModule,
-Swagger, test E2E.
+Frontend Next.js scaffolding (2026-08-02):
+`frontend/` con Next.js 14, App Router, TailwindCSS 3, TypeScript estricto.
+`src/app/` con layout.tsx, page.tsx, not-found.tsx, error.tsx.
+`src/lib/` con api-client.ts y constants.ts.
+`src/types/index.ts` con contratos de ApiResponse.
+`frontend/Dockerfile` multi-stage (development/build/production).
+Servicio `frontend` agregado a docker-compose.yml.
+lint-staged actualizado para cubrir archivos del frontend.
 
 ### Próxima tarea
 
-Continuar Fase 0: Docker Compose (postgres + redis + minio + backend) — aguardando autorización.
+Fase 1 — Base de Datos (resolver primero los [~] M-04 y M-03) — aguardando autorización.
 
 ---
 

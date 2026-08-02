@@ -1,0 +1,29 @@
+{
+  "name": "sistema-permisos-circulacion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema Web de Permisos de Circulación de Motocicletas (Pico y Placa)",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.9.6"
+  },
+  "lint-staged": {
+    "backend/src/**/*.ts": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "backend/test/**/*.ts": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "frontend/src/**/*.{ts,tsx}": [
+      "prettier --write"
+    ]
+  }
+}
