@@ -417,3 +417,20 @@ usuario administrador inicial (contraseña temporal)
 - La tabla `auditoria` es de solo inserción (append-only). No se permite UPDATE ni DELETE sobre ella.
 - Los hashes de contraseña usan BCrypt con 12 rounds mínimo.
 - El campo `historial_contrasenas` en `usuarios` almacena los últimos 5 hashes para evitar reutilización.
+
+---
+
+# Regla de Consistencia del Modelo
+
+La definición del modelo de datos seguirá obligatoriamente el siguiente orden de prioridad:
+
+1. `MODELO_DATOS.md`
+2. Entidades del ORM oficial (TypeORM)
+3. Migraciones
+4. `schema.sql`
+
+Ningún artefacto podrá modificar el modelo de datos de forma independiente.
+
+Si durante el desarrollo se detecta una inconsistencia entre estos artefactos, la implementación deberá detenerse y presentar la diferencia al usuario para su aprobación antes de continuar.
+
+No está permitido corregir automáticamente una inconsistencia estructural.

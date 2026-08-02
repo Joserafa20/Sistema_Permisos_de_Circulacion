@@ -9,6 +9,11 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin Publicar]
 
+### Añadido
+- `ADR-016` — Jerarquía de autoridad entre artefactos del modelo de datos (MODELO_DATOS.md > Entidades > Migraciones > schema.sql). Prohibición de corrección automática de inconsistencias estructurales.
+- `DATABASE.md` — sección "Regla de Consistencia del Modelo" derivada de ADR-016.
+- `DECISION_LOG.md` — HAL-004 actualizado con impacto en lint-staged y fecha límite de resolución (antes de Fase 2).
+
 ### Por Hacer
 - Script SQL completo y migraciones TypeORM — Fase 1 (en progreso).
 - Seeds: roles, motivos, configuración, municipio, usuario admin — Fase 1.

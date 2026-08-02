@@ -421,6 +421,62 @@ Descartado. El uso de SQL embebido directamente en servicios viola el principio 
 
 ---
 
+## ADR-016 — 2026-08-02
+
+### Título
+
+Jerarquía de autoridad entre artefactos del modelo de datos
+
+### Estado
+
+Aceptado
+
+### Contexto
+
+El sistema define su modelo de datos en múltiples artefactos que deben mantenerse coherentes entre sí:
+
+1. `docs/MODELO_DATOS.md` — especificación funcional del esquema, tipos, constraints e índices.
+2. Entidades TypeORM (`infrastructure/persistence/*.entity.ts`) — representación en código del esquema.
+3. Migraciones TypeORM (`database/migrations/`) — cambios versionados al esquema de BD.
+4. `database/schema.sql` — script SQL autocontenido para inicializar la base de datos.
+
+Durante la implementación de las entidades TypeORM en la Fase 1 se detectó una inconsistencia concreta: `MODELO_DATOS.md` define la columna `hash_pdf VARCHAR(64)` en la tabla `permisos`, pero la `PermisoEntity` implementada no incluye esa columna. Este caso demostró que sin una jerarquía explícita, las inconsistencias pueden propagarse silenciosamente entre artefactos.
+
+### Decisión
+
+Se establece el siguiente orden de prioridad entre los artefactos del modelo de datos:
+
+1. **`docs/MODELO_DATOS.md`** — es la fuente de verdad. Toda discrepancia se resuelve contra este documento.
+2. **Entidades TypeORM** — deben reflejar exactamente `MODELO_DATOS.md`. Ninguna columna, tipo o constraint puede diferir sin una modificación previa y aprobada de `MODELO_DATOS.md`.
+3. **Migraciones** — se generan a partir de las entidades. No pueden introducir columnas o constraints no definidos en `MODELO_DATOS.md`.
+4. **`database/schema.sql`** — se genera a partir de `MODELO_DATOS.md` directamente. Debe ser coherente con las entidades pero no es la fuente de verdad.
+
+Ningún artefacto puede modificar el modelo de datos de forma independiente.
+
+Si durante el desarrollo se detecta una inconsistencia entre estos artefactos, la implementación debe detenerse y presentar la diferencia al usuario para su aprobación antes de continuar.
+
+**No está permitido corregir automáticamente una inconsistencia estructural.**
+
+### Justificación técnica
+
+- Una inconsistencia no detectada entre entidades y esquema SQL puede causar que las migraciones TypeORM generen DDL incorrecto, produciendo discrepancias entre el esquema en código y el esquema real en la base de datos.
+- El orden de prioridad refleja la naturaleza de cada artefacto: `MODELO_DATOS.md` es diseño, las entidades son implementación, las migraciones son historia incremental, y el SQL es reproducibilidad.
+- La prohibición de corrección automática evita que inconsistencias en `MODELO_DATOS.md` se propaguen silenciosamente hacia abajo en la cadena de artefactos sin revisión explícita del responsable del proyecto.
+
+### Consecuencias
+
+- Todo cambio al esquema de datos debe iniciarse modificando `MODELO_DATOS.md`.
+- Toda inconsistencia detectada genera una pausa obligatoria y un reporte al usuario.
+- La columna `hash_pdf` en `permisos` (inconsistencia R-01 identificada en el análisis del Script SQL) deberá resolverse con aprobación explícita del usuario antes de implementar las migraciones.
+
+### Referencias
+
+- `DATABASE.md` — sección "Regla de Consistencia del Modelo" (política operativa derivada de este ADR).
+- `docs/MODELO_DATOS.md` — §7.1 `permisos`: define `hash_pdf VARCHAR(64)`.
+- `PermisoEntity` — `backend/src/modules/permisos/infrastructure/persistence/permiso.entity.ts`.
+
+---
+
 # Hallazgos Pendientes (no bloqueantes)
 
 ## HAL-001 — 2026-08-02
@@ -497,15 +553,27 @@ ESLint v9 (instalado por `@nestjs/cli`) usa flat config por defecto (`eslint.con
 
 ### Contexto
 
-NestJS CLI v10 aún genera proyectos con `.eslintrc.json`. La migración a flat config de ESLint es un breaking change que requiere reescribir la configuración a formato `eslint.config.js`. No es crítico en Fase 0 porque no existen archivos de lógica de negocio aún.
+NestJS CLI v10 aún genera proyectos con `.eslintrc.json`. La migración a flat config de ESLint es un breaking change que requiere reescribir la configuración a formato `eslint.config.js`. No es crítico en Fase 0 porque no existen archivos de lógica de negocio.
 
-### Acción pendiente
+### Impacto adicional registrado — 2026-08-02
 
-Migrar `backend/.eslintrc.json` a `backend/eslint.config.js` (flat config ESLint v9) en Fase 1, antes de agregar lógica de negocio. Alternativamente, downgrade a `eslint@8` si la compatibilidad es prioritaria.
+El paso `eslint --fix --max-warnings=0` en lint-staged fue eliminado de `package.json` (raíz del monorepo) como desbloqueador de la Fase 1. Dos causas combinadas:
 
-### Fase
+1. `eslint` no está en PATH en Windows; el binario está en `backend/node_modules/.bin/`.
+2. HAL-004: incluso con path correcto, ESLint v9 + `.eslintrc.json` retorna exit 0 sin lintear.
 
-Fase 1 — primera sesión técnica.
+El paso era un no-op en la práctica. **Deuda técnica activa.**
+
+### Acción pendiente — fecha límite: antes del inicio de Fase 2
+
+1. Migrar `backend/.eslintrc.json` → `backend/eslint.config.js` (flat config ESLint v9).
+2. Actualizar lint-staged en `package.json` para usar ruta local:
+   `"./backend/node_modules/.bin/eslint --fix --max-warnings=0"` o via `npx`.
+3. Verificar que el hook rechace archivos con errores de lint antes de permitir el commit.
+
+### Fase de resolución
+
+Antes del inicio de Fase 2 — Autenticación y Seguridad.
 
 ---
 
