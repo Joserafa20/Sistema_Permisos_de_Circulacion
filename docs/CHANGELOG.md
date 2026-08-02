@@ -10,11 +10,43 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin Publicar]
 
 ### Por Hacer
-- Implementación del backend (NestJS).
-- Implementación del frontend (Next.js).
-- Scripts SQL y migraciones TypeORM.
-- Configuración de Docker para producción.
-- Pruebas unitarias, de integración y E2E.
+- Implementación del frontend (Next.js) — Fase 0 pendiente.
+- Scripts SQL y migraciones TypeORM — Fase 1.
+- Autenticación JWT — Fase 2.
+- Módulo de solicitudes — Fase 3.
+- PDF + QR — Fase 4.
+- Configuración de Docker para producción — Fase 8.
+- Pruebas unitarias, de integración y E2E — Fase 8.
+
+---
+
+## [0.1.1] — 2026-08-02
+
+### Añadido
+
+**Fase 0 — Docker Compose e Infraestructura de Desarrollo:**
+- `backend/Dockerfile` — Dockerfile multi-stage con 4 etapas: `base`, `development` (hot reload), `build` (compilación TypeScript + poda de dependencias), `production` (imagen mínima con usuario no-root `nestjs`).
+- `docker/docker-compose.yml` — Docker Compose Specification (sin atributo `version`) con 5 servicios: `postgres` (PostgreSQL 15 Alpine), `redis` (Redis 7 Alpine), `minio` (MinIO latest), `createbuckets` (MinIO MC para inicialización de buckets), `backend` (NestJS en modo desarrollo con hot reload).
+- `docker/docker-compose.override.yml` — Plantilla de sobrescrituras opcionales para entorno local (cambio de puertos en caso de conflictos).
+- `docker/.env.example` — Plantilla documentada de variables de entorno para Docker. Incluye todas las variables agrupadas por servicio con instrucciones de uso.
+- `docker/postgres/init.sql` — Script de inicialización PostgreSQL: instala extensiones `uuid-ossp` y `pgcrypto` en el primer arranque.
+
+**Características de la infraestructura Docker:**
+- Healthchecks en todos los servicios: `pg_isready` (postgres), `redis-cli ping` (redis), HTTP `/minio/health/live` (minio), HTTP `/api/v1/health` (backend).
+- Dependencias con condición `service_healthy`: backend no inicia hasta que postgres, redis y minio estén saludables y los buckets creados.
+- Volúmenes nombrados: `postgres_data`, `redis_data`, `minio_data` — datos persisten entre reinicios.
+- Red dedicada `picoyplaca-network` — comunicación entre servicios exclusivamente por nombre de servicio.
+- `restart: unless-stopped` en todos los servicios de infraestructura.
+- Logging `json-file` con rotación (`max-size: 10m`, `max-file: 3–5`).
+- `CHOKIDAR_USEPOLLING=true` para hot reload en Windows/WSL.
+- Buckets MinIO (`pyp-documentos-dev`, `pyp-permisos-dev`, `pyp-reportes-dev`) creados automáticamente con `--ignore-existing`.
+
+### Modificado
+- `.gitignore` (raíz) — agregado `docker/.env.docker` a la lista de exclusiones.
+- `README.md` — sección "Inicio Rápido" reemplazada con instrucciones Docker completas (tabla de servicios, comandos up/down). Estado Fase 0 actualizado a 75%.
+- `.claude/TASKS.md` — Repositorio Git, `.gitignore` y Docker Compose marcados como `[x]`. Estado de Fase 0 actualizado.
+- `.claude/ROADMAP.md` — Fase 0 actualizada al 75%. Progreso en barra visual actualizado.
+- `.claude/SESSION.md` — Estado actualizado con tarea completada, decisiones técnicas y próximos pasos.
 
 ---
 

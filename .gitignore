@@ -34,8 +34,10 @@ desktop.ini
 *.log
 logs/
 
-# ── Docker volumes locales ──────────────────────────────────────
+# ── Docker ──────────────────────────────────────────────────────
 docker/volumes/
+docker/.env.docker
+# .env.example se sube al repo (es la plantilla documentada)
 
 # ── Archivos de memoria de Claude (no son código del proyecto) ──
 memory/

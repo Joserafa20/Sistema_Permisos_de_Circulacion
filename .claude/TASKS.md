@@ -30,11 +30,11 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.
 **Semana:** 1
 **Dependencia:** Ninguna. Punto de partida.
-**Estado:** 🟡 En progreso — Backend base completado
+**Estado:** 🟡 En progreso — Backend base + Docker Compose completados
 
-- [ ] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*)
-- [ ] `.gitignore` completo (Node, env, build)
-- [ ] Docker Compose: PostgreSQL + Redis + MinIO
+- [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
+- [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
+- [x] Docker Compose: PostgreSQL + Redis + MinIO ✅ 2026-08-02
 - [x] Backend NestJS: scaffolding base con ConfigModule tipado
 - [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
 - [x] Archivo `.env.example` completo con todas las variables
@@ -318,18 +318,19 @@
 
 ### Tarea Activa
 
-Fase 0 — Pendientes: Docker Compose, Frontend Next.js, Husky, Git.
+Fase 0 — Pendientes: Frontend Next.js, Husky.
 
 ### Última tarea terminada
 
-Infraestructura base del Backend NestJS (2026-08-02):
-scaffolding completo, ConfigModule con validación Joi, TypeOrmModule, Logger Pino,
-Helmet, CORS, ValidationPipe global, HttpExceptionFilter, interceptores, HealthModule,
-Swagger, test E2E.
+Docker Compose desarrollo (2026-08-02):
+`backend/Dockerfile` multi-stage (development/build/production), `docker/docker-compose.yml`
+con PostgreSQL 15 + Redis 7 + MinIO + Backend NestJS, healthchecks en todos los servicios,
+bucket auto-creation (`createbuckets`), volúmenes nombrados, red `picoyplaca-network`,
+`restart: unless-stopped`, logging json-file, `.env.example` documentado, `postgres/init.sql`.
 
 ### Próxima tarea
 
-Continuar Fase 0: Docker Compose (postgres + redis + minio + backend) — aguardando autorización.
+Continuar Fase 0: Frontend Next.js scaffolding (App Router + TailwindCSS) — aguardando autorización.
 
 ---
 

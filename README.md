@@ -45,7 +45,7 @@ src/módulo/
 ├── backend/         ← API REST NestJS
 ├── frontend/        ← Interfaz Next.js (pendiente Fase 5)
 ├── database/        ← Migraciones TypeORM y seeds (pendiente Fase 1)
-└── docker/          ← Dockerfiles y configuración Nginx (pendiente Fase 0)
+└── docker/          ← Docker Compose, Dockerfile, init scripts
 ```
 
 ---
@@ -55,7 +55,7 @@ src/módulo/
 | Fase | Descripción | Estado |
 |------|-------------|--------|
 | Documentación | PRD, API, Modelo de Datos, Manuales, Auditoría | ✅ Completa |
-| Fase 0 | Fundamentos e infraestructura base | 🟡 En progreso (55%) |
+| Fase 0 | Fundamentos e infraestructura base | 🟡 En progreso (75%) |
 | Fase 1 | Base de datos y migraciones | ⬜ Pendiente |
 | Fase 2 | Autenticación y seguridad | ⬜ Pendiente |
 | Fase 3 | Módulo de Solicitudes (backend) | ⬜ Pendiente |
@@ -67,19 +67,44 @@ src/módulo/
 
 ---
 
-## Inicio Rápido (Backend)
+## Inicio Rápido
+
+### Con Docker (recomendado)
+
+```bash
+cd docker
+cp .env.example .env.docker
+# Editar .env.docker con valores reales
+
+docker compose --env-file .env.docker up --build
+```
+
+| Servicio | URL |
+|----------|-----|
+| API REST | http://localhost:3001/api/v1 |
+| Swagger UI | http://localhost:3001/api/docs |
+| MinIO Console | http://localhost:9001 |
+| PostgreSQL | localhost:5432 |
+| Redis | localhost:6379 |
+
+```bash
+# Detener (conserva datos)
+docker compose --env-file .env.docker down
+
+# Detener y eliminar datos
+docker compose --env-file .env.docker down -v
+```
+
+### Sin Docker (backend solo)
 
 ```bash
 cd backend
 cp .env.example .env
-# Completar variables en .env
+# Completar variables en .env (requiere PostgreSQL, Redis y MinIO locales)
 
 npm install
 npm run start:dev
 ```
-
-Servidor: `http://localhost:3001/api/v1`
-Swagger UI: `http://localhost:3001/api/docs`
 
 ---
 

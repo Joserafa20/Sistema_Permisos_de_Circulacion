@@ -15,11 +15,11 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.  
 **Duración estimada:** Semana 1  
 **Dependencia:** Ninguna. Es el punto de partida.
-**Estado:** 🟡 En progreso (55%)
+**Estado:** 🟡 En progreso (75%)
 
-- [ ] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*)
-- [ ] `.gitignore` completo (Node, env, build)
-- [ ] Docker Compose: PostgreSQL + Redis + MinIO
+- [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
+- [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
+- [x] Docker Compose: PostgreSQL + Redis + MinIO ✅ 2026-08-02
 - [x] Backend NestJS: scaffolding base con ConfigModule tipado ✅ 2026-08-02
 - [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
 - [x] Archivo `.env.example` completo con todas las variables ✅ 2026-08-02
@@ -255,7 +255,7 @@
 ## Progreso por Fase
 
 ```
-Fase 0: Fundamentos          █████░░░░░  55%  Semana 1  ← EN PROGRESO
+Fase 0: Fundamentos          ███████░░░  75%  Semana 1  ← EN PROGRESO
 Fase 1: Base de Datos        ░░░░░░░░░░  0%   Semanas 1-2
 Fase 2: Auth y Seguridad     ░░░░░░░░░░  0%   Semanas 2-3
 Fase 3: Solicitudes Backend  ░░░░░░░░░░  0%   Semanas 3-4
