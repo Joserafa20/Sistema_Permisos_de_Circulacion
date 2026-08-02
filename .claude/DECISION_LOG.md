@@ -328,6 +328,99 @@ Vigente
 
 ---
 
+## ADR-015 — 2026-08-02
+
+### Título
+
+TypeORM 0.3 como ORM oficial del proyecto
+
+### Estado
+
+Aceptado
+
+### Contexto
+
+El sistema requiere una capa de acceso a datos que:
+
+1. Sea compatible con PostgreSQL 15 y sus características nativas (ENUMs, UUID, JSONB, TIMESTAMPTZ, soft delete).
+2. Se integre con la arquitectura hexagonal del proyecto, permitiendo que el dominio defina interfaces de repositorio (`ISolicitudRepository`, `IPermisoRepository`, etc.) y que la infraestructura las implemente sin acoplar el dominio al ORM.
+3. Soporte migraciones versionadas con CLI, dado que `synchronize: true` está prohibido en todos los entornos del proyecto (ver `DATABASE.md`).
+4. Se integre de forma nativa con el ecosistema NestJS (inyección de dependencias, módulos, providers).
+
+La decisión del ORM no fue registrada en un ADR independiente durante la Fase 0. Se estableció implícitamente en ADR-001 (justificación del ecosistema NestJS) y ADR-003 (justificación de compatibilidad con PostgreSQL), y se especificó operativamente en `DATABASE.md` y `ARCHITECTURE.md`. Este ADR la formaliza con carácter retroactivo para dejarla explícita en el registro de decisiones.
+
+### Decisión
+
+Se adopta **TypeORM 0.3+** como ORM oficial del proyecto para toda interacción entre el backend NestJS y la base de datos PostgreSQL.
+
+Toda operación de persistencia deberá realizarse a través de `Repository<T>` o `QueryRunner` de TypeORM. Queda prohibido el uso de SQL embebido directamente en servicios o casos de uso (ver `DATABASE.md`).
+
+### Justificación técnica
+
+**Integración con NestJS**
+El paquete `@nestjs/typeorm` registra TypeORM en el contenedor de inyección de dependencias de NestJS. Los repositorios se inyectan directamente en servicios y casos de uso mediante el decorador `@InjectRepository(Entidad)`, sin configuración manual de instancias ni conexiones.
+
+**Compatibilidad con arquitectura hexagonal**
+TypeORM permite crear repositorios personalizados que implementan interfaces definidas en la capa de dominio (`ISolicitudRepository`, `IPermisoRepository`, etc.). Esto garantiza que el dominio no depende del ORM — solo de las interfaces que él mismo define. La implementación concreta de TypeORM reside en `infrastructure/persistence/`, respetando la inversión de dependencias establecida en `ARCHITECTURE.md`.
+
+**Soporte de PostgreSQL 15**
+TypeORM 0.3 soporta nativamente: tipos ENUM de PostgreSQL (`@Column({ type: 'enum', enum: EstadoSolicitud })`), columnas JSONB, UUID como clave primaria (`@PrimaryGeneratedColumn('uuid')`), TIMESTAMPTZ, soft delete (`@DeleteDateColumn`), y extensiones como `uuid-ossp`.
+
+**Migraciones versionadas**
+El CLI de TypeORM (`typeorm migration:generate`, `migration:run`, `migration:revert`) permite generar y ejecutar migraciones TypeScript versionadas. Esto cumple el requerimiento del proyecto de nunca usar `synchronize: true`, mantener un historial completo de cambios al esquema y soportar rollbacks controlados.
+
+**Madurez y ecosistema**
+TypeORM es la solución de persistencia históricamente asociada al ecosistema NestJS. Todas las guías oficiales de NestJS, la documentación de `@nestjs/typeorm` y los proyectos de referencia están construidos sobre TypeORM. Esto reduce la fricción durante el desarrollo y el onboarding de nuevos desarrolladores.
+
+### Alternativas evaluadas
+
+**Prisma**
+
+Prisma ofrece un generador de cliente con tipos extremadamente precisos derivados del schema (`schema.prisma`). Su DX (Developer Experience) es reconocida como superior en proyectos donde el esquema se define en el archivo Prisma y el cliente se genera automáticamente.
+
+Sin embargo, presenta tres incompatibilidades con los requisitos de este proyecto:
+
+1. **Arquitectura hexagonal:** Prisma Client no es un repositorio inyectable en el sentido de NestJS. Para usar Prisma con arquitectura hexagonal se requiere envolver el cliente en un servicio adicional (`PrismaService`) y luego en adaptadores de repositorio por entidad, aumentando la complejidad de la capa de infraestructura sin beneficio funcional.
+
+2. **Tipos ENUM nativos de PostgreSQL:** Prisma modela los ENUMs en su propio `schema.prisma` y los mapea a ENUMs de PostgreSQL, pero el control granular sobre los tipos nativos (nombre del tipo SQL, valor por defecto en la BD, migración incremental) es más limitado que TypeORM. El proyecto requiere 5 ENUMs nativos con nombres específicos usados tanto en el ORM como en scripts SQL directos.
+
+3. **Migraciones en sistemas existentes:** El modelo de migraciones de Prisma (`prisma migrate`) está optimizado para proyectos que inician desde cero con Prisma. La coexistencia con scripts SQL manuales (`database/schema.sql`) y con la extensión `uuid-ossp` inicializada externamente (en `docker/postgres/init.sql`) introduce complejidad adicional.
+
+**Decisión sobre Prisma:** No adoptado. Las ventajas de DX no compensan la incompatibilidad con los tres requisitos estructurales del proyecto.
+
+**MikroORM**
+
+MikroORM tiene mejor soporte de Unit of Work y un modelo de identidad más riguroso que TypeORM. Sin embargo, su integración con NestJS (`@mikro-orm/nestjs`) es menos madura, su comunidad es considerablemente más pequeña, y la documentación de referencia del ecosistema NestJS no lo cubre como opción principal. No fue evaluado como alternativa viable dado el contexto del proyecto.
+
+**SQL nativo con `pg`**
+
+Descartado. El uso de SQL embebido directamente en servicios viola el principio de abstracción de persistencia requerido por la arquitectura hexagonal y hace los tests de unidad significativamente más complejos (no hay repositorios mockeables).
+
+### Consecuencias
+
+**Positivas:**
+- Repositorios inyectables mediante `@InjectRepository()`, compatibles con el sistema DI de NestJS.
+- Entidades TypeScript como única fuente de verdad del esquema (junto con las migraciones).
+- Soporte completo de las características PostgreSQL 15 requeridas por `DATABASE.md`.
+- CLI de migraciones integrado: `typeorm migration:generate | run | revert`.
+- Tests unitarios simplificados: los repositorios se mockean mediante el token de inyección.
+
+**Restricciones derivadas:**
+- `synchronize: false` obligatorio en todos los entornos (desarrollo, test, producción). Cualquier cambio de esquema debe hacerse a través de una migración generada y revisada.
+- Las entidades TypeORM residen exclusivamente en `infrastructure/persistence/`. Las entidades de dominio (en `domain/entities/`) son clases POJO sin decoradores de ORM.
+- Toda consulta compleja debe hacerse con `QueryBuilder` de TypeORM, nunca con SQL embebido en un servicio.
+- Las migraciones se versionan en `backend/src/database/migrations/` y se ejecutan automáticamente en el arranque del contenedor de test.
+
+### Referencias
+
+- `DATABASE.md` — Sección "ORM": establece TypeORM con migraciones versionadas como mandato operativo.
+- `ARCHITECTURE.md` — Stack Tecnológico Completo: lista TypeORM 0.3+ en la tabla de tecnologías del backend.
+- `ARCHITECTURE.md` — Capas por Módulo: define `infrastructure/persistence/ ← TypeORM entities, repositories, migrations`.
+- ADR-001: justificación de NestJS menciona TypeORM como parte del ecosistema que motivó la elección.
+- ADR-003: justificación de PostgreSQL menciona "compatibilidad con TypeORM 0.3".
+
+---
+
 # Hallazgos Pendientes (no bloqueantes)
 
 ## HAL-001 — 2026-08-02
