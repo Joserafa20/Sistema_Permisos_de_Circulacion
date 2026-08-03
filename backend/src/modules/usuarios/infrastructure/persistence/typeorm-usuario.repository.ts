@@ -2,12 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
+  CreateUsuarioData,
+  DependenciaBrief,
   IUsuarioRepository,
   ListarUsuariosQuery,
+  RolBrief,
 } from '../../domain/ports/usuario-repository.interface';
 import { UsuarioDomainEntity } from '../../domain/entities/usuario.domain-entity';
 import { UsuarioEntity } from './usuario.entity';
 import { UsuarioMapper } from './usuario.mapper';
+import { RoleEntity } from '../../../roles/infrastructure/persistence/role.entity';
+import { DependenciaEntity } from '../../../dependencias/infrastructure/persistence/dependencia.entity';
 
 const SORT_FIELD_MAP: Record<string, string> = {
   nombre: 'usuario.nombre',
@@ -22,6 +27,10 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
   constructor(
     @InjectRepository(UsuarioEntity)
     private readonly repo: Repository<UsuarioEntity>,
+    @InjectRepository(RoleEntity)
+    private readonly rolRepo: Repository<RoleEntity>,
+    @InjectRepository(DependenciaEntity)
+    private readonly dependenciaRepo: Repository<DependenciaEntity>,
   ) {}
 
   async findMany(
@@ -75,5 +84,44 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
       withDeleted: false,
     });
     return entity ? UsuarioMapper.toDomain(entity) : null;
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    const count = await this.repo.count({ where: { email } });
+    return count > 0;
+  }
+
+  async findRol(rolId: string): Promise<RolBrief | null> {
+    const rol = await this.rolRepo.findOne({ where: { id: rolId } });
+    if (!rol) return null;
+    return { id: rol.id, nombre: rol.nombre, activo: rol.activo };
+  }
+
+  async findDependencia(dependenciaId: string): Promise<DependenciaBrief | null> {
+    const dep = await this.dependenciaRepo.findOne({ where: { id: dependenciaId } });
+    if (!dep) return null;
+    return { id: dep.id, nombre: dep.nombre, activo: dep.activo };
+  }
+
+  async save(data: CreateUsuarioData): Promise<UsuarioDomainEntity> {
+    const entity = this.repo.create({
+      nombre: data.nombre,
+      apellido: data.apellido,
+      email: data.email,
+      contrasenaHash: data.contrasenaHash,
+      rol: { id: data.rolId } as RoleEntity,
+      dependencia: data.dependenciaId ? ({ id: data.dependenciaId } as DependenciaEntity) : null,
+      contrasenaExpiraAt: data.contrasenaExpiraAt,
+      activo: true,
+      intentosFallidos: 0,
+      historialContrasenas: [],
+      createdBy: { id: data.createdById } as UsuarioEntity,
+    });
+    const saved = await this.repo.save(entity);
+    const loaded = await this.repo.findOneOrFail({
+      where: { id: saved.id },
+      relations: ['rol', 'dependencia'],
+    });
+    return UsuarioMapper.toDomain(loaded);
   }
 }

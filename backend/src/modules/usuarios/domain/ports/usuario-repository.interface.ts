@@ -13,7 +13,34 @@ export interface ListarUsuariosQuery {
   busqueda?: string;
 }
 
+export interface CreateUsuarioData {
+  nombre: string;
+  apellido: string;
+  email: string;
+  contrasenaHash: string;
+  rolId: string;
+  dependenciaId: string | null;
+  contrasenaExpiraAt: string;
+  createdById: string;
+}
+
+export interface RolBrief {
+  id: string;
+  nombre: string;
+  activo: boolean;
+}
+
+export interface DependenciaBrief {
+  id: string;
+  nombre: string;
+  activo: boolean;
+}
+
 export interface IUsuarioRepository {
   findMany(query: ListarUsuariosQuery): Promise<{ items: UsuarioDomainEntity[]; total: number }>;
   findById(id: string): Promise<UsuarioDomainEntity | null>;
+  existsByEmail(email: string): Promise<boolean>;
+  findRol(rolId: string): Promise<RolBrief | null>;
+  findDependencia(dependenciaId: string): Promise<DependenciaBrief | null>;
+  save(data: CreateUsuarioData): Promise<UsuarioDomainEntity>;
 }
