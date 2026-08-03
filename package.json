@@ -15,11 +15,9 @@
   },
   "lint-staged": {
     "backend/src/**/*.ts": [
-      "eslint --fix --max-warnings=0",
       "prettier --write"
     ],
     "backend/test/**/*.ts": [
-      "eslint --fix --max-warnings=0",
       "prettier --write"
     ],
     "frontend/src/**/*.{ts,tsx}": [

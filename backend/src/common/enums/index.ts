@@ -1,0 +1,10 @@
+export { EstadoSolicitud } from './estado-solicitud.enum';
+export { EstadoPermiso } from './estado-permiso.enum';
+export { TipoDocumentoAdjunto } from './tipo-documento-adjunto.enum';
+export { TipoConfig } from './tipo-config.enum';
+export { AccionAuditoria } from './accion-auditoria.enum';
+export { TipoToken } from './tipo-token.enum';
+export { TipoDocumentoIdentidad } from './tipo-documento-identidad.enum';
+export { TipoNotificacion } from './tipo-notificacion.enum';
+export { EstadoEnvioNotificacion } from './estado-envio-notificacion.enum';
+export { ResultadoQrValidacion } from './resultado-qr-validacion.enum';

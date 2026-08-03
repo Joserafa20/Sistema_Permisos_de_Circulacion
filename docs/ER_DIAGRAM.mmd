@@ -1,0 +1,309 @@
+erDiagram
+
+    %% ================================================================
+    %% Sistema de Permisos de Circulación — Pico y Placa
+    %% Diagrama Entidad-Relación — Modelo de Datos v1.0
+    %% Fuente: docs/MODELO_DATOS.md | Motor: PostgreSQL 15+
+    %% 16 entidades · 30 FK · 5 ENUM nativos · UUID v4 PKs
+    %% ================================================================
+
+
+    %% ─────────────────────────────────────────────────────────────────
+    %% MÓDULO 1: CATÁLOGOS
+    %% Tablas de referencia con activo BOOLEAN (sin soft delete)
+    %% ─────────────────────────────────────────────────────────────────
+
+    roles {
+        uuid        id           PK
+        varchar     nombre       UK "administrador | funcionario"
+        text        descripcion
+        boolean     activo
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    municipios {
+        uuid    id           PK
+        varchar nombre
+        varchar departamento
+        varchar codigo_dane  UK "Código DANE oficial"
+        boolean activo
+    }
+
+    motivos {
+        uuid        id               PK
+        varchar     nombre           UK
+        text        descripcion
+        boolean     requiere_soporte    "Obliga adjuntar carta laboral"
+        boolean     activo
+        integer     orden
+        timestamptz created_at
+        timestamptz updated_at
+        uuid        created_by       FK
+        uuid        updated_by       FK
+    }
+
+    dependencias {
+        uuid        id          PK
+        varchar     nombre
+        varchar     codigo      UK
+        text        descripcion
+        boolean     activo
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at     "Soft delete"
+        uuid        created_by  FK
+        uuid        updated_by  FK
+    }
+
+
+    %% ─────────────────────────────────────────────────────────────────
+    %% MÓDULO 2: SEGURIDAD Y ACCESO
+    %% ─────────────────────────────────────────────────────────────────
+
+    usuarios {
+        uuid        id                      PK
+        varchar     nombre
+        varchar     apellido
+        varchar     email                   UK
+        varchar     contrasena_hash            "BCrypt 12 rounds mínimo"
+        uuid        rol_id                  FK
+        uuid        dependencia_id          FK
+        boolean     activo
+        timestamptz ultimo_login
+        integer     intentos_fallidos          "CHECK >= 0"
+        timestamptz bloqueado_hasta            "Bloqueo 30 min tras 5 intentos"
+        date        contrasena_expira_at       "Expira cada 90 días"
+        jsonb       historial_contrasenas      "Últimas 5 hashes — impide reutilización"
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at              "Soft delete"
+        uuid        created_by              FK
+        uuid        updated_by              FK
+    }
+
+    tokens {
+        uuid        id          PK
+        uuid        usuario_id  FK
+        varchar     token_hash     "SHA-256 del token — nunca texto plano"
+        varchar     tipo           "refresh | reset_contrasena"
+        timestamptz expira_at
+        boolean     revocado
+        timestamptz revocado_at
+        inet        ip_address
+        text        user_agent
+        timestamptz created_at
+    }
+
+
+    %% ─────────────────────────────────────────────────────────────────
+    %% MÓDULO 3: TRÁMITES
+    %% ─────────────────────────────────────────────────────────────────
+
+    ciudadanos {
+        uuid        id                       PK
+        varchar     tipo_documento              "CC | CE | PAS | TI | NIT"
+        varchar     numero_documento          UK
+        varchar     nombre
+        varchar     apellido
+        date        fecha_nacimiento
+        varchar     direccion
+        varchar     barrio
+        uuid        municipio_id             FK
+        varchar     celular
+        varchar     email
+        boolean     acepta_tratamiento_datos    "Ley 1581/2012 — obligatorio"
+        timestamptz fecha_aceptacion_datos      "CHECK: si acepta=true entonces NOT NULL"
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at               "Soft delete"
+    }
+
+    motocicletas {
+        uuid        id             PK
+        uuid        ciudadano_id   FK
+        varchar     placa             "Formato colombiano AAA000 | AAA00A"
+        varchar     marca
+        varchar     linea
+        integer     modelo            "CHECK: 1900–2100"
+        integer     cilindraje        "CHECK: > 0"
+        varchar     color
+        varchar     numero_motor
+        varchar     numero_chasis
+        boolean     activo
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at     "Soft delete"
+    }
+
+    solicitudes {
+        uuid             id                     PK
+        varchar          numero_radicado         UK "Formato 20260802-PYP-001234"
+        uuid             ciudadano_id            FK
+        uuid             motocicleta_id          FK
+        uuid             motivo_id               FK
+        date             fecha_inicio
+        date             fecha_fin                  "CHECK: fecha_fin >= fecha_inicio"
+        text             descripcion_adicional
+        estado_solicitud estado                     "ENUM nativo PostgreSQL"
+        boolean          declaracion_jurada         "CHECK: = true — obligatorio"
+        inet             ip_solicitante
+        numeric          recaptcha_score            "NUMERIC(3,2) — reCAPTCHA v3"
+        timestamptz      created_at
+        timestamptz      updated_at
+        timestamptz      deleted_at              "Soft delete"
+    }
+
+    historial_estados {
+        uuid             id               PK
+        uuid             solicitud_id     FK
+        estado_solicitud estado_anterior     "NULL si es el primer estado"
+        estado_solicitud estado_nuevo
+        text             motivo              "Obligatorio en rechazos y correcciones"
+        jsonb            campos_correccion   "Campos a corregir por el ciudadano"
+        uuid             usuario_id       FK "NULL si cambio automático por job"
+        inet             ip_address
+        timestamptz      created_at
+    }
+
+    documentos {
+        uuid                   id                 PK
+        uuid                   solicitud_id       FK
+        tipo_documento_adjunto tipo_documento        "ENUM nativo PostgreSQL"
+        varchar                nombre_original
+        varchar                nombre_almacenado
+        varchar                storage_key           "Ruta MinIO — NUNCA exponer en API"
+        varchar                mime_type             "CHECK: pdf | jpeg | png"
+        integer                tamano_bytes          "CHECK: > 0"
+        varchar                hash_sha256           "Integridad del archivo"
+        boolean                activo
+        timestamptz            created_at
+    }
+
+
+    %% ─────────────────────────────────────────────────────────────────
+    %% MÓDULO 4: PERMISOS Y VERIFICACIÓN QR
+    %% ─────────────────────────────────────────────────────────────────
+
+    permisos {
+        uuid          id                   PK
+        varchar       codigo_permiso        UK "Formato 2026-PYP-00145 — seq_codigo_permiso"
+        uuid          solicitud_id          FK "UNIQUE — relación 1:1 con solicitudes"
+        uuid          funcionario_id        FK
+        varchar       codigo_qr             UK "UUID+SHA-256+salt — sin datos personales"
+        varchar       storage_key_pdf          "Ruta MinIO — NUNCA exponer en API"
+        timestamptz   fecha_expedicion
+        date          fecha_vencimiento        "CHECK: > fecha_expedicion::DATE"
+        estado_permiso estado                  "ENUM nativo PostgreSQL"
+        text          motivo_revocacion        "Obligatorio si estado=revocado"
+        timestamptz   revocado_at
+        uuid          revocado_por          FK "CHECK: NOT NULL si estado=revocado"
+        jsonb         snapshot_ciudadano       "Snapshot inmutable al momento de aprobación"
+        jsonb         snapshot_motocicleta     "Snapshot inmutable al momento de aprobación"
+        jsonb         snapshot_motivo          "Snapshot inmutable al momento de aprobación"
+        varchar       hash_pdf                 "SHA-256 del PDF — integridad documental"
+        timestamptz   created_at
+        timestamptz   updated_at
+    }
+
+    qr_validaciones {
+        uuid        id          PK
+        uuid        permiso_id  FK "NULL si código no existe en BD"
+        varchar     codigo_qr      "El código escaneado tal como llegó"
+        inet        ip_address
+        text        user_agent
+        varchar     resultado      "vigente | vencido | revocado | no_encontrado"
+        timestamptz created_at
+    }
+
+
+    %% ─────────────────────────────────────────────────────────────────
+    %% MÓDULO 5: COMUNICACIONES
+    %% ─────────────────────────────────────────────────────────────────
+
+    notificaciones {
+        uuid        id             PK
+        varchar     destinatario      "Email del ciudadano"
+        varchar     asunto
+        varchar     tipo              "solicitud_recibida | aprobada | rechazada | correccion"
+        uuid        solicitud_id   FK
+        uuid        permiso_id     FK
+        varchar     estado_envio      "pendiente | enviado | error"
+        integer     intentos          "BullMQ con backoff exponencial — máx 3"
+        timestamptz ultimo_intento
+        text        error_detalle
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+
+    %% ─────────────────────────────────────────────────────────────────
+    %% MÓDULO 6: AUDITORÍA Y CONFIGURACIÓN
+    %% ─────────────────────────────────────────────────────────────────
+
+    auditoria {
+        uuid             id               PK
+        uuid             usuario_id       FK "NULL en acciones públicas del ciudadano"
+        accion_auditoria accion              "ENUM nativo — 13 valores"
+        varchar          entidad             "Tabla afectada: solicitud | permiso | usuario…"
+        uuid             entidad_id
+        jsonb            datos_anteriores    "Estado antes del cambio — NULL en creaciones"
+        jsonb            datos_nuevos        "Estado después del cambio — NULL en eliminaciones"
+        inet             ip_address
+        text             user_agent
+        timestamptz      created_at          "Solo inserción — Ley 1712/2014 retención 5 años"
+    }
+
+    configuracion {
+        uuid        id          PK
+        varchar     clave       UK "nombre_alcaldia | dias_max_permiso | color_institucional…"
+        text        valor
+        tipo_config tipo           "ENUM nativo PostgreSQL — texto | numero | booleano | json | imagen_base64"
+        text        descripcion
+        timestamptz updated_at
+        uuid        updated_by  FK
+    }
+
+
+    %% ================================================================
+    %% RELACIONES
+    %% ================================================================
+
+    %% ── Catálogos → Usuarios ────────────────────────────────────────
+    roles         ||--o{ usuarios      : "asignado a"
+    dependencias  ||--o{ usuarios      : "agrupa"
+    usuarios      ||--o{ motivos       : "administra"
+    usuarios      ||--o{ dependencias  : "administra"
+
+    %% ── Seguridad ───────────────────────────────────────────────────
+    usuarios      ||--o{ tokens        : "posee"
+
+    %% ── Municipios → Ciudadanos ─────────────────────────────────────
+    municipios    ||--o{ ciudadanos    : "reside en"
+
+    %% ── Trámites ────────────────────────────────────────────────────
+    ciudadanos    ||--o{ motocicletas  : "posee"
+    ciudadanos    ||--o{ solicitudes   : "realiza"
+    motocicletas  ||--o{ solicitudes   : "objeto de"
+    motivos       ||--o{ solicitudes   : "clasifica"
+
+    solicitudes   ||--o{ historial_estados : "registra cambios"
+    solicitudes   ||--o{ documentos        : "adjunta"
+    solicitudes   ||--|o permisos          : "genera"
+    solicitudes   ||--o{ notificaciones    : "origina"
+
+    %% ── Funcionarios → Permisos ─────────────────────────────────────
+    usuarios      ||--o{ permisos      : "aprueba"
+
+    %% ── Permisos ────────────────────────────────────────────────────
+    permisos      ||--o{ qr_validaciones : "es escaneado en"
+    permisos      ||--o{ notificaciones  : "origina"
+
+    %% ── Auditoría ───────────────────────────────────────────────────
+    usuarios      ||--o{ auditoria     : "genera"
+
+    %% ── Configuración ───────────────────────────────────────────────
+    usuarios      ||--o{ configuracion : "actualiza"
+
+    %% ── Historial → Usuarios ────────────────────────────────────────
+    usuarios      ||--o{ historial_estados : "registra"

@@ -62,7 +62,11 @@ Ninguna funcionalidad se considera completa sin haber aplicado los controles de 
 | CRUD Motivos | ❌ | — | ❌ | ✅ |
 | Ver auditoría | ❌ | — | ❌ | ✅ |
 | Exportar reportes | ❌ | — | ❌ | ✅ |
-| Configurar sistema | ❌ | — | ❌ | ✅ |
+| Configurar sistema (parámetros) | ❌ | — | ❌ | ✅ |
+| Ver configuración institucional (datos públicos) | ✅ | — | — | — |
+| Ver configuración institucional (datos completos) | ❌ | — | ❌ | ✅ |
+| Editar configuración institucional | ❌ | — | ❌ | ✅ |
+| Cargar/reemplazar escudo o logo | ❌ | — | ❌ | ✅ |
 
 *El ciudadano no tiene cuenta; se identifica con radicado + documento.
 

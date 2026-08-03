@@ -77,28 +77,23 @@
 **Objetivo:** Modelo de datos completo, normalizado y versionado antes de escribir lógica de negocio.
 **Semanas:** 1–2
 **Dependencia:** Fase 0 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** ✅ Completada — 7 / 7 tareas completadas
 
-- [ ] Tipos ENUM de PostgreSQL definidos
-- [ ] Script SQL completo (`database/schema.sql`)
-- [ ] Migraciones TypeORM para todas las tablas
-- [ ] Índices de rendimiento aplicados desde el inicio
-- [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
-- [ ] Entidades TypeORM con relaciones
-- [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
+- [x] Tipos ENUM de PostgreSQL definidos ✅ 2026-08-02
+- [x] Script SQL completo (`database/schema.sql`) ✅ 2026-08-02
+- [x] Migraciones TypeORM para todas las tablas ✅ 2026-08-02
+- [x] Índices de rendimiento aplicados desde el inicio ✅ 2026-08-02
+- [x] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal ✅ 2026-08-02
+- [x] Entidades TypeORM con relaciones ✅ 2026-08-02
+- [x] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`) ✅ 2026-08-02
 
 ### Pendientes de Diseño — Fase 1
 
-- [~] **[AUDITORÍA M-04]** Confirmar si los datos del ciudadano se almacenan en tabla separada
-  `ciudadanos` (con FK en `solicitudes`) o embebidos en la tabla `solicitudes` (campos `ciudadano_*`).
-  Decisión afecta el esquema SQL, las migraciones y los endpoints de la Fase 3.
-  _Referencia: `docs/AUDITORIA_DOCUMENTACION.md` §9.2_
+- [x] **[AUDITORÍA M-04]** ✅ Resuelto 2026-08-02 — Tabla `ciudadanos` separada con FK en `solicitudes`.
+  Implementado en `CiudadanoEntity` y `SolicitudEntity`.
 
-- [~] **[AUDITORÍA M-03]** Confirmar si existe tabla `historial_contrasenas(id, usuario_id,
-  hash_contrasena, created_at)` o mecanismo equivalente en `MODELO_DATOS.md`.
-  Requerido por `SECURITY.md` (últimas 5 contraseñas no reutilizables).
-  Si no está contemplado, agregar antes de ejecutar las migraciones.
-  _Referencia: `docs/AUDITORIA_DOCUMENTACION.md` §9.3_
+- [x] **[AUDITORÍA M-03]** ✅ Resuelto 2026-08-02 — Campo `historial_contrasenas JSONB DEFAULT '[]'`
+  en tabla `usuarios` (no tabla separada). Implementado en `UsuarioEntity`.
 
 ---
 
@@ -108,6 +103,10 @@
 **Dependencia:** Fase 1 completada.
 **Estado:** ⬜ No iniciada
 
+- [ ] Migración TypeORM para tabla `configuracion_institucional`
+- [ ] Seed inicial de `configuracion_institucional` (configurable vía `.env`)
+- [ ] Variables de entorno `SEED_CI_*` en `.env.example`
+- [ ] Módulo NestJS `configuracion-institucional/` con arquitectura hexagonal
 - [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
 - [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
 - [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
@@ -123,6 +122,8 @@
 - [ ] Global Exception Filter (sin exposición de internos)
 - [ ] Helmet + CORS configurados
 - [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
+
+> **Nota:** El módulo `configuracion-institucional` comparte Fase 2 con Auth porque la tabla debe existir antes de la Fase 4 (generación de PDF). Las pantallas de UI del administrador se implementan en Fase 7.
 
 ### Pendientes de Diseño — Fase 2
 
@@ -270,14 +271,17 @@
 **Dependencia:** Fase 6 completada.
 **Estado:** ⬜ No iniciada
 
+- [ ] Pantalla "Configuración Institucional" (CU-42 a CU-45):
+  - [ ] Vista de consulta con previsualización de escudo y logo (HU-44)
+  - [ ] Formulario de edición de datos textuales (HU-45)
+  - [ ] Carga/reemplazo del escudo con validación de formato y tamaño (HU-46)
+  - [ ] Carga/reemplazo del logo con opción de eliminar (HU-47)
 - [ ] Dashboard administrativo con KPIs globales
 - [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
 - [ ] CRUD de Roles
 - [ ] CRUD de Dependencias
 - [ ] CRUD de Motivos (con activación/desactivación sin borrar)
-- [ ] Configuración del sistema:
-  - [ ] Nombre de la alcaldía, municipio
-  - [ ] Logo / escudo (upload de imagen)
+- [ ] Configuración del Sistema (Parámetros Operativos):
   - [ ] Firma digital configurable (upload de imagen)
   - [ ] Sello institucional (upload de imagen)
   - [ ] Parámetros: días máximos permiso, plazos, color institucional

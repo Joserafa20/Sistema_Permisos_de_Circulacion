@@ -37,23 +37,18 @@
 **Duración estimada:** Semanas 1–2  
 **Dependencia:** Fase 0 completada.
 
-- [ ] Tipos ENUM de PostgreSQL definidos
-- [ ] Script SQL completo (`database/schema.sql`)
-- [ ] Migraciones TypeORM para todas las tablas
-- [ ] Índices de rendimiento aplicados desde el inicio
-- [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
-- [ ] Entidades TypeORM con relaciones
-- [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
+- [x] Tipos ENUM de PostgreSQL definidos ✅ 2026-08-02
+- [x] Script SQL completo (`database/schema.sql`) ✅ 2026-08-02
+- [x] Migraciones TypeORM para todas las tablas ✅ 2026-08-02
+- [x] Índices de rendimiento aplicados desde el inicio ✅ 2026-08-02
+- [x] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal ✅ 2026-08-02
+- [x] Entidades TypeORM con relaciones ✅ 2026-08-02
+- [x] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`) ✅ 2026-08-02
 
 ### Pendientes de Diseño — Fase 1
 
-- [~] **[M-04]** Confirmar estructura de ciudadanos: tabla separada `ciudadanos` vs. campos
-  embebidos `ciudadano_*` en `solicitudes`. Afecta esquema SQL, migraciones y Fase 3.
-  _Ver `docs/AUDITORIA_DOCUMENTACION.md` §9.2_
-
-- [~] **[M-03]** Confirmar existencia de tabla `historial_contrasenas` en `MODELO_DATOS.md`.
-  Requerida por `SECURITY.md` (no reutilizar últimas 5 contraseñas). Agregar antes de migraciones.
-  _Ver `docs/AUDITORIA_DOCUMENTACION.md` §9.3_
+- [x] **[M-04]** ✅ Resuelto 2026-08-02 — Tabla separada `ciudadanos` con FK en `solicitudes`.
+- [x] **[M-03]** ✅ Resuelto 2026-08-02 — Campo `historial_contrasenas JSONB DEFAULT '[]'` en `usuarios`.
 
 ---
 
@@ -62,6 +57,8 @@
 **Duración estimada:** Semanas 2–3  
 **Dependencia:** Fase 1 completada.
 
+- [ ] Migración TypeORM y seed para `configuracion_institucional` (debe existir antes de Fase 4 — PDF)
+- [ ] Módulo backend `configuracion-institucional/` con endpoints CRUD e imagen
 - [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
 - [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
 - [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
@@ -205,14 +202,13 @@
 **Duración estimada:** Semanas 7–8  
 **Dependencia:** Fase 6 completada.
 
+- [ ] Pantalla de Configuración Institucional (CU-42 a CU-45): consulta, edición, carga de escudo y logo
 - [ ] Dashboard administrativo con KPIs globales
 - [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
 - [ ] CRUD de Roles
 - [ ] CRUD de Dependencias
 - [ ] CRUD de Motivos (con activación/desactivación sin borrar)
-- [ ] Configuración del sistema:
-  - [ ] Nombre de la alcaldía, municipio
-  - [ ] Logo / escudo (upload de imagen)
+- [ ] Configuración del Sistema (Parámetros Operativos):
   - [ ] Firma digital configurable (upload de imagen)
   - [ ] Sello institucional (upload de imagen)
   - [ ] Parámetros: días máximos permiso, plazos, color institucional
@@ -260,13 +256,13 @@
 | Fase | Descripción | Completadas | Total | Estado |
 |------|-------------|:-----------:|:-----:|--------|
 | Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
-| Fase 1 | Base de Datos | 0 | 7 | 🔵 Siguiente ← |
+| Fase 1 | Base de Datos | 7 | 7 | ✅ Completada ← |
 | Fase 2 | Auth y Seguridad | 0 | 15 | ⬜ No iniciada |
 | Fase 3 | Solicitudes Backend | 0 | 16 | ⬜ No iniciada |
 | Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |
 | Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
-| Fase 7 | Panel Admin | 0 | 12 | ⬜ No iniciada |
+| Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
 
 **Duración total estimada:** 10 semanas para un equipo de 2–3 desarrolladores.

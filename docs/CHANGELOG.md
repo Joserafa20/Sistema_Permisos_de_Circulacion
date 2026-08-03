@@ -9,14 +9,100 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin Publicar]
 
-### Por Hacer
-- Implementación del frontend (Next.js) — Fase 0 pendiente.
-- Scripts SQL y migraciones TypeORM — Fase 1.
-- Autenticación JWT — Fase 2.
-- Módulo de solicitudes — Fase 3.
-- PDF + QR — Fase 4.
-- Configuración de Docker para producción — Fase 8.
-- Pruebas unitarias, de integración y E2E — Fase 8.
+_Sin cambios pendientes de publicar. Próxima versión: v0.3.0 (Fase 2 — Autenticación)._
+
+---
+
+## [0.2.0] — 2026-08-02
+
+### Resumen
+
+**Fase 1 completa — Modelo de datos, documentación funcional y cierre de auditoría.**
+Establece el esquema de base de datos completo del sistema, incluyendo el modelo de datos
+relacional íntegro (16 tablas, 30 FKs, 28 índices), el primer requerimiento funcional
+post-planificación (módulo Configuración Institucional) y el cierre de todas las auditorías
+técnicas y documentales de la fase.
+
+### Corregido
+
+- **INC-CI-001** — `ROADMAP.md` / `TASKS.md` Fase 7: bloque "Configuración del sistema"
+  renombrado a "Configuración del Sistema (Parámetros Operativos)". Eliminados 2 sub-ítems
+  solapados con el módulo CI. Total Fase 7 ajustado a 10 ítems.
+- **INC-CI-002** — `ARCHITECTURE.md`: `ConfiguracionInstitucionalModule` agregado a tabla de
+  módulos. `IConfiguracionInstitucionalRepository` agregado a Driven Ports. Nueva sección
+  "Separación de Dominios" con regla arquitectónica de no-mezcla entre repositorios.
+- **INC-001** — `PermisoEntity`: columna `hash_pdf: string | null` agregada (faltaba respecto a MODELO_DATOS.md).
+- **INC-002** — `TokenEntity`: índice `idx_tokens_token_hash` corregido a no-unique.
+- **INC-003** — `TokenEntity`: índice compuesto renombrado a `idx_tokens_usuario_tipo_revocado`.
+- Auditoría de índices TypeORM — 7 diferencias corregidas en 6 entidades (D-001 a D-007).
+- Nomenclatura `uq_motocicletas_placa_activa` unificada en MODELO_DATOS.md §10 y §11.
+
+### Añadido
+
+**Módulo Configuración Institucional (documentación — implementación en Fase 2):**
+- `docs/PRD_Sistema_Permisos_de_Circulacion.md` — §MÓDULO: CONFIGURACIÓN INSTITUCIONAL.
+- `docs/MODELO_DATOS.md §9.3` — entidad `configuracion_institucional` (singleton, 16 columnas).
+  Claves `nombre_alcaldia`, `municipio` y `logo_url` en `configuracion` marcadas como deprecadas.
+- `docs/REGLAS_NEGOCIO.md` — RN-101 a RN-108 (singleton, admin-only, escudo obligatorio, no-delete,
+  MinIO privado, auditoría de cambios, independencia de PDFs emitidos).
+- `docs/HISTORIAS_USUARIO.md` — Épica É-09 (HU-44 a HU-47). Total: 47 historias, 168 puntos.
+- `docs/CASOS_USO.md` — Módulo 6 (CU-42 a CU-45).
+- `.claude/API.md` — 5 endpoints documentados del módulo CI.
+- `.claude/SECURITY.md` — 4 filas nuevas en la Matriz de Permisos RBAC.
+- `.claude/DECISION_LOG.md` — ADR-017: Parametrización Institucional para Reutilización Multi-Alcaldía.
+- `.claude/ARCHITECTURE.md` — sección "Separación de Dominios" con tabla comparativa completa.
+
+**Diagrama ER:**
+- `docs/ER_DIAGRAM.md` — Documentación técnica: 16 entidades, 20 relaciones, 6 módulos lógicos,
+  FK circulares, constraints, 8 decisiones de diseño D-001 a D-007. Mermaid embebido.
+- `docs/ER_DIAGRAM.mmd` — Diagrama Mermaid puro (`erDiagram`). Compatible GitHub/Obsidian/mermaid.live.
+
+**Modelo de datos — artefactos técnicos:**
+- `database/schema.sql` — Script SQL completo y autocontenido para PostgreSQL 15+: 5 ENUMs nativos,
+  secuencia `seq_codigo_permiso`, 16 tablas, 30 FKs (25 inline + 5 circulares ALTER TABLE),
+  11 CHECK constraints, 24 índices regulares, 3 índices parciales, 1 UNIQUE INDEX parcial.
+- `backend/database/migrations/1785628800000-InitialSchema.ts` — Migración inicial TypeORM con
+  `up()` y `down()` completos. Reproducción exacta de `database/schema.sql`.
+- `backend/database/seeds/seed.ts` — 6 secciones idempotentes (`ON CONFLICT DO NOTHING`): roles,
+  municipio, dependencias, motivos, 9 parámetros de configuración, usuario administrador (BCrypt 12).
+- `backend/.env.example` — sección `Seeds iniciales` con variables `SEED_*` configurables.
+- `bcryptjs` agregado como dependencia de backend.
+
+**ENUMs (`backend/src/common/enums/`) — 11 archivos:**
+- 5 ENUMs PostgreSQL nativos: `estado_solicitud`, `estado_permiso`, `tipo_documento_adjunto`,
+  `tipo_config`, `accion_auditoria`.
+- 5 TypeScript-only (VARCHAR): `TipoToken`, `TipoDocumentoIdentidad`, `TipoNotificacion`,
+  `EstadoEnvioNotificacion`, `ResultadoQrValidacion`.
+- `index.ts` — barrel export de todos los enums.
+
+**Entidades TypeORM (`backend/src/modules/**/infrastructure/persistence/`) — 16 archivos:**
+- `RoleEntity`, `MunicipioEntity`, `CiudadanoEntity`, `MotocicletaEntity`, `DependenciaEntity`,
+  `UsuarioEntity`, `TokenEntity`, `MotivoEntity`, `SolicitudEntity`, `HistorialEstadoEntity`,
+  `DocumentoEntity`, `PermisoEntity`, `QrValidacionEntity`, `NotificacionEntity`,
+  `AuditoriaRegistroEntity`, `ConfiguracionEntity`.
+
+**ADRs y documentación técnica:**
+- `ADR-015` — TypeORM 0.3 como ORM oficial (en DECISION_LOG.md).
+- `ADR-016` — Jerarquía de autoridad entre artefactos del modelo de datos.
+- `ADR-017` — Parametrización Institucional para Reutilización Multi-Alcaldía.
+- `.claude/DATABASE.md` — regla de consistencia del modelo y propagación de cambios (7 pasos).
+
+### Decisiones técnicas
+- **M-04 resuelto:** tabla `ciudadanos` separada con FK en `solicitudes`.
+- **M-03 resuelto:** `historial_contrasenas JSONB DEFAULT '[]'` en `usuarios` (no tabla separada).
+- `enumName` explícito en todos los `@Column({ type: 'enum' })` para forzar nombres PostgreSQL.
+- `Relation<T>` en todas las referencias de tipo en relaciones (evita dependencias circulares).
+- Columnas `date` y `decimal`/`numeric` tipadas como `string` (comportamiento TypeORM 0.3).
+- FK circulares excluidas del diagrama Mermaid (limitación del renderizador) — documentadas en §6.
+- Singleton `configuracion_institucional` enforced en capa de aplicación (no a nivel BD).
+
+### Deuda técnica conocida
+- **HAL-001** — `baseUrl` deprecated en `backend/tsconfig.json` (TS5102). Path aliases no usados.
+  No bloqueante (tsc exit 0). Resolver en Fase 2 antes de usar aliases en código nuevo.
+- **HAL-004** — ESLint paso removido de lint-staged (HAL-004). ESLint funciona vía `npm run lint`.
+  Resolver antes de Fase 2 para re-habilitar enforcement en pre-commit.
+- **HAL-002** — Next.js 14 (5 CVEs altas, 0 críticas). Evaluar upgrade en Fase 8.
+- **HAL-003** — 28 vulnerabilidades NestJS (0 críticas). Evaluar NestJS v11 en Fase 8.
 
 ---
 

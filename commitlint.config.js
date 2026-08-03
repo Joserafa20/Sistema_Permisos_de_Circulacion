@@ -15,6 +15,7 @@ module.exports = {
         'motivos', 'configuracion', 'auditoria', 'reportes', 'qr', 'pdf', 'notificaciones',
         'health', 'storage', 'config', 'common', 'docker', 'ci', 'docs', 'tracking',
         'fase-0', 'fase-1', 'fase-2', 'fase-3', 'fase-4', 'fase-5', 'fase-6', 'fase-7', 'fase-8',
+        'adr',
       ],
     ],
     'subject-case': [2, 'never', ['sentence-case', 'start-case', 'pascal-case', 'upper-case']],
