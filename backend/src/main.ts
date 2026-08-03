@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ValidationError } from 'class-validator';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
@@ -51,6 +52,18 @@ async function bootstrap(): Promise<void> {
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
+      // Produce errors[] estructurados según API_FUNCIONAL.md §3 en lugar de string[]
+      exceptionFactory: (errors: ValidationError[]) => {
+        const details = errors.map((err) => ({
+          field: err.property,
+          message: Object.values(err.constraints ?? {}).join('; '),
+        }));
+        return new BadRequestException({
+          message: 'Los datos enviados no son válidos',
+          code: 'VALIDATION_ERROR',
+          errors: details,
+        });
+      },
     }),
   );
 

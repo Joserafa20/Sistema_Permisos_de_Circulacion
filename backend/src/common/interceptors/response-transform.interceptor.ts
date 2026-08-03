@@ -9,6 +9,7 @@ export class ResponseTransformInterceptor<T> implements NestInterceptor<T, ApiRe
       map((data) => ({
         success: true,
         data,
+        message: 'Operación exitosa',
         timestamp: new Date().toISOString(),
       })),
     );
