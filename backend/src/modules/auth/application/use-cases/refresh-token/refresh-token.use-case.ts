@@ -58,7 +58,7 @@ export class RefreshTokenUseCase {
       throw new UnauthorizedException('Usuario no disponible');
     }
 
-    const rol = usuario.rol.nombre.toUpperCase();
+    const rol = usuario.rol.nombre;
     const payload = { sub: userId, rol };
 
     const accessToken = this.jwtService.sign(payload);

@@ -52,7 +52,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
       const intentos = usuario.intentosFallidos + 1;
       const update: Partial<UsuarioEntity> = { intentosFallidos: intentos };
       if (intentos >= 5) {
-        update.bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000) as unknown as Date;
+        update.bloqueadoHasta = new Date(Date.now() + 30 * 60 * 1000) as unknown as Date;
       }
       await this.usuarioRepo.update(usuario.id, update);
       await this.auditarFallo(usuario.id, ipAddress, userAgent, email);

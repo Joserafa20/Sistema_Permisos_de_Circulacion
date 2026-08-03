@@ -49,7 +49,7 @@ export class LoginUseCase {
       ultimoLogin: new Date(),
     });
 
-    const rol = usuario.rol.nombre.toUpperCase();
+    const rol = usuario.rol.nombre;
     const payload = { sub: userId, rol };
 
     const accessToken = this.jwtService.sign(payload);
