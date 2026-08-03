@@ -9,100 +9,100 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin Publicar]
 
-### Corregido
-- **Auditoría arquitectónica final — módulo Configuración Institucional** (INC-CI-001, INC-CI-002):
-  - `.claude/ROADMAP.md` y `.claude/TASKS.md` — bloque Fase 7 "Configuración del sistema" renombrado
-    a "Configuración del Sistema (Parámetros Operativos)". Eliminados sub-ítems "Nombre de la alcaldía,
-    municipio" y "Logo / escudo (upload de imagen)" que ahora pertenecen exclusivamente a
-    `ConfiguracionInstitucionalModule`. Conservados: firma digital, sello, parámetros operativos y
-    color institucional. Total Fase 7 ajustado a 10 ítems.
-  - `.claude/ARCHITECTURE.md` — `ConfiguracionInstitucionalModule` agregado a tabla de Módulos NestJS.
-    `IConfiguracionInstitucionalRepository` agregado a Driven Ports. Nueva sección "Separación de
-    Dominios" con tabla comparativa exhaustiva (`ConfiguracionModule` vs `ConfiguracionInstitucionalModule`)
-    y regla arquitectónica de no-mezcla entre repositorios de dominio.
-  - Auditoría cerrada sin inconsistencias pendientes. Documentación 100% consistente.
-
-### Añadido
-- **Módulo Configuración Institucional** — nuevo requerimiento funcional incorporado en documentación:
-  - `docs/PRD_Sistema_Permisos_de_Circulacion.md` — nuevo módulo documentado bajo §TIPOS DE USUARIOS > Administrador y sección §MÓDULO: CONFIGURACIÓN INSTITUCIONAL.
-  - `docs/MODELO_DATOS.md` — nueva entidad §9.3 `configuracion_institucional` (singleton, 16 columnas, reglas de negocio, sin soft delete, FK a usuarios). Claves `nombre_alcaldia`, `municipio` y `logo_url` de `configuracion` marcadas como deprecadas con nota de migración.
-  - `docs/REGLAS_NEGOCIO.md` — sección "Reglas de Configuración Institucional" con RN-101 a RN-108: singleton por instalación, acceso exclusivo de administrador, fuente única de identidad para documentos, escudo obligatorio, auditoría de cambios, no-eliminación, almacenamiento MinIO privado, independencia de PDFs ya emitidos.
-  - `docs/HISTORIAS_USUARIO.md` — Épica É-09 con HU-44 a HU-47 (consultar, editar, cargar escudo, cargar logo). Tabla de sprints actualizada (47 historias, 168 puntos).
-  - `docs/CASOS_USO.md` — Módulo 6 con CU-42 a CU-45 (consultar, actualizar datos textuales, reemplazar escudo, reemplazar logo). Diagrama de actores actualizado.
-  - `.claude/API.md` — nuevo módulo "Configuración Institucional (Admin)": 5 endpoints documentados con restricciones de formato/tamaño, respuesta pública, notas de seguridad.
-  - `.claude/SECURITY.md` — 4 nuevas filas en la Matriz de Permisos RBAC para el módulo.
-  - `.claude/DECISION_LOG.md` — ADR-017: Parametrización Institucional para Reutilización del Sistema entre Alcaldías.
-  - `.claude/TASKS.md` — 3 tareas en Fase 2 (migración + seed + módulo backend) + 4 subtareas en Fase 7 (UI admin).
-  - `.claude/ROADMAP.md` — tareas agregadas en Fase 2 y Fase 7.
-- `docs/ER_DIAGRAM.md` — Documentación técnica completa del modelo de datos: descripción general, módulos lógicos, 16 entidades con propósito, 20 relaciones con cardinalidades, FK circulares y auto-referencias, CHECK/UNIQUE constraints, 8 decisiones de diseño, métricas del modelo. Diagrama Mermaid embebido compatible con GitHub y Obsidian.
-- `docs/ER_DIAGRAM.mmd` — Diagrama Mermaid puro (`erDiagram`) con 16 entidades, columnas con marcadores PK/FK/UK y comentarios descriptivos, 20 relaciones con etiquetas, agrupado en 6 módulos con comentarios. Compatible con GitHub/Obsidian/mermaid.live. Excluye FK circulares (limitación Mermaid — documentadas en ER_DIAGRAM.md §6).
-- `backend/database/seeds/seed.ts` — Script de seeds inicial idempotente para PostgreSQL 15 + TypeORM. Incluye 6 secciones (ON CONFLICT DO NOTHING): roles (administrador, funcionario), municipio sede, dependencias (Secretaría de Movilidad + Secretaría General), 9 motivos de permiso, 9 parámetros de configuración del sistema, usuario administrador con contraseña temporal BCrypt 12 rounds. Variables configurables vía `.env`. Script: `npm run seed`.
-- `bcryptjs` agregado como dependencia (requerido para hash BCrypt en seeds y Fase 2 auth).
-- `backend/.env.example` — sección `Seeds iniciales` con todas las variables configurables.
-- `MODELO_DATOS.md` — unificada nomenclatura del índice único parcial de motocicletas: `idx_motocicletas_placa_activo` e `idx_motocicletas_activas` (§10) reemplazados por `uq_motocicletas_placa_activa` en todas las secciones del documento. Ahora coincide con schema.sql, migración y entidades ORM.
-- **Auditoría de índices TypeORM** — 7 diferencias corregidas en 6 entidades para sincronizar con MODELO_DATOS.md, schema.sql y migración:
-  - `CiudadanoEntity`: eliminado `@Index('idx_ciudadanos_numero_doc')` (duplicaba el índice único del constraint `uq_ciudadanos_numero_documento`).
-  - `UsuarioEntity`: eliminado `@Index('idx_usuarios_email')` (duplicaba el índice único del constraint `uq_usuarios_email`); agregado `@Index('idx_usuarios_rol_id', ['rol'])`.
-  - `SolicitudEntity`: agregado `@Index('idx_solicitudes_estado_moto', ['motocicleta', 'estado'])` (índice compuesto para RN-03).
-  - `AuditoriaRegistroEntity`: renombrado `idx_auditoria_entidad` → `idx_auditoria_entidad_id`.
-  - `HistorialEstadoEntity`: renombrado `idx_historial_estados_solicitud_id` → `idx_historial_solicitud_created`.
-  - `PermisoEntity`: agregado `@Index('idx_permisos_funcionario_id', ['funcionario'])`.
-- `backend/database/migrations/1785628800000-InitialSchema.ts` — Migración inicial TypeORM. Reproduce exactamente `database/schema.sql`: 5 ENUMs, 1 secuencia `seq_codigo_permiso`, 16 tablas, 5 FK circulares vía `ALTER TABLE`, 27 índices regulares, 4 índices parciales, 1 índice único parcial. `up()` y `down()` con orden de reversión correcto (FK circulares primero, tablas en orden inverso de dependencia, drop de secuencia y tipos).
-- `ADR-016` — Jerarquía de autoridad entre artefactos del modelo de datos (MODELO_DATOS.md > Entidades > Migraciones > schema.sql). Prohibición de corrección automática de inconsistencias estructurales.
-- `DATABASE.md` — sección "Regla de consistencia del modelo" actualizada a versión definitiva: agrega descripción de cada artefacto, regla de no modificación sin autorización, y sección "Regla de propagación de cambios" con secuencia obligatoria de 7 pasos.
-- `DECISION_LOG.md` — HAL-004 actualizado con impacto en lint-staged y fecha límite de resolución (antes de Fase 2).
-- Reconciliación del modelo de datos: entidades ORM sincronizadas con MODELO_DATOS.md (fuente oficial). INC-001: `hashPdf: string | null` agregado a `PermisoEntity`. INC-002: índice `token_hash` corregido a `idx_tokens_token_hash` no-unique en `TokenEntity`. INC-003: índice compuesto renombrado a `idx_tokens_usuario_tipo_revocado` en `TokenEntity`. Los cuatro artefactos quedan sincronizados.
-- `database/schema.sql` — Script SQL completo y autocontenido para PostgreSQL 15+. Incluye: 5 tipos ENUM nativos, secuencia `seq_codigo_permiso`, 16 tablas con 30 FK (25 inline + 5 circulares via ALTER TABLE), 11 CHECK constraints, 27 índices regulares, 4 índices parciales y 1 índice único parcial (`uq_motocicletas_placa_activa`). Fuente: `docs/MODELO_DATOS.md`. 3 inconsistencias detectadas entre entidades ORM y MODELO_DATOS.md (INC-001: `hash_pdf` ausente en `PermisoEntity`; INC-002: `token_hash` unique en entidad vs non-unique en MODELO_DATOS.md; INC-003: nombre de índice compuesto en tokens).
-
-### Por Hacer
-- Autenticación JWT — Fase 2.
-- Módulo de solicitudes — Fase 3.
-- PDF + QR — Fase 4.
-- Configuración de Docker para producción — Fase 8.
-- Pruebas unitarias, de integración y E2E — Fase 8.
+_Sin cambios pendientes de publicar. Próxima versión: v0.3.0 (Fase 2 — Autenticación)._
 
 ---
 
 ## [0.2.0] — 2026-08-02
 
+### Resumen
+
+**Fase 1 completa — Modelo de datos, documentación funcional y cierre de auditoría.**
+Establece el esquema de base de datos completo del sistema, incluyendo el modelo de datos
+relacional íntegro (16 tablas, 30 FKs, 28 índices), el primer requerimiento funcional
+post-planificación (módulo Configuración Institucional) y el cierre de todas las auditorías
+técnicas y documentales de la fase.
+
+### Corregido
+
+- **INC-CI-001** — `ROADMAP.md` / `TASKS.md` Fase 7: bloque "Configuración del sistema"
+  renombrado a "Configuración del Sistema (Parámetros Operativos)". Eliminados 2 sub-ítems
+  solapados con el módulo CI. Total Fase 7 ajustado a 10 ítems.
+- **INC-CI-002** — `ARCHITECTURE.md`: `ConfiguracionInstitucionalModule` agregado a tabla de
+  módulos. `IConfiguracionInstitucionalRepository` agregado a Driven Ports. Nueva sección
+  "Separación de Dominios" con regla arquitectónica de no-mezcla entre repositorios.
+- **INC-001** — `PermisoEntity`: columna `hash_pdf: string | null` agregada (faltaba respecto a MODELO_DATOS.md).
+- **INC-002** — `TokenEntity`: índice `idx_tokens_token_hash` corregido a no-unique.
+- **INC-003** — `TokenEntity`: índice compuesto renombrado a `idx_tokens_usuario_tipo_revocado`.
+- Auditoría de índices TypeORM — 7 diferencias corregidas en 6 entidades (D-001 a D-007).
+- Nomenclatura `uq_motocicletas_placa_activa` unificada en MODELO_DATOS.md §10 y §11.
+
 ### Añadido
 
-**Fase 1 — Modelo de datos: ENUMs y entidades TypeORM:**
+**Módulo Configuración Institucional (documentación — implementación en Fase 2):**
+- `docs/PRD_Sistema_Permisos_de_Circulacion.md` — §MÓDULO: CONFIGURACIÓN INSTITUCIONAL.
+- `docs/MODELO_DATOS.md §9.3` — entidad `configuracion_institucional` (singleton, 16 columnas).
+  Claves `nombre_alcaldia`, `municipio` y `logo_url` en `configuracion` marcadas como deprecadas.
+- `docs/REGLAS_NEGOCIO.md` — RN-101 a RN-108 (singleton, admin-only, escudo obligatorio, no-delete,
+  MinIO privado, auditoría de cambios, independencia de PDFs emitidos).
+- `docs/HISTORIAS_USUARIO.md` — Épica É-09 (HU-44 a HU-47). Total: 47 historias, 168 puntos.
+- `docs/CASOS_USO.md` — Módulo 6 (CU-42 a CU-45).
+- `.claude/API.md` — 5 endpoints documentados del módulo CI.
+- `.claude/SECURITY.md` — 4 filas nuevas en la Matriz de Permisos RBAC.
+- `.claude/DECISION_LOG.md` — ADR-017: Parametrización Institucional para Reutilización Multi-Alcaldía.
+- `.claude/ARCHITECTURE.md` — sección "Separación de Dominios" con tabla comparativa completa.
+
+**Diagrama ER:**
+- `docs/ER_DIAGRAM.md` — Documentación técnica: 16 entidades, 20 relaciones, 6 módulos lógicos,
+  FK circulares, constraints, 8 decisiones de diseño D-001 a D-007. Mermaid embebido.
+- `docs/ER_DIAGRAM.mmd` — Diagrama Mermaid puro (`erDiagram`). Compatible GitHub/Obsidian/mermaid.live.
+
+**Modelo de datos — artefactos técnicos:**
+- `database/schema.sql` — Script SQL completo y autocontenido para PostgreSQL 15+: 5 ENUMs nativos,
+  secuencia `seq_codigo_permiso`, 16 tablas, 30 FKs (25 inline + 5 circulares ALTER TABLE),
+  11 CHECK constraints, 24 índices regulares, 3 índices parciales, 1 UNIQUE INDEX parcial.
+- `backend/database/migrations/1785628800000-InitialSchema.ts` — Migración inicial TypeORM con
+  `up()` y `down()` completos. Reproducción exacta de `database/schema.sql`.
+- `backend/database/seeds/seed.ts` — 6 secciones idempotentes (`ON CONFLICT DO NOTHING`): roles,
+  municipio, dependencias, motivos, 9 parámetros de configuración, usuario administrador (BCrypt 12).
+- `backend/.env.example` — sección `Seeds iniciales` con variables `SEED_*` configurables.
+- `bcryptjs` agregado como dependencia de backend.
 
 **ENUMs (`backend/src/common/enums/`) — 11 archivos:**
-- `estado-solicitud.enum.ts` — PostgreSQL ENUM `estado_solicitud` (6 valores: recibida → vencida).
-- `estado-permiso.enum.ts` — PostgreSQL ENUM `estado_permiso` (vigente, vencido, revocado).
-- `tipo-documento-adjunto.enum.ts` — PostgreSQL ENUM `tipo_documento_adjunto` (cedula, licencia, soat, rtm, carta_laboral, otro).
-- `tipo-config.enum.ts` — PostgreSQL ENUM `tipo_config` (texto, numero, booleano, json, imagen_base64).
-- `accion-auditoria.enum.ts` — PostgreSQL ENUM `accion_auditoria` (13 valores: login → exportar_reporte).
-- `tipo-token.enum.ts` — TypeScript-only VARCHAR (refresh, reset_contrasena).
-- `tipo-documento-identidad.enum.ts` — TypeScript-only VARCHAR (CC, CE, PAS, NIT).
-- `tipo-notificacion.enum.ts` — TypeScript-only VARCHAR (4 tipos de notificación).
-- `estado-envio-notificacion.enum.ts` — TypeScript-only VARCHAR (pendiente, enviado, error).
-- `resultado-qr-validacion.enum.ts` — TypeScript-only VARCHAR (vigente, vencido, revocado, no_encontrado).
+- 5 ENUMs PostgreSQL nativos: `estado_solicitud`, `estado_permiso`, `tipo_documento_adjunto`,
+  `tipo_config`, `accion_auditoria`.
+- 5 TypeScript-only (VARCHAR): `TipoToken`, `TipoDocumentoIdentidad`, `TipoNotificacion`,
+  `EstadoEnvioNotificacion`, `ResultadoQrValidacion`.
 - `index.ts` — barrel export de todos los enums.
 
 **Entidades TypeORM (`backend/src/modules/**/infrastructure/persistence/`) — 16 archivos:**
-- `roles/` → `RoleEntity` (tabla `roles`).
-- `ciudadanos/` → `MunicipioEntity` (tabla `municipios`), `CiudadanoEntity` (tabla `ciudadanos`, Ley 1581/2012), `MotocicletaEntity` (tabla `motocicletas`).
-- `dependencias/` → `DependenciaEntity` (tabla `dependencias`).
-- `usuarios/` → `UsuarioEntity` (tabla `usuarios`, campo `historial_contrasenas JSONB`).
-- `auth/` → `TokenEntity` (tabla `tokens`, índice compuesto usuario+tipo+revocado).
-- `motivos/` → `MotivoEntity` (tabla `motivos`).
-- `solicitudes/` → `SolicitudEntity` (tabla `solicitudes`, ENUM `estado_solicitud`), `HistorialEstadoEntity` (tabla `historial_estados`).
-- `documentos/` → `DocumentoEntity` (tabla `documentos`, `storage_key` nunca expuesto en API).
-- `permisos/` → `PermisoEntity` (tabla `permisos`, snapshots JSONB, `storage_key_pdf`), `QrValidacionEntity` (tabla `qr_validaciones`).
-- `notificaciones/` → `NotificacionEntity` (tabla `notificaciones`).
-- `auditoria/` → `AuditoriaRegistroEntity` (tabla `auditoria`, append-only, retención 5 años Ley 1712/2014).
-- `configuracion/` → `ConfiguracionEntity` (tabla `configuracion`).
+- `RoleEntity`, `MunicipioEntity`, `CiudadanoEntity`, `MotocicletaEntity`, `DependenciaEntity`,
+  `UsuarioEntity`, `TokenEntity`, `MotivoEntity`, `SolicitudEntity`, `HistorialEstadoEntity`,
+  `DocumentoEntity`, `PermisoEntity`, `QrValidacionEntity`, `NotificacionEntity`,
+  `AuditoriaRegistroEntity`, `ConfiguracionEntity`.
+
+**ADRs y documentación técnica:**
+- `ADR-015` — TypeORM 0.3 como ORM oficial (en DECISION_LOG.md).
+- `ADR-016` — Jerarquía de autoridad entre artefactos del modelo de datos.
+- `ADR-017` — Parametrización Institucional para Reutilización Multi-Alcaldía.
+- `.claude/DATABASE.md` — regla de consistencia del modelo y propagación de cambios (7 pasos).
 
 ### Decisiones técnicas
-- **M-04 resuelto:** tabla `ciudadanos` separada con FK en `solicitudes` (según DATABASE.md).
+- **M-04 resuelto:** tabla `ciudadanos` separada con FK en `solicitudes`.
 - **M-03 resuelto:** `historial_contrasenas JSONB DEFAULT '[]'` en `usuarios` (no tabla separada).
-- `enumName` explícito en todos los `@Column({ type: 'enum' })` para forzar nombres exactos de PostgreSQL.
-- `Relation<T>` de TypeORM usado para todas las referencias de tipo en relaciones (evita dependencias circulares).
-- Columnas `date` tipadas como `string` (comportamiento de TypeORM 0.3 con PostgreSQL `date`).
-- Columnas `decimal`/`numeric` tipadas como `string` (TypeORM retorna string para evitar pérdida de precisión float).
+- `enumName` explícito en todos los `@Column({ type: 'enum' })` para forzar nombres PostgreSQL.
+- `Relation<T>` en todas las referencias de tipo en relaciones (evita dependencias circulares).
+- Columnas `date` y `decimal`/`numeric` tipadas como `string` (comportamiento TypeORM 0.3).
+- FK circulares excluidas del diagrama Mermaid (limitación del renderizador) — documentadas en §6.
+- Singleton `configuracion_institucional` enforced en capa de aplicación (no a nivel BD).
+
+### Deuda técnica conocida
+- **HAL-001** — `baseUrl` deprecated en `backend/tsconfig.json` (TS5102). Path aliases no usados.
+  No bloqueante (tsc exit 0). Resolver en Fase 2 antes de usar aliases en código nuevo.
+- **HAL-004** — ESLint paso removido de lint-staged (HAL-004). ESLint funciona vía `npm run lint`.
+  Resolver antes de Fase 2 para re-habilitar enforcement en pre-commit.
+- **HAL-002** — Next.js 14 (5 CVEs altas, 0 críticas). Evaluar upgrade en Fase 8.
+- **HAL-003** — 28 vulnerabilidades NestJS (0 críticas). Evaluar NestJS v11 en Fase 8.
 
 ---
 
