@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { HealthModule } from './modules/health/health.module';
+import { ConfiguracionInstitucionalModule } from './modules/configuracion-institucional/configuracion-institucional.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { HealthModule } from './modules/health/health.module';
 
     // ── Módulos funcionales ────────────────────────────────────────
     HealthModule,
+    ConfiguracionInstitucionalModule,
     // Los módulos de negocio se registran en sus fases correspondientes.
     // Fase 2: AuthModule, UsuariosModule
     // Fase 3: SolicitudesModule, DocumentosModule, CiudadanosModule
