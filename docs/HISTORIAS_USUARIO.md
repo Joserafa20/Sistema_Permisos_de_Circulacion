@@ -71,6 +71,7 @@
 | HU-45 | Editar los datos institucionales de la alcaldía | É-09 | 7 |
 | HU-46 | Cargar o reemplazar el escudo oficial | É-09 | 7 |
 | HU-47 | Cargar o reemplazar el logo institucional | É-09 | 7 |
+| HU-48 | Registrar condiciones y restricciones de un permiso | É-02 | 4 |
 
 ---
 
@@ -353,6 +354,30 @@
 
 **Sprint:** 3 · **Prioridad:** Crítica · **Puntos de historia:** 5  
 **Referencia:** CU-15, `POST /api/v1/solicitudes/{id}/aprobar`
+
+---
+
+### HU-48 — Registrar Condiciones y Restricciones de un Permiso
+
+> **Como** funcionario autorizado de la Secretaría de Movilidad,  
+> **quiero** poder registrar condiciones o restricciones específicas al aprobar o después de aprobar un permiso,  
+> **para** comunicarle al ciudadano y a las autoridades de tránsito limitaciones particulares de circulación que el permiso general no cubre.
+
+**Criterios de Aceptación:**
+
+- [ ] **CA-48-1:** El modal de confirmación de aprobación (CU-15) incluye un campo de texto opcional etiquetado "Condiciones y Restricciones" con placeholder *"Ej: Válido únicamente entre 06:00 y 18:00. Portar cédula de ciudadanía en todo momento."*
+- [ ] **CA-48-2:** El campo tiene un contador de caracteres visible y no permite superar 500 caracteres (validado en frontend y backend).
+- [ ] **CA-48-3:** El campo es de llenado opcional: si el funcionario no escribe nada, el permiso se aprueba normalmente sin condiciones.
+- [ ] **CA-48-4:** Una vez aprobado el permiso, el funcionario puede editar el campo desde el detalle del permiso mediante el botón "Editar Condiciones", disponible solo para roles `funcionario` y `administrador`.
+- [ ] **CA-48-5:** Cada edición queda registrada en `auditoria` con el valor anterior y el valor nuevo.
+- [ ] **CA-48-6:** Al escanear el QR del permiso, si hay condiciones registradas, se muestran en una sección destacada "⚠️ Condiciones y Restricciones" con el valor actual (no el valor del PDF).
+- [ ] **CA-48-7:** El PDF generado incluye la sección "Condiciones y Restricciones" solo si el campo tenía valor al momento de generación; las ediciones posteriores no regeneran el PDF (RN-33).
+- [ ] **CA-48-8:** El campo `condicionesRestricciones` no está incluido en el DTO público del ciudadano (RN-38).
+
+**Reglas de Negocio:** RN-38, RN-39, RN-33.
+
+**Sprint:** 4 · **Prioridad:** Media · **Puntos de historia:** 3  
+**Referencia:** CU-15, `PATCH /api/v1/permisos/{id}/condiciones`
 
 ---
 

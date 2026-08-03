@@ -1790,6 +1790,7 @@ Obtiene el detalle completo de un permiso.
     },
     "solicitudId": "uuid",
     "numeroRadicado": "20260802-PYP-000145",
+    "condicionesRestricciones": null,
     "motivo_revocacion": null,
     "revocado_at": null,
     "createdAt": "2026-08-02T19:30:00Z"
@@ -1874,6 +1875,51 @@ Revoca un permiso vigente. Solo el administrador puede ejecutar esta acción.
 
 ---
 
+### `PATCH /api/v1/permisos/{id}/condiciones` 👮
+
+Registra o actualiza las condiciones y restricciones específicas de un permiso. Solo disponible para funcionarios y administradores. Puede usarse al aprobar o con posterioridad (ej: corregir una condición). No regenera el PDF (RN-33).
+
+**Restricción:** El permiso debe estar en estado `vigente`.
+
+**Request Body:**
+```json
+{
+  "condicionesRestricciones": "Válido únicamente entre 06:00 y 18:00. Portar cédula de ciudadanía en todo momento."
+}
+```
+
+| Campo | Tipo | Requerido | Validación |
+|-------|------|-----------|------------|
+| `condicionesRestricciones` | string \| null | ✅ | Max 500 chars. Enviar `null` para eliminar el campo |
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "codigoPermiso": "2026-PYP-00145",
+    "condicionesRestricciones": "Válido únicamente entre 06:00 y 18:00. Portar cédula de ciudadanía en todo momento."
+  },
+  "message": "Condiciones y restricciones del permiso actualizadas correctamente.",
+  "timestamp": "2026-08-02T19:30:00Z"
+}
+```
+
+**Response 422 — Permiso no vigente:**
+```json
+{
+  "success": false,
+  "message": "Solo se pueden editar condiciones de permisos vigentes",
+  "code": "PERMISO_NO_VIGENTE",
+  "timestamp": "2026-08-02T19:30:00Z"
+}
+```
+
+**Efectos:** Registra `editar_condiciones_permiso` en `auditoria` con el valor anterior y el nuevo valor. El código QR reflejará el nuevo valor inmediatamente (RN-39).
+
+---
+
 ### `GET /api/v1/public/verificar/{codigoQR}` 🌐
 
 Valida la autenticidad de un permiso escaneando su QR. Endpoint público optimizado para móvil.
@@ -1901,7 +1947,8 @@ Valida la autenticidad de un permiso escaneando su QR. Endpoint público optimiz
     "fechaExpedicion": "2026-08-02",
     "fechaVencimiento": "2026-08-25",
     "estadoPermiso": "VIGENTE",
-    "funcionarioAutorizo": "Juan Pérez — Secretaría de Movilidad"
+    "funcionarioAutorizo": "Juan Pérez — Secretaría de Movilidad",
+    "condicionesRestricciones": null
   },
   "message": "Permiso vigente y válido",
   "timestamp": "2026-08-02T19:30:00Z"

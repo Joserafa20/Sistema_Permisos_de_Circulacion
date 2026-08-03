@@ -1060,7 +1060,31 @@ async obtenerPerfil(@CurrentUser() user: JwtPayload): Promise<UsuarioResponseDto
 | Rate Limiting | `@nestjs/throttler` (ver `API_FUNCIONAL.md §5`) |
 | Contraseñas | `bcrypt` con `saltRounds = 12` |
 
-### 12.6 Variables de entorno
+### 12.6 Eventos de Auditoría registrados
+
+Toda acción relevante debe registrar un evento en la tabla `auditoria`. Los valores del campo `accion` están normalizados:
+
+| Acción (`accion`) | Entidad afectada | Quien puede registrarla |
+|---|---|---|
+| `crear_solicitud` | `solicitudes` | Sistema (ciudadano público) |
+| `aprobar_solicitud` | `solicitudes` | Funcionario / Administrador |
+| `rechazar_solicitud` | `solicitudes` | Funcionario / Administrador |
+| `solicitar_correccion` | `solicitudes` | Funcionario / Administrador |
+| `corregir_solicitud` | `solicitudes` | Sistema (ciudadano) |
+| `adjuntar_documento` | `documentos` | Sistema (ciudadano) |
+| `generar_permiso_pdf` | `permisos` | Sistema (job BullMQ) |
+| `revocar_permiso` | `permisos` | Administrador |
+| `editar_condiciones_permiso` | `permisos` | Funcionario / Administrador |
+| `validar_qr` | `qr_validaciones` | Sistema (público) |
+| `login` | `usuarios` | Sistema |
+| `logout` | `usuarios` | Sistema |
+| `cambiar_contrasena` | `usuarios` | Usuario autenticado |
+| `crear_usuario` | `usuarios` | Administrador |
+| `desactivar_usuario` | `usuarios` | Administrador |
+
+Para `editar_condiciones_permiso`, el campo `detalle` del registro de auditoría debe incluir `{ "valorAnterior": "...", "valorNuevo": "..." }` en formato JSON (RN-38).
+
+### 12.7 Variables de entorno
 
 Nunca hardcodear secretos en el código. Todo secreto va en `.env` (gitignored) y se accede mediante `ConfigService`:
 

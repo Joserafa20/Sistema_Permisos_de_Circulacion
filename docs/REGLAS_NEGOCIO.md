@@ -11,7 +11,7 @@
 - [Clasificación de Reglas](#clasificación-de-reglas)
 - [RN-01 a RN-14: Reglas del PRD Original](#reglas-del-prd-original)
 - [RN-15 a RN-30: Reglas de Solicitudes](#reglas-de-solicitudes)
-- [RN-31 a RN-50: Reglas de Permisos](#reglas-de-permisos)
+- [RN-31 a RN-50: Reglas de Permisos](#reglas-de-permisos) *(incluye RN-38, RN-39 — condiciones y restricciones; RN-40 — estrategia de evolución RFC-002)*
 - [RN-51 a RN-65: Reglas de Seguridad y Acceso](#reglas-de-seguridad-y-acceso)
 - [RN-66 a RN-75: Reglas de Auditoría](#reglas-de-auditoría)
 - [RN-76 a RN-85: Reglas de Notificaciones](#reglas-de-notificaciones)
@@ -595,6 +595,74 @@ Cuando un administrador revoca un permiso, el sistema notifica al ciudadano por 
 - La notificación se encola en BullMQ tras la revocación.
 - El correo informa: número de permiso, fecha de revocación y la recomendación de contactar a la alcaldía para más información.
 - El correo **no** incluye el motivo de la revocación si este es de naturaleza sensible (queda a criterio del sistema de notificaciones).
+
+---
+
+### RN-38 — Las Condiciones y Restricciones del Permiso Solo Pueden Ser Escritas por el Funcionario
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Restricción |
+| **Categoría** | Permisos / Control de Acceso |
+| **Prioridad** | Alta |
+
+**Enunciado:**  
+El campo `condiciones_restricciones` del permiso es un texto libre opcional que únicamente puede ser creado o modificado por un funcionario autorizado o un administrador. El ciudadano nunca puede crear, modificar ni visualizar este campo durante la solicitud.
+
+**Especificación:**
+- El campo no existe en el formulario de solicitud del ciudadano (portal público). No está en el DTO público `CrearSolicitudDto`.
+- El funcionario puede ingresar el valor al momento de aprobar la solicitud o mediante un `PATCH` posterior al permiso.
+- Máximo 500 caracteres. Validado en la capa de aplicación (DTO). El campo es `TEXT NULL` en base de datos.
+- El campo se incluye en el PDF en el momento de la generación (sección condicional; no aparece si es NULL o vacío).
+- El campo se muestra en la validación del QR en campo para que la autoridad de tránsito pueda verificar las restricciones.
+- Cada modificación posterior a la generación genera un registro en `auditoria` con los datos anteriores y nuevos.
+- La modificación post-generación **no** regenera el PDF (RN-33 prevalece). El QR siempre muestra el valor actual de la BD.
+
+**Implementación:**  
+Campo en `AprobarSolicitudDto` (opcional, `@IsOptional() @IsString() @MaxLength(500)`). Endpoint `PATCH /api/v1/permisos/{id}/condiciones` protegido con `@Roles(FUNCIONARIO, ADMINISTRADOR)`.
+
+**Excepción:** Ninguna. El ciudadano nunca tiene acceso de escritura sobre este campo.
+
+---
+
+### RN-39 — Las Condiciones y Restricciones Son Visibles en el QR y en el PDF
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Derivación |
+| **Categoría** | Permisos / QR / PDF |
+| **Prioridad** | Alta |
+
+**Enunciado:**  
+Si el permiso tiene condiciones y restricciones definidas, estas deben ser visibles tanto en el PDF impreso como en la página de validación del QR, de forma que la autoridad de tránsito en campo conozca las restricciones aplicables.
+
+**Especificación:**
+- **En el PDF:** Sección condicional "CONDICIONES Y RESTRICCIONES" aparece solo si el campo no es NULL y no está vacío. Se ubica después de los datos del motivo y antes de la firma del funcionario.
+- **En el QR:** La respuesta del endpoint `GET /public/verificar/{codigoQR}` incluye el campo `condicionesRestricciones` cuando el permiso está `vigente`. La página de validación lo muestra en sección destacada con icono de advertencia.
+- **Divergencia PDF vs BD:** Si el campo se modifica después de generado el PDF, el QR siempre muestra el valor actualizado en BD. El PDF existente conserva el valor que tenía al momento de su generación.
+
+---
+
+### RN-40 — Estrategia de Evolución del Módulo de Restricciones *(RFC-002)*
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Arquitectura |
+| **Categoría** | Permisos / Evolución |
+| **Prioridad** | Media |
+
+**Enunciado:**  
+La implementación inicial de restricciones usa exclusivamente el campo de texto libre `condiciones_restricciones`. La incorporación del catálogo institucional de restricciones predefinidas es una mejora futura que debe realizarse de forma **aditiva**, sin modificar ni romper el campo existente ni el contrato vigente de la API.
+
+**Especificación de la evolución futura:**
+- Se creará la tabla `catalogo_restricciones` (§4.5 de MODELO_DATOS) con las restricciones estandarizadas de la Alcaldía.
+- Se creará la tabla de relación `permisos_restricciones` (N:M) para asociar restricciones del catálogo a un permiso.
+- El campo `condiciones_restricciones` en `permisos` se conserva para notas libres complementarias.
+- El endpoint `PATCH /permisos/{id}/condiciones` se extiende para aceptar opcionalmente `restriccionesIds: string[]`; el campo `condicionesRestricciones` permanece sin cambios.
+- El response del permiso y del QR añade el campo `restriccionesCatalogo: []` de forma aditiva.
+
+**Restricción para Fase 2:**  
+No implementar ningún componente del catálogo (tabla, endpoint, DTO, módulo, seed) en el Bloque B1 ni en el desarrollo de los módulos de Fase 2. El catálogo queda únicamente como diseño documentado.
 
 ---
 
@@ -1261,6 +1329,9 @@ El sistema debe permitir al administrador atender los derechos de Acceso, Rectif
 | RN-35 | | | ✅ | | | |
 | RN-36 | | ✅ | | | | ✅ |
 | RN-37 | | ✅ | | | ✅ | |
+| RN-38 | | ✅ | ✅ | | ✅ | |
+| RN-39 | | ✅ | ✅ | | | |
+| RN-40 | | ✅ | | | ✅ | |
 | RN-51 | | | | ✅ | | |
 | RN-52 | | | | ✅ | | |
 | RN-53 | ✅ | ✅ | | | | |
