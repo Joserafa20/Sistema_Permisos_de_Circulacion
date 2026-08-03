@@ -21,6 +21,10 @@ import { RolesGuard } from './infrastructure/guards/roles.guard';
 import { LoginUseCase } from './application/use-cases/login/login.use-case';
 import { LogoutUseCase } from './application/use-cases/logout/logout.use-case';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token/refresh-token.use-case';
+import { RecuperarContrasenaUseCase } from './application/use-cases/recuperar-contrasena/recuperar-contrasena.use-case';
+import { RestablecerContrasenaUseCase } from './application/use-cases/restablecer-contrasena/restablecer-contrasena.use-case';
+import { CambiarContrasenaUseCase } from './application/use-cases/cambiar-contrasena/cambiar-contrasena.use-case';
+import { MeUseCase } from './application/use-cases/me/me.use-case';
 
 import { AuthController } from './infrastructure/controllers/auth.controller';
 
@@ -52,6 +56,10 @@ import { AuthController } from './infrastructure/controllers/auth.controller';
     LoginUseCase,
     LogoutUseCase,
     RefreshTokenUseCase,
+    RecuperarContrasenaUseCase,
+    RestablecerContrasenaUseCase,
+    CambiarContrasenaUseCase,
+    MeUseCase,
   ],
   exports: [JwtAuthGuard, RolesGuard, JwtModule, PassportModule],
 })
