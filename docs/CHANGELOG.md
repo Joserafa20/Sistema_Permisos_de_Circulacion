@@ -10,6 +10,17 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin Publicar]
 
 ### Añadido
+- **Módulo Configuración Institucional** — nuevo requerimiento funcional incorporado en documentación:
+  - `docs/PRD_Sistema_Permisos_de_Circulacion.md` — nuevo módulo documentado bajo §TIPOS DE USUARIOS > Administrador y sección §MÓDULO: CONFIGURACIÓN INSTITUCIONAL.
+  - `docs/MODELO_DATOS.md` — nueva entidad §9.3 `configuracion_institucional` (singleton, 16 columnas, reglas de negocio, sin soft delete, FK a usuarios). Claves `nombre_alcaldia`, `municipio` y `logo_url` de `configuracion` marcadas como deprecadas con nota de migración.
+  - `docs/REGLAS_NEGOCIO.md` — sección "Reglas de Configuración Institucional" con RN-101 a RN-108: singleton por instalación, acceso exclusivo de administrador, fuente única de identidad para documentos, escudo obligatorio, auditoría de cambios, no-eliminación, almacenamiento MinIO privado, independencia de PDFs ya emitidos.
+  - `docs/HISTORIAS_USUARIO.md` — Épica É-09 con HU-44 a HU-47 (consultar, editar, cargar escudo, cargar logo). Tabla de sprints actualizada (47 historias, 168 puntos).
+  - `docs/CASOS_USO.md` — Módulo 6 con CU-42 a CU-45 (consultar, actualizar datos textuales, reemplazar escudo, reemplazar logo). Diagrama de actores actualizado.
+  - `.claude/API.md` — nuevo módulo "Configuración Institucional (Admin)": 5 endpoints documentados con restricciones de formato/tamaño, respuesta pública, notas de seguridad.
+  - `.claude/SECURITY.md` — 4 nuevas filas en la Matriz de Permisos RBAC para el módulo.
+  - `.claude/DECISION_LOG.md` — ADR-017: Parametrización Institucional para Reutilización del Sistema entre Alcaldías.
+  - `.claude/TASKS.md` — 3 tareas en Fase 2 (migración + seed + módulo backend) + 4 subtareas en Fase 7 (UI admin).
+  - `.claude/ROADMAP.md` — tareas agregadas en Fase 2 y Fase 7.
 - `docs/ER_DIAGRAM.md` — Documentación técnica completa del modelo de datos: descripción general, módulos lógicos, 16 entidades con propósito, 20 relaciones con cardinalidades, FK circulares y auto-referencias, CHECK/UNIQUE constraints, 8 decisiones de diseño, métricas del modelo. Diagrama Mermaid embebido compatible con GitHub y Obsidian.
 - `docs/ER_DIAGRAM.mmd` — Diagrama Mermaid puro (`erDiagram`) con 16 entidades, columnas con marcadores PK/FK/UK y comentarios descriptivos, 20 relaciones con etiquetas, agrupado en 6 módulos con comentarios. Compatible con GitHub/Obsidian/mermaid.live. Excluye FK circulares (limitación Mermaid — documentadas en ER_DIAGRAM.md §6).
 - `backend/database/seeds/seed.ts` — Script de seeds inicial idempotente para PostgreSQL 15 + TypeORM. Incluye 6 secciones (ON CONFLICT DO NOTHING): roles (administrador, funcionario), municipio sede, dependencias (Secretaría de Movilidad + Secretaría General), 9 motivos de permiso, 9 parámetros de configuración del sistema, usuario administrador con contraseña temporal BCrypt 12 rounds. Variables configurables vía `.env`. Script: `npm run seed`.

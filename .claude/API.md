@@ -263,6 +263,52 @@ Formatos: `excel`, `pdf`, `csv`.
 
 ---
 
+## Módulo: Configuración Institucional (Admin)
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| GET | `/api/v1/admin/configuracion-institucional` | Admin | Obtener la configuración institucional completa (con URLs firmadas para imágenes) |
+| PUT | `/api/v1/admin/configuracion-institucional` | Admin | Actualizar datos textuales institucionales |
+| PATCH | `/api/v1/admin/configuracion-institucional/escudo` | Admin | Cargar o reemplazar el escudo oficial (multipart/form-data) |
+| PATCH | `/api/v1/admin/configuracion-institucional/logo` | Admin | Cargar, reemplazar o eliminar el logo institucional (multipart/form-data) |
+| GET | `/api/v1/public/configuracion-institucional` | Público | Datos públicos de la alcaldía (nombre, URL firmada del escudo) para el portal ciudadano |
+
+> Los endpoints de escritura son exclusivos del rol `administrador`. El endpoint público devuelve solo los campos no sensibles necesarios para el portal. Los `storage_key` de imágenes **nunca** se incluyen en las respuestas — solo URLs firmadas con TTL de 5 minutos.
+
+**Body de actualización de datos textuales (`PUT`):**
+```json
+{
+  "nombreAlcaldia": "Alcaldía Municipal de Neiva",
+  "nit": "800.099.999-9",
+  "codigoDane": "41001",
+  "departamento": "Huila",
+  "municipio": "Neiva",
+  "direccion": "Calle 10 N° 4-35 Centro Administrativo Municipal",
+  "telefono": "6088713000",
+  "correoInstitucional": "alcaldia@neiva.gov.co",
+  "sitioWeb": "https://www.neiva.gov.co"
+}
+```
+
+**Respuesta del endpoint público:**
+```json
+{
+  "nombreAlcaldia": "Alcaldía Municipal de Neiva",
+  "municipio": "Neiva",
+  "departamento": "Huila",
+  "correoInstitucional": "alcaldia@neiva.gov.co",
+  "escudoUrl": "https://minio.local/institucional/escudo.png?X-Amz-Expires=300&..."
+}
+```
+
+**Restricciones de imágenes:**
+- Formatos: `image/png`, `image/svg+xml`, `image/jpeg`
+- Tamaño máximo: 5 MB
+- El escudo es **obligatorio** — no puede eliminarse sin reemplazarlo
+- El logo es **opcional** — puede eliminarse enviando `DELETE` implícito (`logo: null` en el body)
+
+---
+
 ## Módulo: Health
 
 | Método | Endpoint | Acceso | Descripción |

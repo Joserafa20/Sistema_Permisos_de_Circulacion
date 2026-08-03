@@ -41,11 +41,49 @@ Control total del sistema.
 Podrá administrar:
 - Usuarios
 - Roles
-- Configuración
+- Configuración del sistema (parámetros operativos)
+- **Configuración Institucional** (identidad de la alcaldía, escudo, logo)
 - Motivos permitidos
 - Auditoría
 - Reportes
 - Copias de seguridad
+
+---
+
+## MÓDULO: CONFIGURACIÓN INSTITUCIONAL
+
+### Objetivo
+
+Permitir que el sistema pueda instalarse en cualquier Alcaldía de Colombia sin necesidad de modificar el código fuente. Cada instalación del sistema tendrá una única configuración institucional. Toda la información utilizada en documentos oficiales (como el permiso PDF y los correos institucionales) se obtiene automáticamente desde esta configuración.
+
+### Información que administra
+
+**Información General:**
+- Nombre de la Alcaldía
+- NIT
+- Código DANE del municipio sede
+- Departamento
+- Municipio
+
+**Información de Contacto:**
+- Dirección física
+- Teléfono institucional
+- Correo institucional
+- Sitio web (opcional)
+
+**Identidad Institucional:**
+- Escudo oficial (imagen — obligatorio)
+- Logo institucional (imagen — opcional)
+
+### Reglas del módulo
+
+- Solo puede existir una configuración institucional por instalación del sistema (singleton).
+- Únicamente el usuario con rol **Administrador** puede modificar esta información.
+- Todos los módulos del sistema utilizan estos datos en modo de solo lectura.
+- La generación del permiso PDF obtiene automáticamente el nombre de la alcaldía y el escudo desde esta configuración.
+- No se permite eliminar la configuración institucional.
+- No se almacena historial de versiones (la tabla `auditoria` registra los cambios).
+- La inicialización del registro se realiza mediante el seed de despliegue.
 
 ## FLUJO DEL CIUDADANO
 

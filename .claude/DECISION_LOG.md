@@ -477,6 +477,75 @@ Si durante el desarrollo se detecta una inconsistencia entre estos artefactos, l
 
 ---
 
+## ADR-017 — 2026-08-02
+
+### Título
+
+Parametrización Institucional para Reutilización del Sistema entre Alcaldías
+
+### Estado
+
+Aceptado
+
+### Contexto
+
+El sistema fue inicialmente concebido para una alcaldía específica, con ciertos datos institucionales (nombre de la alcaldía, municipio, logo) almacenados como parámetros clave-valor en la tabla `configuracion`. Este enfoque presenta tres limitaciones:
+
+1. **Acoplamiento implícito:** Los módulos de generación de PDF, correos institucionales y el portal ciudadano leen de claves específicas en `configuracion` (`nombre_alcaldia`, `municipio`, `logo_url`), creando un acoplamiento invisible entre la tabla de parámetros operativos y la identidad institucional.
+
+2. **Sin estructura ni validación:** Al ser clave-valor no tipado, no hay constraint que obligue a que `nombre_alcaldia` exista y sea no vacío antes de emitir un permiso PDF. Cualquier clave faltante produce un PDF incorrecto o una excepción en runtime.
+
+3. **No reutilizable:** Una instalación en otra alcaldía requiere intervención técnica para identificar y actualizar todas las claves dispersas en `configuracion` que contienen datos institucionales.
+
+### Decisión
+
+Se introduce una nueva entidad `configuracion_institucional` en el modelo de datos — una tabla singleton (un único registro por instalación) que centraliza toda la información de identidad institucional:
+
+- **Información General:** nombre oficial, NIT, código DANE, departamento, municipio.
+- **Información de Contacto:** dirección, teléfono, correo institucional, sitio web.
+- **Identidad Visual:** escudo oficial (obligatorio), logo institucional (opcional).
+
+Las claves `nombre_alcaldia`, `municipio` y `logo_url` de la tabla `configuracion` quedan **deprecadas** y serán eliminadas en la migración que cree la tabla `configuracion_institucional` (programada para Fase 2).
+
+Todo módulo que necesite datos institucionales deberá leerlos desde `configuracion_institucional`, no desde `configuracion`.
+
+### Justificación técnica
+
+- **Reutilización:** Cualquier alcaldía de Colombia puede instalar el sistema y configurar su identidad institucional a través de la interfaz de administrador, sin modificar una sola línea de código.
+- **Estructura y validación:** Las columnas tienen tipos y constraints explícitos en PostgreSQL (`NOT NULL` donde es obligatorio, `VARCHAR` con límites, `FK` hacia `usuarios`). Un registro incompleto no puede persistirse.
+- **Integridad documental:** Al ser un registro con estructura fija, el `PDFModule` puede fallar con error descriptivo (`ESCUDO_NO_DISPONIBLE`) si la imagen obligatoria no está disponible, en lugar de generar silenciosamente un PDF sin escudo.
+- **Separación de responsabilidades:** `configuracion` gestiona parámetros operativos (plazos, límites numéricos, colores). `configuracion_institucional` gestiona identidad. Son dominios distintos.
+- **Auditoría:** Todo cambio a la configuración institucional queda registrado en `auditoria` con valores anteriores y nuevos, lo que no era posible con el enfoque clave-valor (se registraba solo la clave modificada, no la imagen anterior).
+
+### Impacto
+
+| Módulo | Impacto |
+|--------|---------|
+| `docs/MODELO_DATOS.md` | Nueva entidad §9.3 `configuracion_institucional` |
+| `docs/PRD_*.md` | Nuevo módulo documentado |
+| `docs/REGLAS_NEGOCIO.md` | RN-101 a RN-108 agregadas |
+| `docs/HISTORIAS_USUARIO.md` | É-09, HU-44 a HU-47 agregadas |
+| `docs/CASOS_USO.md` | Módulo 6, CU-42 a CU-45 agregados |
+| `.claude/API.md` | Nuevos endpoints documentados |
+| `.claude/SECURITY.md` | Matriz RBAC actualizada |
+| `database/` | Nueva migración TypeORM — Fase 2 |
+| `backend/src/modules/configuracion-institucional/` | Nuevo módulo NestJS — Fase 2 |
+| `frontend/` | Nueva pantalla de administración — Fase 7 |
+| `backend/database/seeds/seed.ts` | Nuevo seed para `configuracion_institucional` — Fase 2 |
+| `backend/.env.example` | Nuevas variables SEED_CI_* — Fase 2 |
+
+### Consecuencias
+
+- **Positivas:** Reutilización inmediata entre alcaldías. Validación estructural de la identidad. PDF siempre contiene datos completos o falla explícitamente.
+- **Restricciones derivadas:** Los servicios de PDF y notificaciones deben actualizarse para leer de `configuracion_institucional` en lugar de `configuracion`. La migración de Fase 2 debe eliminar las claves deprecadas de `configuracion` coordinadamente.
+
+### Referencias
+
+- `docs/MODELO_DATOS.md` — §9.3 `configuracion_institucional`
+- `docs/REGLAS_NEGOCIO.md` — RN-101 a RN-108
+
+---
+
 # Hallazgos Pendientes (no bloqueantes)
 
 ## HAL-001 — 2026-08-02

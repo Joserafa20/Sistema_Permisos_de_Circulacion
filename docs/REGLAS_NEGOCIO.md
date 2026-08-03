@@ -17,6 +17,7 @@
 - [RN-76 a RN-85: Reglas de Notificaciones](#reglas-de-notificaciones)
 - [RN-86 a RN-95: Reglas de Configuración](#reglas-de-configuración)
 - [RN-96 a RN-100: Reglas de Datos y Privacidad](#reglas-de-datos-y-privacidad)
+- [RN-101 a RN-108: Reglas de Configuración Institucional](#reglas-de-configuración-institucional)
 - [Marco Legal Aplicable](#marco-legal-aplicable)
 - [Matriz de Impacto](#matriz-de-impacto)
 
@@ -977,6 +978,156 @@ La tabla `auditoria` acepta únicamente operaciones `INSERT` y `SELECT`. Las ope
 
 ---
 
+## Reglas de Configuración Institucional
+
+### RN-101 — Solo Existe una Configuración Institucional por Instalación
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Restricción |
+| **Categoría** | Configuración Institucional |
+| **Prioridad** | Crítica |
+
+**Enunciado:**  
+El sistema solo puede tener un registro de configuración institucional. No se permite crear un segundo registro.
+
+**Especificación:**
+- Al intentar crear un segundo registro, el sistema retorna error `409 CONFLICT` con código `CONFIGURACION_INSTITUCIONAL_YA_EXISTE`.
+- La inicialización se realiza exclusivamente mediante el seed de despliegue.
+- A partir del primer registro, solo se permiten operaciones `UPDATE`. El endpoint `POST` no existe en la API pública.
+- El use case de actualización verifica `COUNT(*) = 1` antes de proceder.
+
+---
+
+### RN-102 — Solo el Administrador puede Modificar la Configuración Institucional
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Restricción |
+| **Categoría** | Configuración Institucional / Seguridad |
+| **Prioridad** | Crítica |
+
+**Enunciado:**  
+Únicamente el usuario con rol `administrador` tiene permisos de escritura sobre la configuración institucional. El rol `funcionario` y el acceso público solo pueden leer los datos públicos.
+
+**Especificación:**
+- Endpoint `PUT /api/v1/admin/configuracion-institucional` protegido por `RolesGuard('administrador')`.
+- Endpoints `PATCH` de imagen protegidos con el mismo guard.
+- Todo intento de modificación por un rol no autorizado retorna `403 FORBIDDEN`.
+- Todo cambio exitoso genera un registro en `auditoria` con `accion = 'editar'`.
+
+---
+
+### RN-103 — La Configuración Institucional es la Fuente de Identidad para Documentos Oficiales
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Derivación |
+| **Categoría** | Configuración Institucional / PDF / Comunicaciones |
+| **Prioridad** | Alta |
+
+**Enunciado:**  
+Toda información de identidad institucional utilizada en documentos generados por el sistema (PDF del permiso, correos electrónicos, portal público) debe obtenerse exclusivamente desde la tabla `configuracion_institucional`.
+
+**Especificación:**
+- `PDFModule` lee `nombre_alcaldia` y obtiene el escudo via URL firmada del `escudo_storage_key`.
+- `NotificacionesModule` usa `nombre_alcaldia`, `direccion` y `correo_institucional` en el footer de los correos.
+- El portal ciudadano (Frontend) muestra `nombre_alcaldia` y la URL firmada del escudo en el encabezado.
+- Está **prohibido** leer estos datos desde la tabla `configuracion` (las claves deprecadas `nombre_alcaldia`, `municipio`, `logo_url` deberán eliminarse en la migración de Fase 2).
+
+---
+
+### RN-104 — El Escudo Institucional es Obligatorio
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Validación |
+| **Categoría** | Configuración Institucional |
+| **Prioridad** | Alta |
+
+**Enunciado:**  
+El escudo oficial es un campo requerido. El sistema no permite guardar una configuración institucional sin escudo cargado.
+
+**Especificación:**
+- `escudo_storage_key` es `NOT NULL` en la tabla.
+- El DTO de actualización valida que el archivo de escudo esté presente y sea de tipo `image/png` o `image/svg+xml` o `image/jpeg`.
+- Si el escudo no está disponible al generar un PDF, el sistema lanza excepción `ESCUDO_NO_DISPONIBLE` y aborta la generación del permiso.
+
+---
+
+### RN-105 — Todo Cambio en la Configuración Institucional Queda Auditado
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Acción |
+| **Categoría** | Configuración Institucional / Auditoría |
+| **Prioridad** | Alta |
+
+**Enunciado:**  
+Toda modificación de la configuración institucional genera un registro en la bitácora de auditoría con los valores anteriores y los nuevos.
+
+**Especificación:**
+- Se registra en `auditoria`: `accion = 'editar'`, `entidad = 'configuracion_institucional'`, `entidad_id = [uuid]`, `datos_anteriores = {campo: valor_previo}`, `datos_nuevos = {campo: valor_nuevo}`.
+- El campo `updated_by` de `configuracion_institucional` se actualiza con el ID del administrador que realizó el cambio.
+- Los `storage_key` de imágenes se incluyen en los datos de auditoría como referencias (no como contenido binario).
+
+---
+
+### RN-106 — La Configuración Institucional No Puede Eliminarse
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Restricción |
+| **Categoría** | Configuración Institucional |
+| **Prioridad** | Crítica |
+
+**Enunciado:**  
+No existe endpoint de eliminación para la configuración institucional. El registro debe existir en todo momento para garantizar el funcionamiento del sistema.
+
+**Especificación:**
+- La tabla no tiene columna `deleted_at`.
+- No existe endpoint `DELETE /api/v1/admin/configuracion-institucional`.
+- Todo intento de eliminar el registro a nivel de base de datos debe ser rechazado mediante permisos del usuario de aplicación PostgreSQL.
+
+---
+
+### RN-107 — Las Imágenes Institucionales se Almacenan en MinIO con Acceso Privado
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Restricción |
+| **Categoría** | Configuración Institucional / Seguridad |
+| **Prioridad** | Alta |
+
+**Enunciado:**  
+Los archivos de escudo y logo se almacenan en un bucket privado de MinIO. El acceso se realiza únicamente mediante URLs firmadas con TTL controlado.
+
+**Especificación:**
+- Bucket: `institucional/` (privado, no público).
+- `storage_key` nunca se expone en la respuesta de la API. La API retorna una URL firmada con TTL de 5 minutos para consulta general y TTL de 60 segundos para inclusión en PDFs (generación inmediata).
+- Al reemplazar una imagen, el archivo anterior permanece en MinIO hasta que un job de limpieza lo elimine (retención mínima 30 días para auditoría).
+- Formatos permitidos: `image/png`, `image/svg+xml`, `image/jpeg`.
+- Tamaño máximo: 5 MB por imagen.
+
+---
+
+### RN-108 — Cambio de Imágenes No Invalida PDFs ya Generados
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Restricción |
+| **Categoría** | Configuración Institucional / Permisos |
+| **Prioridad** | Media |
+
+**Enunciado:**  
+La actualización del escudo o logo institucional no modifica los permisos PDF ya generados. Los nuevos PDFs usan las imágenes actualizadas.
+
+**Especificación:**
+- Los permisos PDF ya emitidos se almacenan íntegramente en MinIO y no se regeneran al cambiar la imagen institucional.
+- Los `snapshot_ciudadano`, `snapshot_motocicleta` y `snapshot_motivo` del permiso contienen únicamente datos del ciudadano — la imagen del escudo se embebe en el PDF en el momento de su generación y queda capturada en el archivo almacenado.
+
+---
+
 ## Reglas de Datos y Privacidad
 
 ### RN-96 — Consentimiento de Tratamiento de Datos es Obligatorio
@@ -1134,6 +1285,14 @@ El sistema debe permitir al administrador atender los derechos de Acceso, Rectif
 | RN-98 | | | | | ✅ | |
 | RN-99 | | | | | ✅ | |
 | RN-100 | | ✅ | ✅ | | | |
+| RN-101 | | | ✅ | | | |
+| RN-102 | | | | | ✅ | |
+| RN-103 | | ✅ | ✅ | | ✅ | |
+| RN-104 | ✅ | | | | | |
+| RN-105 | | | ✅ | | ✅ | |
+| RN-106 | | | | | ✅ | |
+| RN-107 | | | ✅ | | | |
+| RN-108 | | | | | ✅ | |
 
 ---
 

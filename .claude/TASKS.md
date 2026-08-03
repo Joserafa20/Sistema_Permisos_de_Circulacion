@@ -103,6 +103,10 @@
 **Dependencia:** Fase 1 completada.
 **Estado:** ⬜ No iniciada
 
+- [ ] Migración TypeORM para tabla `configuracion_institucional`
+- [ ] Seed inicial de `configuracion_institucional` (configurable vía `.env`)
+- [ ] Variables de entorno `SEED_CI_*` en `.env.example`
+- [ ] Módulo NestJS `configuracion-institucional/` con arquitectura hexagonal
 - [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
 - [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
 - [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
@@ -118,6 +122,8 @@
 - [ ] Global Exception Filter (sin exposición de internos)
 - [ ] Helmet + CORS configurados
 - [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
+
+> **Nota:** El módulo `configuracion-institucional` comparte Fase 2 con Auth porque la tabla debe existir antes de la Fase 4 (generación de PDF). Las pantallas de UI del administrador se implementan en Fase 7.
 
 ### Pendientes de Diseño — Fase 2
 
@@ -265,6 +271,11 @@
 **Dependencia:** Fase 6 completada.
 **Estado:** ⬜ No iniciada
 
+- [ ] Pantalla "Configuración Institucional" (CU-42 a CU-45):
+  - [ ] Vista de consulta con previsualización de escudo y logo (HU-44)
+  - [ ] Formulario de edición de datos textuales (HU-45)
+  - [ ] Carga/reemplazo del escudo con validación de formato y tamaño (HU-46)
+  - [ ] Carga/reemplazo del logo con opción de eliminar (HU-47)
 - [ ] Dashboard administrativo con KPIs globales
 - [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
 - [ ] CRUD de Roles

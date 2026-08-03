@@ -19,6 +19,9 @@
 7. [Módulo de Permisos](#7-módulo-de-permisos)
 8. [Módulo de Comunicaciones](#8-módulo-de-comunicaciones)
 9. [Módulo de Auditoría y Configuración](#9-módulo-de-auditoría-y-configuración)
+   - [9.1 `auditoria`](#91-auditoria)
+   - [9.2 `configuracion`](#92-configuracion)
+   - [9.3 `configuracion_institucional`](#93-configuracion_institucional)
 10. [Índices](#10-índices)
 11. [Restricciones de Integridad](#11-restricciones-de-integridad)
 12. [Soft Delete — Estrategia Global](#12-soft-delete--estrategia-global)
@@ -545,17 +548,62 @@ Parámetros operativos del sistema gestionados por el administrador sin necesida
 
 **Parámetros semilla requeridos:**
 
-| Clave | Tipo | Default |
-|-------|------|---------|
-| `nombre_alcaldia` | texto | — |
-| `municipio` | texto | — |
-| `logo_url` | texto | — |
-| `firma_url` | imagen_base64 | — |
-| `sello_url` | imagen_base64 | — |
-| `dias_max_permiso` | numero | 30 |
-| `plazo_revision_horas` | numero | 48 |
-| `plazo_correccion_dias` | numero | 5 |
-| `color_institucional` | texto | #1a56db |
+| Clave | Tipo | Default | Estado |
+|-------|------|---------|--------|
+| `nombre_alcaldia` | texto | — | ⚠️ **Deprecado** — migrar a `configuracion_institucional.nombre_alcaldia` |
+| `municipio` | texto | — | ⚠️ **Deprecado** — migrar a `configuracion_institucional.municipio` |
+| `logo_url` | texto | — | ⚠️ **Deprecado** — migrar a `configuracion_institucional.logo_storage_key` |
+| `firma_url` | imagen_base64 | — | Vigente |
+| `sello_url` | imagen_base64 | — | Vigente |
+| `dias_max_permiso` | numero | 30 | Vigente |
+| `plazo_revision_horas` | numero | 48 | Vigente |
+| `plazo_correccion_dias` | numero | 5 | Vigente |
+| `color_institucional` | texto | #1a56db | Vigente |
+
+> **Nota de migración:** Las claves `nombre_alcaldia`, `municipio` y `logo_url` serán eliminadas de `configuracion` en la migración que cree la tabla `configuracion_institucional`. Los servicios que las consulten deben actualizarse para leer desde `configuracion_institucional`.
+
+---
+
+### 9.3 `configuracion_institucional`
+
+Datos de identidad de la Alcaldía que instala el sistema. **Registro único (singleton) por instalación.** Toda información oficial utilizada en documentos (PDF del permiso, correos institucionales, portal público) se obtiene desde esta tabla.
+
+> **Estado de implementación:** Documentada. Pendiente de migración TypeORM y seed — programado para Fase 2.
+
+| Columna | Tipo | Restricción | Descripción |
+|---------|------|-------------|-------------|
+| `id` | UUID | PK | Identificador único |
+| `nombre_alcaldia` | VARCHAR(200) | NOT NULL | Nombre oficial de la Alcaldía (ej: Alcaldía Municipal de Neiva) |
+| `nit` | VARCHAR(20) | NOT NULL | NIT con dígito de verificación (ej: 800.099.999-9) |
+| `codigo_dane` | VARCHAR(10) | NOT NULL | Código DANE del municipio sede |
+| `departamento` | VARCHAR(100) | NOT NULL | Nombre del departamento |
+| `municipio` | VARCHAR(100) | NOT NULL | Nombre del municipio sede |
+| `direccion` | VARCHAR(255) | NOT NULL | Dirección física de la sede principal |
+| `telefono` | VARCHAR(20) | NOT NULL | Teléfono institucional |
+| `correo_institucional` | VARCHAR(150) | NOT NULL | Correo de contacto oficial |
+| `sitio_web` | VARCHAR(255) | | Sitio web oficial (opcional) |
+| `escudo_storage_key` | VARCHAR(500) | NOT NULL | Ruta MinIO del escudo oficial. **NUNCA exponer en API** — usar URL firmada TTL 5 min |
+| `logo_storage_key` | VARCHAR(500) | | Ruta MinIO del logo institucional (opcional). **NUNCA exponer en API** |
+| `escudo_hash` | VARCHAR(64) | | Hash SHA-256 del archivo de escudo (integridad) |
+| `logo_hash` | VARCHAR(64) | | Hash SHA-256 del archivo de logo (integridad) |
+| `updated_at` | TIMESTAMPTZ | | Última actualización |
+| `updated_by` | UUID | FK usuarios | Administrador que realizó la última modificación |
+
+**Reglas de negocio aplicadas:**
+
+- **Singleton:** Solo existe UN registro por instalación. No se permite crear un segundo registro (aplicación bloquea `INSERT` si ya existe un registro).
+- No tiene `deleted_at`. **No puede eliminarse.**
+- No tiene `created_by` — el seed de despliegue es el creador implícito.
+- Solo el rol `administrador` puede ejecutar `UPDATE` sobre este registro.
+- Toda modificación genera registro en `auditoria` (`datos_anteriores` + `datos_nuevos`).
+- El PDF del permiso lee `nombre_alcaldia` y descarga el escudo desde `escudo_storage_key` via URL firmada.
+- Los correos institucionales usan `nombre_alcaldia`, `direccion` y `correo_institucional`.
+- El portal público muestra `nombre_alcaldia` y la URL firmada del escudo en el encabezado.
+- Los `storage_key` de imágenes se almacenan en MinIO bucket privado `institucional/`. El acceso se realiza exclusivamente con URLs firmadas (TTL 5 minutos para el portal y TTL corto para el PDF).
+
+**Sin relaciones directas hacia otras tablas** (diseño autocontenido para evitar acoplamiento con catálogos).
+
+**Seed requerido:** El seed de despliegue inicial (`npm run seed`) debe crear este registro con los datos de la alcaldía que instala el sistema. Los valores se configuran mediante variables de entorno (ver `.env.example`, sección "Configuración Institucional").
 
 ---
 
@@ -617,6 +665,9 @@ idx_qr_validaciones_created_at      (created_at DESC)
 
 ── notificaciones ──────────────────────────────────────────────────
 idx_notificaciones_estado_envio     (estado_envio)
+
+── configuracion_institucional ─────────────────────────────────────
+(tabla singleton — sin índices adicionales requeridos)
 idx_notificaciones_solicitud_id     (solicitud_id)
 ```
 

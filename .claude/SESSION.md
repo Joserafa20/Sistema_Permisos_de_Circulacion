@@ -151,6 +151,14 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   Decisiones de diseño D-001 a D-007 documentadas en §8.
   Fase 1 completada: 7/7 tareas.
 
+✓ **Módulo Configuración Institucional incorporado** — documentación completa. 2026-08-02
+  Nuevo requerimiento funcional integrado en toda la documentación del proyecto (sin tocar código).
+  Nueva entidad `configuracion_institucional` (singleton, tabla, reglas de negocio, API, seguridad).
+  Documentos actualizados: PRD, MODELO_DATOS.md, REGLAS_NEGOCIO.md (RN-101 a RN-108),
+  HISTORIAS_USUARIO.md (É-09, HU-44 a HU-47), CASOS_USO.md (Módulo 6, CU-42 a CU-45),
+  API.md, SECURITY.md, DECISION_LOG.md (ADR-017), TASKS.md, ROADMAP.md.
+  Implementación programada: Fase 2 (migración + seed + módulo backend) + Fase 7 (UI admin).
+
 ## Última actualización
 
-2026-08-02 — Fase 1: diagrama ER generado. Fase 1 completada (7/7 tareas). Esperando autorización para cierre y merge.
+2026-08-02 — Incorporación documental del módulo Configuración Institucional. Fase 1 sigue completada (7/7 tareas). Pendiente autorización para cierre y merge de feature/fase-1-base-datos.

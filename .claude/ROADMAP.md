@@ -57,6 +57,8 @@
 **Duración estimada:** Semanas 2–3  
 **Dependencia:** Fase 1 completada.
 
+- [ ] Migración TypeORM y seed para `configuracion_institucional` (debe existir antes de Fase 4 — PDF)
+- [ ] Módulo backend `configuracion-institucional/` con endpoints CRUD e imagen
 - [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
 - [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
 - [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
@@ -200,6 +202,7 @@
 **Duración estimada:** Semanas 7–8  
 **Dependencia:** Fase 6 completada.
 
+- [ ] Pantalla de Configuración Institucional (CU-42 a CU-45): consulta, edición, carga de escudo y logo
 - [ ] Dashboard administrativo con KPIs globales
 - [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
 - [ ] CRUD de Roles
