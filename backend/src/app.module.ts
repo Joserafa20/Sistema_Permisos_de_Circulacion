@@ -10,6 +10,7 @@ import { ConfiguracionInstitucionalModule } from './modules/configuracion-instit
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/infrastructure/guards/roles.guard';
+import { UsuariosModule } from './modules/usuarios/usuarios.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { RolesGuard } from './modules/auth/infrastructure/guards/roles.guard';
     HealthModule,
     ConfiguracionInstitucionalModule,
     AuthModule,
+    UsuariosModule,
   ],
   providers: [
     // ── Guards globales ────────────────────────────────────────────
