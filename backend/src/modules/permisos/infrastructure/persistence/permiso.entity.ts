@@ -73,6 +73,10 @@ export class PermisoEntity {
   @Column({ name: 'snapshot_motivo', type: 'jsonb' })
   snapshotMotivo: Record<string, unknown>;
 
+  /** Hash SHA-256 del PDF para verificación de integridad documental. */
+  @Column({ name: 'hash_pdf', type: 'varchar', length: 64, nullable: true })
+  hashPdf: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

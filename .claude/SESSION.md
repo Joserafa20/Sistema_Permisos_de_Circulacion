@@ -53,6 +53,11 @@ Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit
 ✓ **Script SQL completo** — `database/schema.sql` (5 ENUMs, 1 secuencia, 16 tablas, 30 FKs,
   11 CHECKs, 27 índices regulares, 4 índices parciales, 1 índice único parcial). ✅ 2026-08-02
   Inconsistencias detectadas y documentadas (INC-001, INC-002, INC-003) — no bloqueantes.
+✓ **Reconciliación del modelo** — Entidades ORM sincronizadas con MODELO_DATOS.md. ✅ 2026-08-02
+  INC-001: `hashPdf: string | null` agregado a `PermisoEntity`.
+  INC-002: índice `token_hash` renombrado a `idx_tokens_token_hash` y eliminada propiedad `unique`.
+  INC-003: índice compuesto renombrado a `idx_tokens_usuario_tipo_revocado` en `TokenEntity`.
+  Los cuatro artefactos (MODELO_DATOS.md, entidades, migraciones, schema.sql) quedan sincronizados.
 
 ---
 
@@ -118,4 +123,4 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
 
 ## Última actualización
 
-2026-08-02 — Fase 1: `database/schema.sql` completado (16 tablas, 5 ENUMs, 30 FKs, 11 CHECKs, 32 índices). 3 inconsistencias ORM↔MODELO_DATOS detectadas y reportadas al usuario.
+2026-08-02 — Fase 1: reconciliación completa. Los cuatro artefactos del modelo de datos quedan sincronizados (MODELO_DATOS.md, entidades ORM, schema.sql). Migraciones pueden proceder.

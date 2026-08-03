@@ -12,12 +12,12 @@ import { UsuarioEntity } from '../../../usuarios/infrastructure/persistence/usua
 import { TipoToken } from '../../../../common/enums';
 
 @Entity({ name: 'tokens' })
-@Index('idx_tokens_usuario_tipo', ['usuario', 'tipo', 'revocado'])
+@Index('idx_tokens_usuario_tipo_revocado', ['usuario', 'tipo', 'revocado'])
 export class TokenEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index('idx_tokens_hash', { unique: true })
+  @Index('idx_tokens_token_hash')
   @Column({ name: 'token_hash', type: 'varchar', length: 255 })
   tokenHash: string;
 
