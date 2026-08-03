@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/infrastructure/guards/roles.guard';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { CiudadanosModule } from './modules/ciudadanos/ciudadanos.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module';
     ConfiguracionInstitucionalModule,
     AuthModule,
     UsuariosModule,
+    CiudadanosModule,
   ],
   providers: [
     // ── Guards globales ────────────────────────────────────────────
