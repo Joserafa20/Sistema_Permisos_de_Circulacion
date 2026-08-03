@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
@@ -107,4 +107,4 @@ async function bootstrap(): Promise<void> {
   appLogger.log(`🌍 Entorno: ${nodeEnv}`);
 }
 
-bootstrap();
+void bootstrap();

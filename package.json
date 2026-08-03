@@ -15,10 +15,12 @@
   },
   "lint-staged": {
     "backend/src/**/*.ts": [
-      "prettier --write"
+      "prettier --write",
+      "backend/node_modules/.bin/eslint --fix --config backend/eslint.config.js"
     ],
     "backend/test/**/*.ts": [
-      "prettier --write"
+      "prettier --write",
+      "backend/node_modules/.bin/eslint --fix --config backend/eslint.config.js"
     ],
     "frontend/src/**/*.{ts,tsx}": [
       "prettier --write"
