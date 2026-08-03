@@ -125,6 +125,19 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
 
 ---
 
+✓ **Auditoría y sincronización de índices** — 7 diferencias corregidas en 6 entidades. ✅ 2026-08-02
+  D-001: `idx_ciudadanos_numero_doc` eliminado de `CiudadanoEntity` (duplicaba índice único del constraint).
+  D-002: `idx_usuarios_email` eliminado de `UsuarioEntity` (duplicaba índice único del constraint).
+  D-003: `idx_usuarios_rol_id` agregado a `UsuarioEntity`.
+  D-004: `idx_solicitudes_estado_moto` (compuesto) agregado a `SolicitudEntity`.
+  D-005: `idx_auditoria_entidad` renombrado a `idx_auditoria_entidad_id` en `AuditoriaRegistroEntity`.
+  D-006: `idx_historial_estados_solicitud_id` renombrado a `idx_historial_solicitud_created`.
+  D-007: `idx_permisos_funcionario_id` agregado a `PermisoEntity`.
+  MODELO_DATOS.md §10 tiene inconsistencia interna en nombre del índice parcial de motocicletas
+  (idx_motocicletas_placa_activo/idx_motocicletas_activas vs uq_motocicletas_placa_activa en §11).
+  Schema.sql y migración siguen §11. No requiere corrección en código.
+  Quality Gate: tsc --noEmit exit 0.
+
 ## Última actualización
 
-2026-08-02 — Fase 1: migración inicial TypeORM completada. `backend/database/migrations/1785628800000-InitialSchema.ts` reproduce exactamente `database/schema.sql`. Progreso: 4/7 tareas.
+2026-08-02 — Fase 1: auditoría de índices completada. 7 diferencias corregidas en 6 entidades. Progreso: 5/7 tareas.

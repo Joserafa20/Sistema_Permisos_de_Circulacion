@@ -13,7 +13,7 @@ import { UsuarioEntity } from '../../../usuarios/infrastructure/persistence/usua
 import { EstadoSolicitud } from '../../../../common/enums';
 
 @Entity({ name: 'historial_estados' })
-@Index('idx_historial_estados_solicitud_id', ['solicitud', 'createdAt'])
+@Index('idx_historial_solicitud_created', ['solicitud', 'createdAt'])
 export class HistorialEstadoEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

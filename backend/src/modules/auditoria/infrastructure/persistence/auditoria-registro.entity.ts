@@ -20,7 +20,7 @@ import { AccionAuditoria } from '../../../../common/enums';
 @Index('idx_auditoria_created_at', ['createdAt'])
 @Index('idx_auditoria_usuario_id', ['usuario'])
 @Index('idx_auditoria_accion', ['accion'])
-@Index('idx_auditoria_entidad', ['entidad', 'entidadId'])
+@Index('idx_auditoria_entidad_id', ['entidad', 'entidadId'])
 export class AuditoriaRegistroEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

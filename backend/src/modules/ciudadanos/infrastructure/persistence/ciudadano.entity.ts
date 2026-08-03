@@ -20,7 +20,6 @@ import { TipoDocumentoIdentidad } from '../../../../common/enums';
  * con FK en `solicitudes`. Un ciudadano puede tener múltiples motos y solicitudes.
  */
 @Entity({ name: 'ciudadanos' })
-@Index('idx_ciudadanos_numero_doc', ['numeroDocumento'])
 @Index('idx_ciudadanos_email', ['email'])
 export class CiudadanoEntity {
   @PrimaryGeneratedColumn('uuid')

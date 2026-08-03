@@ -17,6 +17,7 @@ import { EstadoPermiso } from '../../../../common/enums';
 @Entity({ name: 'permisos' })
 @Index('idx_permisos_estado', ['estado'])
 @Index('idx_permisos_fecha_vencimiento', ['fechaVencimiento'])
+@Index('idx_permisos_funcionario_id', ['funcionario'])
 export class PermisoEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

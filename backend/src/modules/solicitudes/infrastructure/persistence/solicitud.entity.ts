@@ -20,6 +20,7 @@ import { EstadoSolicitud } from '../../../../common/enums';
 @Index('idx_solicitudes_created_at', ['createdAt'])
 @Index('idx_solicitudes_ciudadano_id', ['ciudadano'])
 @Index('idx_solicitudes_motocicleta_id', ['motocicleta'])
+@Index('idx_solicitudes_estado_moto', ['motocicleta', 'estado'])
 export class SolicitudEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

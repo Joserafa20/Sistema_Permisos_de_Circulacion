@@ -14,7 +14,7 @@ import { RoleEntity } from '../../../roles/infrastructure/persistence/role.entit
 import { DependenciaEntity } from '../../../dependencias/infrastructure/persistence/dependencia.entity';
 
 @Entity({ name: 'usuarios' })
-@Index('idx_usuarios_email', ['email'])
+@Index('idx_usuarios_rol_id', ['rol'])
 export class UsuarioEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

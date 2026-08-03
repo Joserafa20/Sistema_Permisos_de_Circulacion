@@ -10,6 +10,13 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin Publicar]
 
 ### Añadido
+- **Auditoría de índices TypeORM** — 7 diferencias corregidas en 6 entidades para sincronizar con MODELO_DATOS.md, schema.sql y migración:
+  - `CiudadanoEntity`: eliminado `@Index('idx_ciudadanos_numero_doc')` (duplicaba el índice único del constraint `uq_ciudadanos_numero_documento`).
+  - `UsuarioEntity`: eliminado `@Index('idx_usuarios_email')` (duplicaba el índice único del constraint `uq_usuarios_email`); agregado `@Index('idx_usuarios_rol_id', ['rol'])`.
+  - `SolicitudEntity`: agregado `@Index('idx_solicitudes_estado_moto', ['motocicleta', 'estado'])` (índice compuesto para RN-03).
+  - `AuditoriaRegistroEntity`: renombrado `idx_auditoria_entidad` → `idx_auditoria_entidad_id`.
+  - `HistorialEstadoEntity`: renombrado `idx_historial_estados_solicitud_id` → `idx_historial_solicitud_created`.
+  - `PermisoEntity`: agregado `@Index('idx_permisos_funcionario_id', ['funcionario'])`.
 - `backend/database/migrations/1785628800000-InitialSchema.ts` — Migración inicial TypeORM. Reproduce exactamente `database/schema.sql`: 5 ENUMs, 1 secuencia `seq_codigo_permiso`, 16 tablas, 5 FK circulares vía `ALTER TABLE`, 27 índices regulares, 4 índices parciales, 1 índice único parcial. `up()` y `down()` con orden de reversión correcto (FK circulares primero, tablas en orden inverso de dependencia, drop de secuencia y tipos).
 - `ADR-016` — Jerarquía de autoridad entre artefactos del modelo de datos (MODELO_DATOS.md > Entidades > Migraciones > schema.sql). Prohibición de corrección automática de inconsistencias estructurales.
 - `DATABASE.md` — sección "Regla de consistencia del modelo" actualizada a versión definitiva: agrega descripción de cada artefacto, regla de no modificación sin autorización, y sección "Regla de propagación de cambios" con secuencia obligatoria de 7 pasos.
