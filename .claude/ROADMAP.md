@@ -39,7 +39,7 @@
 
 - [x] Tipos ENUM de PostgreSQL definidos ✅ 2026-08-02
 - [x] Script SQL completo (`database/schema.sql`) ✅ 2026-08-02
-- [ ] Migraciones TypeORM para todas las tablas
+- [x] Migraciones TypeORM para todas las tablas ✅ 2026-08-02
 - [ ] Índices de rendimiento aplicados desde el inicio
 - [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
 - [x] Entidades TypeORM con relaciones ✅ 2026-08-02
@@ -255,7 +255,7 @@
 | Fase | Descripción | Completadas | Total | Estado |
 |------|-------------|:-----------:|:-----:|--------|
 | Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
-| Fase 1 | Base de Datos | 3 | 7 | 🔵 En progreso ← |
+| Fase 1 | Base de Datos | 4 | 7 | 🔵 En progreso ← |
 | Fase 2 | Auth y Seguridad | 0 | 15 | ⬜ No iniciada |
 | Fase 3 | Solicitudes Backend | 0 | 16 | ⬜ No iniciada |
 | Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |

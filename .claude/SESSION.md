@@ -58,6 +58,10 @@ Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit
   INC-002: índice `token_hash` renombrado a `idx_tokens_token_hash` y eliminada propiedad `unique`.
   INC-003: índice compuesto renombrado a `idx_tokens_usuario_tipo_revocado` en `TokenEntity`.
   Los cuatro artefactos (MODELO_DATOS.md, entidades, migraciones, schema.sql) quedan sincronizados.
+✓ **Migración inicial TypeORM** — `backend/database/migrations/1785628800000-InitialSchema.ts` ✅ 2026-08-02
+  Implementa `up()`: 5 ENUMs, 1 secuencia, 16 tablas, 5 FK circulares via ALTER TABLE, 27 índices regulares,
+  4 índices parciales, 1 índice único parcial. Implementa `down()` en orden inverso con drop correcto de
+  FK circulares antes de drop de tablas. Reproducción exacta de `database/schema.sql`.
 
 ---
 
@@ -123,4 +127,4 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
 
 ## Última actualización
 
-2026-08-02 — Fase 1: reconciliación completa. Los cuatro artefactos del modelo de datos quedan sincronizados (MODELO_DATOS.md, entidades ORM, schema.sql). Migraciones pueden proceder.
+2026-08-02 — Fase 1: migración inicial TypeORM completada. `backend/database/migrations/1785628800000-InitialSchema.ts` reproduce exactamente `database/schema.sql`. Progreso: 4/7 tareas.

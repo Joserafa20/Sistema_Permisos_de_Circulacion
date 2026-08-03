@@ -10,6 +10,7 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin Publicar]
 
 ### Añadido
+- `backend/database/migrations/1785628800000-InitialSchema.ts` — Migración inicial TypeORM. Reproduce exactamente `database/schema.sql`: 5 ENUMs, 1 secuencia `seq_codigo_permiso`, 16 tablas, 5 FK circulares vía `ALTER TABLE`, 27 índices regulares, 4 índices parciales, 1 índice único parcial. `up()` y `down()` con orden de reversión correcto (FK circulares primero, tablas en orden inverso de dependencia, drop de secuencia y tipos).
 - `ADR-016` — Jerarquía de autoridad entre artefactos del modelo de datos (MODELO_DATOS.md > Entidades > Migraciones > schema.sql). Prohibición de corrección automática de inconsistencias estructurales.
 - `DATABASE.md` — sección "Regla de consistencia del modelo" actualizada a versión definitiva: agrega descripción de cada artefacto, regla de no modificación sin autorización, y sección "Regla de propagación de cambios" con secuencia obligatoria de 7 pasos.
 - `DECISION_LOG.md` — HAL-004 actualizado con impacto en lint-staged y fecha límite de resolución (antes de Fase 2).
