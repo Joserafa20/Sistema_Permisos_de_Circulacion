@@ -15,4 +15,5 @@ export interface ListarUsuariosQuery {
 
 export interface IUsuarioRepository {
   findMany(query: ListarUsuariosQuery): Promise<{ items: UsuarioDomainEntity[]; total: number }>;
+  findById(id: string): Promise<UsuarioDomainEntity | null>;
 }

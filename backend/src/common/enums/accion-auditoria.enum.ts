@@ -12,4 +12,6 @@ export enum AccionAuditoria {
   REVOCAR_PERMISO = 'revocar_permiso',
   CAMBIAR_CONTRASENA = 'cambiar_contrasena',
   EXPORTAR_REPORTE = 'exportar_reporte',
+  // Requiere migración: ALTER TYPE accion_auditoria ADD VALUE 'usuario_consultado';
+  USUARIO_CONSULTADO = 'usuario_consultado',
 }

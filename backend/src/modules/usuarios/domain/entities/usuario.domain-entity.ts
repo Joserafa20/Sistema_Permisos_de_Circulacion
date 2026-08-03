@@ -10,4 +10,8 @@ export class UsuarioDomainEntity {
   rolNombre: string;
   dependenciaId: string | null;
   dependenciaNombre: string | null;
+  // Campos adicionales presentes en la vista de detalle
+  intentosFallidos: number;
+  contrasenaExpiraAt: string | null;
+  updatedAt: Date | null;
 }

@@ -67,4 +67,13 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
       total,
     };
   }
+
+  async findById(id: string): Promise<UsuarioDomainEntity | null> {
+    const entity = await this.repo.findOne({
+      where: { id },
+      relations: ['rol', 'dependencia'],
+      withDeleted: false,
+    });
+    return entity ? UsuarioMapper.toDomain(entity) : null;
+  }
 }
