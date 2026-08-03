@@ -138,6 +138,11 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   Schema.sql y migración siguen §11. No requiere corrección en código.
   Quality Gate: tsc --noEmit exit 0.
 
+✓ **Corrección documental MODELO_DATOS.md** — inconsistencia de nomenclatura resuelta. ✅ 2026-08-02
+  §10 tabla regular: `idx_motocicletas_placa_activo` → `uq_motocicletas_placa_activa (Partial UNIQUE)`.
+  §10 tabla parcial: `idx_motocicletas_activas` → `uq_motocicletas_placa_activa`.
+  Los cuatro artefactos (MODELO_DATOS.md, entidades ORM, schema.sql, migración) quedan completamente sincronizados en nomenclatura.
+
 ## Última actualización
 
-2026-08-02 — Fase 1: auditoría de índices completada. 7 diferencias corregidas en 6 entidades. Progreso: 5/7 tareas.
+2026-08-02 — Fase 1: MODELO_DATOS.md sincronizado. Nomenclatura del índice uq_motocicletas_placa_activa unificada en todas las secciones del documento. Progreso: 5/7 tareas.

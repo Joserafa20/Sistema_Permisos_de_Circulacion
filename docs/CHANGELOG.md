@@ -10,6 +10,7 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin Publicar]
 
 ### Añadido
+- `MODELO_DATOS.md` — unificada nomenclatura del índice único parcial de motocicletas: `idx_motocicletas_placa_activo` e `idx_motocicletas_activas` (§10) reemplazados por `uq_motocicletas_placa_activa` en todas las secciones del documento. Ahora coincide con schema.sql, migración y entidades ORM.
 - **Auditoría de índices TypeORM** — 7 diferencias corregidas en 6 entidades para sincronizar con MODELO_DATOS.md, schema.sql y migración:
   - `CiudadanoEntity`: eliminado `@Index('idx_ciudadanos_numero_doc')` (duplicaba el índice único del constraint `uq_ciudadanos_numero_documento`).
   - `UsuarioEntity`: eliminado `@Index('idx_usuarios_email')` (duplicaba el índice único del constraint `uq_usuarios_email`); agregado `@Index('idx_usuarios_rol_id', ['rol'])`.

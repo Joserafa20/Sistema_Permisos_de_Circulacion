@@ -581,7 +581,7 @@ idx_ciudadanos_email                (email)
 ── motocicletas ────────────────────────────────────────────────────
 idx_motocicletas_placa              (placa)
 idx_motocicletas_ciudadano_id       (ciudadano_id)
-idx_motocicletas_placa_activo       (placa) WHERE deleted_at IS NULL   Partial
+uq_motocicletas_placa_activa        (placa) WHERE deleted_at IS NULL   Partial UNIQUE
 
 ── permisos ────────────────────────────────────────────────────────
 idx_permisos_codigo_qr              (codigo_qr)                 UNIQUE
@@ -638,7 +638,7 @@ idx_tokens_activos        ON tokens(token_hash, expira_at)
 WHERE revocado = false
 
 -- Motos activas sin soft delete (para validar unicidad de placa)
-idx_motocicletas_activas  ON motocicletas(placa)
+uq_motocicletas_placa_activa  ON motocicletas(placa) UNIQUE
 WHERE deleted_at IS NULL
 ```
 
