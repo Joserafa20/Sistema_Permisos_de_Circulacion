@@ -5,6 +5,7 @@ import { ValidationError } from 'class-validator';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
+import * as compression from 'compression';
 import { AppModule } from './app.module';
 import { SWAGGER_BEARER_TOKEN } from './common/constants/swagger.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -12,7 +13,10 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    bodyParser: false,
+  });
 
   // ── Logger ──────────────────────────────────────────────────────
   app.useLogger(app.get(Logger));
@@ -21,6 +25,20 @@ async function bootstrap(): Promise<void> {
   const port = config.get<number>('app.port') ?? 3001;
   const frontendUrl = config.get<string>('app.frontendUrl') ?? '';
   const nodeEnv = config.get<string>('app.nodeEnv') ?? 'development';
+
+  // ── Trust proxy (necesario para req.ip real detrás de nginx/load balancer) ─
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (app.getHttpAdapter().getInstance() as any).set('trust proxy', 1);
+
+  // ── Límite de cuerpo de solicitud ────────────────────────────────
+  // Usar express.json/urlencoded con límite explícito (bodyParser deshabilitado en create()).
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const express = require('express') as typeof import('express');
+  app.use(express.json({ limit: '5mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+
+  // ── Compresión HTTP (gzip/deflate) ───────────────────────────────
+  app.use(compression());
 
   // ── Prefijo global de rutas ──────────────────────────────────────
   app.setGlobalPrefix('api/v1');
@@ -43,16 +61,12 @@ async function bootstrap(): Promise<void> {
   });
 
   // ── Validación global de DTOs ────────────────────────────────────
-  // whitelist: descarta propiedades no declaradas en el DTO.
-  // forbidNonWhitelisted: retorna error 400 si el cliente envía propiedades extra.
-  // transform: convierte los tipos automáticamente (string → number, etc.).
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
-      // Produce errors[] estructurados según API_FUNCIONAL.md §3 en lugar de string[]
       exceptionFactory: (errors: ValidationError[]) => {
         const details = errors.map((err) => ({
           field: err.property,

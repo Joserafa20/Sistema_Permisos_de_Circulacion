@@ -6,7 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { UsuarioEntity } from '../../../../usuarios/infrastructure/persistence/usuario.entity';
 import { TokenEntity } from '../../../infrastructure/persistence/token.entity';
-import { AuditoriaRegistroEntity } from '../../../../auditoria/infrastructure/persistence/auditoria-registro.entity';
+import { AuditoriaService } from '../../../../auditoria/application/auditoria.service';
 import { TipoToken } from '../../../../../common/enums/tipo-token.enum';
 import { AccionAuditoria } from '../../../../../common/enums/accion-auditoria.enum';
 import { UnauthorizedException } from '../../../../../common/exceptions';
@@ -22,12 +22,11 @@ export interface RestablecerContrasenaCommand {
 export class RestablecerContrasenaUseCase {
   constructor(
     private readonly configService: ConfigService,
+    private readonly auditoriaService: AuditoriaService,
     @InjectRepository(UsuarioEntity)
     private readonly usuarioRepo: Repository<UsuarioEntity>,
     @InjectRepository(TokenEntity)
     private readonly tokenRepo: Repository<TokenEntity>,
-    @InjectRepository(AuditoriaRegistroEntity)
-    private readonly auditoriaRepo: Repository<AuditoriaRegistroEntity>,
   ) {}
 
   async execute(command: RestablecerContrasenaCommand): Promise<{ message: string }> {
@@ -51,7 +50,6 @@ export class RestablecerContrasenaUseCase {
 
     const usuario = tokenEntity.usuario;
 
-    // Verificar que la nueva contraseña no esté en el historial
     const historial: string[] = usuario.historialContrasenas ?? [];
     for (const hashAnterior of historial) {
       const esMisma = await bcrypt.compare(nuevaContrasena, hashAnterior);
@@ -63,7 +61,6 @@ export class RestablecerContrasenaUseCase {
     const rounds = this.configService.get<number>('security.bcryptRounds', 12);
     const nuevoHash = await bcrypt.hash(nuevaContrasena, rounds);
 
-    // Actualizar historial (últimas 5)
     const nuevoHistorial = [nuevoHash, ...historial].slice(0, 5);
 
     await this.usuarioRepo.update(usuario.id, {
@@ -74,10 +71,8 @@ export class RestablecerContrasenaUseCase {
       bloqueadoHasta: null,
     });
 
-    // Revocar el token de recuperación
     await this.tokenRepo.update(tokenEntity.id, { revocado: true, revocadoAt: new Date() });
 
-    // Revocar todos los refresh tokens activos del usuario
     await this.tokenRepo
       .createQueryBuilder()
       .update()
@@ -88,17 +83,15 @@ export class RestablecerContrasenaUseCase {
       })
       .execute();
 
-    const registro = this.auditoriaRepo.create({
+    await this.auditoriaService.registrar({
       accion: AccionAuditoria.CAMBIAR_CONTRASENA,
       entidad: 'usuarios',
       entidadId: usuario.id,
-      datosAnteriores: null,
       datosNuevos: { metodo: 'recuperacion' },
-      ipAddress: ipAddress ?? null,
-      userAgent: userAgent ?? null,
-      usuario: { id: usuario.id } as UsuarioEntity,
+      ipAddress,
+      userAgent,
+      usuarioId: usuario.id,
     });
-    await this.auditoriaRepo.save(registro).catch(() => undefined);
 
     return {
       message: 'Contraseña restablecida correctamente. Inicie sesión con su nueva contraseña',

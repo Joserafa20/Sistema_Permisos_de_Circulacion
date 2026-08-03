@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
@@ -7,19 +8,19 @@ import { validationSchema } from './config/validation.schema';
 import { HealthModule } from './modules/health/health.module';
 import { ConfiguracionInstitucionalModule } from './modules/configuracion-institucional/configuracion-institucional.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from './modules/auth/infrastructure/guards/roles.guard';
 
 @Module({
   imports: [
     // ── Configuración global ───────────────────────────────────────
-    // isGlobal: true permite inyectar ConfigService en cualquier módulo
-    // sin necesidad de importar ConfigModule localmente.
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
       validationSchema,
       validationOptions: {
         allowUnknown: false,
-        abortEarly: false, // Reporta TODOS los errores de validación, no solo el primero
+        abortEarly: false,
       },
     }),
 
@@ -33,7 +34,6 @@ import { AuthModule } from './modules/auth/auth.module';
             config.get<string>('app.nodeEnv') !== 'production'
               ? { target: 'pino-pretty', options: { colorize: true, singleLine: true } }
               : undefined,
-          // Nunca loguear campos sensibles
           redact: ['req.headers.authorization', 'req.body.password', 'req.body.token'],
           serializers: {
             req: (req: { method: string; url: string; id: string }) => ({
@@ -47,8 +47,6 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
 
     // ── Base de Datos (TypeORM) ────────────────────────────────────
-    // synchronize: false en todo momento. El esquema se gestiona
-    // exclusivamente mediante migraciones en /database/migrations/.
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -64,7 +62,6 @@ import { AuthModule } from './modules/auth/auth.module';
         synchronize: false,
         logging: config.get<string>('app.nodeEnv') === 'development',
         extra: {
-          // Pool de conexiones
           max: 10,
           min: 2,
           idleTimeoutMillis: 30000,
@@ -77,11 +74,13 @@ import { AuthModule } from './modules/auth/auth.module';
     HealthModule,
     ConfiguracionInstitucionalModule,
     AuthModule,
-    // Los módulos de negocio se registran en sus fases correspondientes.
-    // Fase 2: AuthModule, UsuariosModule
-    // Fase 3: SolicitudesModule, DocumentosModule, CiudadanosModule
-    // Fase 4: PermisosModule, QRModule, PDFModule, NotificacionesModule
-    // Fase 7: ReportesModule, AuditoriaModule, ConfiguracionModule
+  ],
+  providers: [
+    // ── Guards globales ────────────────────────────────────────────
+    // Orden: JwtAuthGuard valida el token (o lo omite en rutas @Public()).
+    // RolesGuard verifica el rol requerido por @Roles() sobre req.user.
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

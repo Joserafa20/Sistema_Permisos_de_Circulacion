@@ -6,17 +6,16 @@ import { Repository } from 'typeorm';
 import { Request } from 'express';
 import * as bcrypt from 'bcryptjs';
 import { UsuarioEntity } from '../../../usuarios/infrastructure/persistence/usuario.entity';
-import { AuditoriaRegistroEntity } from '../../../auditoria/infrastructure/persistence/auditoria-registro.entity';
+import { AuditoriaService } from '../../../auditoria/application/auditoria.service';
 import { AccionAuditoria } from '../../../../common/enums/accion-auditoria.enum';
 import { UnauthorizedException } from '../../../../common/exceptions';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
   constructor(
+    private readonly auditoriaService: AuditoriaService,
     @InjectRepository(UsuarioEntity)
     private readonly usuarioRepo: Repository<UsuarioEntity>,
-    @InjectRepository(AuditoriaRegistroEntity)
-    private readonly auditoriaRepo: Repository<AuditoriaRegistroEntity>,
   ) {
     super({ usernameField: 'email', passwordField: 'contrasena', passReqToCallback: true });
   }
@@ -31,18 +30,32 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
     });
 
     if (!usuario) {
-      await this.auditarFallo(null, ipAddress, userAgent, email);
+      await this.auditoriaService.registrar({
+        accion: AccionAuditoria.LOGIN_FALLIDO,
+        entidad: 'usuarios',
+        datosNuevos: { email },
+        ipAddress,
+        userAgent,
+      });
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
     if (!usuario.activo) {
-      await this.auditarFallo(usuario.id, ipAddress, userAgent, email);
+      await this.auditoriaService.registrar({
+        accion: AccionAuditoria.LOGIN_FALLIDO,
+        entidad: 'usuarios',
+        entidadId: usuario.id,
+        datosNuevos: { email },
+        ipAddress,
+        userAgent,
+        usuarioId: usuario.id,
+      });
       throw new UnauthorizedException('Usuario inactivo. Contacte al administrador');
     }
 
     if (usuario.bloqueadoHasta && new Date() < new Date(usuario.bloqueadoHasta)) {
       throw new UnauthorizedException(
-        `Cuenta bloqueada por exceso de intentos fallidos. Intente nuevamente en 15 minutos`,
+        `Cuenta bloqueada por exceso de intentos fallidos. Intente nuevamente en 30 minutos`,
       );
     }
 
@@ -55,29 +68,18 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
         update.bloqueadoHasta = new Date(Date.now() + 30 * 60 * 1000) as unknown as Date;
       }
       await this.usuarioRepo.update(usuario.id, update);
-      await this.auditarFallo(usuario.id, ipAddress, userAgent, email);
+      await this.auditoriaService.registrar({
+        accion: AccionAuditoria.LOGIN_FALLIDO,
+        entidad: 'usuarios',
+        entidadId: usuario.id,
+        datosNuevos: { email },
+        ipAddress,
+        userAgent,
+        usuarioId: usuario.id,
+      });
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
     return { id: usuario.id };
-  }
-
-  private async auditarFallo(
-    usuarioId: string | null,
-    ipAddress: string | null,
-    userAgent: string | null,
-    email: string,
-  ): Promise<void> {
-    const registro = this.auditoriaRepo.create({
-      accion: AccionAuditoria.LOGIN_FALLIDO,
-      entidad: 'usuarios',
-      entidadId: null,
-      datosAnteriores: null,
-      datosNuevos: { email },
-      ipAddress,
-      userAgent,
-      usuario: usuarioId ? ({ id: usuarioId } as UsuarioEntity) : null,
-    });
-    await this.auditoriaRepo.save(registro).catch(() => undefined);
   }
 }

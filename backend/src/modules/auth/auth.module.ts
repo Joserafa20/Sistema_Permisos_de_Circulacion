@@ -6,8 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import { UsuarioEntity } from '../usuarios/infrastructure/persistence/usuario.entity';
-import { AuditoriaRegistroEntity } from '../auditoria/infrastructure/persistence/auditoria-registro.entity';
 import { TokenEntity } from './infrastructure/persistence/token.entity';
+import { AuditoriaModule } from '../auditoria/auditoria.module';
 
 import { LocalStrategy } from './infrastructure/strategies/local.strategy';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
@@ -31,18 +31,18 @@ import { AuthController } from './infrastructure/controllers/auth.controller';
 @Module({
   imports: [
     ConfigModule,
+    AuditoriaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('jwt.secret') as string,
-        // Access token: 15 minutos en segundos
         signOptions: { expiresIn: 900 },
       }),
     }),
     ThrottlerModule.forRoot([{ name: 'default', ttl: 900000, limit: 5 }]),
-    TypeOrmModule.forFeature([TokenEntity, UsuarioEntity, AuditoriaRegistroEntity]),
+    TypeOrmModule.forFeature([TokenEntity, UsuarioEntity]),
   ],
   controllers: [AuthController],
   providers: [

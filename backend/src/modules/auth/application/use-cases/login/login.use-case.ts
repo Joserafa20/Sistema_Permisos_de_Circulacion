@@ -5,8 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsuarioEntity } from '../../../../usuarios/infrastructure/persistence/usuario.entity';
-import { AuditoriaRegistroEntity } from '../../../../auditoria/infrastructure/persistence/auditoria-registro.entity';
 import { TokenEntity } from '../../../infrastructure/persistence/token.entity';
+import { AuditoriaService } from '../../../../auditoria/application/auditoria.service';
 import { AccionAuditoria } from '../../../../../common/enums/accion-auditoria.enum';
 import { TipoToken } from '../../../../../common/enums/tipo-token.enum';
 import { AuthResponseDto } from '../../dtos/auth-response.dto';
@@ -22,12 +22,11 @@ export class LoginUseCase {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly auditoriaService: AuditoriaService,
     @InjectRepository(UsuarioEntity)
     private readonly usuarioRepo: Repository<UsuarioEntity>,
     @InjectRepository(TokenEntity)
     private readonly tokenRepo: Repository<TokenEntity>,
-    @InjectRepository(AuditoriaRegistroEntity)
-    private readonly auditoriaRepo: Repository<AuditoriaRegistroEntity>,
   ) {}
 
   async execute(command: LoginCommand): Promise<AuthResponseDto> {
@@ -42,7 +41,6 @@ export class LoginUseCase {
       throw new Error('Usuario no encontrado tras validación');
     }
 
-    // Reset intentos fallidos y actualizar ultimoLogin
     await this.usuarioRepo.update(userId, {
       intentosFallidos: 0,
       bloqueadoHasta: null,
@@ -55,7 +53,6 @@ export class LoginUseCase {
     const accessToken = this.jwtService.sign(payload);
 
     const refreshSecret = this.configService.get<string>('jwt.refreshSecret') as string;
-    // 7 días en segundos
     const refreshToken = this.jwtService.sign(
       { sub: userId },
       { secret: refreshSecret, expiresIn: 604800 },
@@ -76,17 +73,15 @@ export class LoginUseCase {
     });
     await this.tokenRepo.save(tokenEntity);
 
-    const auditoriaRegistro = this.auditoriaRepo.create({
+    await this.auditoriaService.registrar({
       accion: AccionAuditoria.LOGIN,
       entidad: 'usuarios',
       entidadId: userId,
-      datosAnteriores: null,
       datosNuevos: { email: usuario.email },
-      ipAddress: ipAddress ?? null,
-      userAgent: userAgent ?? null,
-      usuario: { id: userId } as UsuarioEntity,
+      ipAddress,
+      userAgent,
+      usuarioId: userId,
     });
-    await this.auditoriaRepo.save(auditoriaRegistro).catch(() => undefined);
 
     const contrasenaExpirada = usuario.contrasenaExpiraAt
       ? new Date(usuario.contrasenaExpiraAt) < new Date()

@@ -1,20 +1,19 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
 import { SWAGGER_BEARER_TOKEN } from '../../../../common/constants/swagger.constants';
+import { Public } from '../../../../common/decorators/public.decorator';
+import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
-import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
 import { ObtenerConfiguracionInstitucionalUseCase } from '../../application/use-cases/obtener-configuracion-institucional/obtener-configuracion-institucional.use-case';
 import { ActualizarConfiguracionInstitucionalUseCase } from '../../application/use-cases/actualizar-configuracion-institucional/actualizar-configuracion-institucional.use-case';
 import { ObtenerConfiguracionPublicaUseCase } from '../../application/use-cases/obtener-configuracion-publica/obtener-configuracion-publica.use-case';
 import { ActualizarConfiguracionInstitucionalDto } from '../../application/use-cases/actualizar-configuracion-institucional/actualizar-configuracion-institucional.dto';
 import { ConfiguracionInstitucionalResponseDto } from '../../application/use-cases/obtener-configuracion-institucional/configuracion-institucional-response.dto';
 import { ConfiguracionPublicaResponseDto } from '../../application/use-cases/obtener-configuracion-publica/configuracion-publica-response.dto';
+import { AuthUser } from '../../../auth/infrastructure/strategies/jwt.strategy';
 
 @ApiTags('configuracion-institucional')
 @Controller('configuracion-institucional')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class ConfiguracionInstitucionalController {
   constructor(
     private readonly obtenerUseCase: ObtenerConfiguracionInstitucionalUseCase,
@@ -64,15 +63,15 @@ export class ConfiguracionInstitucionalController {
   @ApiResponse({ status: 404, description: 'Configuración no encontrada' })
   async actualizar(
     @Body() dto: ActualizarConfiguracionInstitucionalDto,
-    @Req() req: Request & { user?: { id?: string } },
+    @CurrentUser() user: AuthUser,
   ): Promise<ConfiguracionInstitucionalResponseDto> {
-    const usuarioId = req.user?.id ?? null;
-    return this.actualizarUseCase.execute({ ...dto, usuarioId: usuarioId ?? '' });
+    return this.actualizarUseCase.execute({ ...dto, usuarioId: user.id });
   }
 }
 
 @ApiTags('public')
 @Controller('public/configuracion-institucional')
+@Public()
 export class ConfiguracionInstitucionalPublicController {
   constructor(private readonly obtenerPublicaUseCase: ObtenerConfiguracionPublicaUseCase) {}
 
