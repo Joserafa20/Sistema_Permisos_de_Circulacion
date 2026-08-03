@@ -143,6 +143,12 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   §10 tabla parcial: `idx_motocicletas_activas` → `uq_motocicletas_placa_activa`.
   Los cuatro artefactos (MODELO_DATOS.md, entidades ORM, schema.sql, migración) quedan completamente sincronizados en nomenclatura.
 
+✓ **Seeds iniciales** — `backend/database/seeds/seed.ts`. ✅ 2026-08-02
+  6 secciones idempotentes (ON CONFLICT DO NOTHING): roles, municipios, dependencias, motivos, configuracion, usuario admin.
+  bcryptjs instalado (12 rounds). Script: `npm run seed` desde /backend.
+  Variables configurables vía .env (ver .env.example sección Seeds).
+  Quality Gate: tsc --noEmit exit 0.
+
 ## Última actualización
 
-2026-08-02 — Fase 1: MODELO_DATOS.md sincronizado. Nomenclatura del índice uq_motocicletas_placa_activa unificada en todas las secciones del documento. Progreso: 5/7 tareas.
+2026-08-02 — Fase 1: seeds completados. 6 seeds idempotentes implementados. bcryptjs agregado. Progreso: 6/7 tareas.

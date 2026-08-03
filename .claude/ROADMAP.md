@@ -41,7 +41,7 @@
 - [x] Script SQL completo (`database/schema.sql`) ✅ 2026-08-02
 - [x] Migraciones TypeORM para todas las tablas ✅ 2026-08-02
 - [x] Índices de rendimiento aplicados desde el inicio ✅ 2026-08-02
-- [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
+- [x] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal ✅ 2026-08-02
 - [x] Entidades TypeORM con relaciones ✅ 2026-08-02
 - [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
 
@@ -255,7 +255,7 @@
 | Fase | Descripción | Completadas | Total | Estado |
 |------|-------------|:-----------:|:-----:|--------|
 | Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
-| Fase 1 | Base de Datos | 5 | 7 | 🔵 En progreso ← |
+| Fase 1 | Base de Datos | 6 | 7 | 🔵 En progreso ← |
 | Fase 2 | Auth y Seguridad | 0 | 15 | ⬜ No iniciada |
 | Fase 3 | Solicitudes Backend | 0 | 16 | ⬜ No iniciada |
 | Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |
