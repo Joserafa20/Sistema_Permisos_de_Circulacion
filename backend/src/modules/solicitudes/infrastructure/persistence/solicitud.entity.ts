@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CiudadanoEntity } from '../../../ciudadanos/infrastructure/persistence/ciudadano.entity';
-import { MotocicletaEntity } from '../../../ciudadanos/infrastructure/persistence/motocicleta.entity';
+import { MotocicletaEntity } from '../../../motocicletas/infrastructure/persistence/motocicleta.entity';
 import { MotivoEntity } from '../../../motivos/infrastructure/persistence/motivo.entity';
 import { EstadoSolicitud } from '../../../../common/enums';
 

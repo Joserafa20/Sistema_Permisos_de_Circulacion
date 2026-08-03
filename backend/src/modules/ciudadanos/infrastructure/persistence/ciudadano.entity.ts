@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { MunicipioEntity } from './municipio.entity';
-import { MotocicletaEntity } from './motocicleta.entity';
+import { MotocicletaEntity } from '../../../motocicletas/infrastructure/persistence/motocicleta.entity';
 import { TipoDocumentoIdentidad } from '../../../../common/enums';
 
 /**
