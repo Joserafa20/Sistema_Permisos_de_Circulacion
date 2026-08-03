@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { SWAGGER_BEARER_TOKEN } from './common/constants/swagger.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
@@ -71,7 +72,7 @@ async function bootstrap(): Promise<void> {
       .setContact('Alcaldía — Área de Sistemas', '', '')
       .addBearerAuth(
         { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', in: 'header' },
-        'access-token',
+        SWAGGER_BEARER_TOKEN,
       )
       .addTag('health', 'Estado del sistema')
       .addTag('auth', 'Autenticación y sesión')
