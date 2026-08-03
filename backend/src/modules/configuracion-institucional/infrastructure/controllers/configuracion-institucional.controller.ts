@@ -1,8 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { SWAGGER_BEARER_TOKEN } from '../../../../common/constants/swagger.constants';
 import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
 import { ObtenerConfiguracionInstitucionalUseCase } from '../../application/use-cases/obtener-configuracion-institucional/obtener-configuracion-institucional.use-case';
 import { ActualizarConfiguracionInstitucionalUseCase } from '../../application/use-cases/actualizar-configuracion-institucional/actualizar-configuracion-institucional.use-case';
 import { ObtenerConfiguracionPublicaUseCase } from '../../application/use-cases/obtener-configuracion-publica/obtener-configuracion-publica.use-case';
@@ -12,6 +14,7 @@ import { ConfiguracionPublicaResponseDto } from '../../application/use-cases/obt
 
 @ApiTags('configuracion-institucional')
 @Controller('configuracion-institucional')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ConfiguracionInstitucionalController {
   constructor(
     private readonly obtenerUseCase: ObtenerConfiguracionInstitucionalUseCase,

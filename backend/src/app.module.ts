@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { HealthModule } from './modules/health/health.module';
 import { ConfiguracionInstitucionalModule } from './modules/configuracion-institucional/configuracion-institucional.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { ConfiguracionInstitucionalModule } from './modules/configuracion-instit
     // ── Módulos funcionales ────────────────────────────────────────
     HealthModule,
     ConfiguracionInstitucionalModule,
+    AuthModule,
     // Los módulos de negocio se registran en sus fases correspondientes.
     // Fase 2: AuthModule, UsuariosModule
     // Fase 3: SolicitudesModule, DocumentosModule, CiudadanosModule
