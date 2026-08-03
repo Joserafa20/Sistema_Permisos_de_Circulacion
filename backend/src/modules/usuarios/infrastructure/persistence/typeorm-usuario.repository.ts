@@ -7,6 +7,7 @@ import {
   IUsuarioRepository,
   ListarUsuariosQuery,
   RolBrief,
+  UpdateUsuarioData,
 } from '../../domain/ports/usuario-repository.interface';
 import { UsuarioDomainEntity } from '../../domain/entities/usuario.domain-entity';
 import { UsuarioEntity } from './usuario.entity';
@@ -91,6 +92,14 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
     return count > 0;
   }
 
+  async existsByEmailExcluding(email: string, excludeId: string): Promise<boolean> {
+    const count = await this.repo
+      .createQueryBuilder('u')
+      .where('u.email = :email AND u.id != :excludeId', { email, excludeId })
+      .getCount();
+    return count > 0;
+  }
+
   async findRol(rolId: string): Promise<RolBrief | null> {
     const rol = await this.rolRepo.findOne({ where: { id: rolId } });
     if (!rol) return null;
@@ -101,6 +110,34 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
     const dep = await this.dependenciaRepo.findOne({ where: { id: dependenciaId } });
     if (!dep) return null;
     return { id: dep.id, nombre: dep.nombre, activo: dep.activo };
+  }
+
+  async update(id: string, data: UpdateUsuarioData): Promise<UsuarioDomainEntity> {
+    const entity = await this.repo.findOneOrFail({
+      where: { id },
+      relations: ['rol', 'dependencia'],
+    });
+
+    if (data.nombre !== undefined) entity.nombre = data.nombre;
+    if (data.apellido !== undefined) entity.apellido = data.apellido;
+    if (data.email !== undefined) entity.email = data.email;
+    if (data.rolId !== undefined) entity.rol = { id: data.rolId } as RoleEntity;
+    if ('dependenciaId' in data) {
+      entity.dependencia = data.dependenciaId
+        ? ({ id: data.dependenciaId } as DependenciaEntity)
+        : null;
+    }
+    if (data.activo !== undefined) entity.activo = data.activo;
+    if ('bloqueadoHasta' in data) entity.bloqueadoHasta = data.bloqueadoHasta ?? null;
+    entity.updatedBy = { id: data.updatedById } as UsuarioEntity;
+
+    await this.repo.save(entity);
+
+    const loaded = await this.repo.findOneOrFail({
+      where: { id },
+      relations: ['rol', 'dependencia'],
+    });
+    return UsuarioMapper.toDomain(loaded);
   }
 
   async save(data: CreateUsuarioData): Promise<UsuarioDomainEntity> {

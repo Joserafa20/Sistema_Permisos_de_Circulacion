@@ -14,4 +14,6 @@ export enum AccionAuditoria {
   EXPORTAR_REPORTE = 'exportar_reporte',
   USUARIO_CONSULTADO = 'usuario_consultado',
   USUARIO_CREADO = 'usuario_creado',
+  USUARIO_ACTUALIZADO = 'usuario_actualizado',
+  USUARIO_DESBLOQUEADO = 'usuario_desbloqueado',
 }

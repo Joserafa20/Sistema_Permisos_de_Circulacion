@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   Req,
 } from '@nestjs/common';
@@ -16,11 +17,13 @@ import { SWAGGER_BEARER_TOKEN } from '../../../../common/constants/swagger.const
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
 import { AuthUser } from '../../../auth/infrastructure/strategies/jwt.strategy';
+import { ActualizarUsuarioDto } from '../../application/dtos/actualizar-usuario.dto';
 import { CrearUsuarioDto } from '../../application/dtos/crear-usuario.dto';
 import { ListarUsuariosQueryDto } from '../../application/dtos/listar-usuarios-query.dto';
 import { UsuarioCreadoDto } from '../../application/dtos/usuario-creado.dto';
 import { UsuarioDetalleDto } from '../../application/dtos/usuario-detalle.dto';
 import { UsuarioListItemDto } from '../../application/dtos/usuario-list-item.dto';
+import { ActualizarUsuarioUseCase } from '../../application/use-cases/actualizar-usuario/actualizar-usuario.use-case';
 import { CrearUsuarioUseCase } from '../../application/use-cases/crear-usuario/crear-usuario.use-case';
 import { ListarUsuariosUseCase } from '../../application/use-cases/listar-usuarios/listar-usuarios.use-case';
 import { ObtenerUsuarioPorIdUseCase } from '../../application/use-cases/obtener-usuario-por-id/obtener-usuario-por-id.use-case';
@@ -34,6 +37,7 @@ export class UsuariosController {
     private readonly listarUsuariosUseCase: ListarUsuariosUseCase,
     private readonly obtenerUsuarioPorIdUseCase: ObtenerUsuarioPorIdUseCase,
     private readonly crearUsuarioUseCase: CrearUsuarioUseCase,
+    private readonly actualizarUsuarioUseCase: ActualizarUsuarioUseCase,
   ) {}
 
   @Get()
@@ -112,5 +116,44 @@ export class UsuariosController {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
     const userAgent = (req.headers['user-agent'] ?? null) as string | null;
     return this.obtenerUsuarioPorIdUseCase.execute({ id, actorId: actor.id, ipAddress, userAgent });
+  }
+
+  @Put(':id')
+  @ApiOperation({
+    summary: 'Actualizar usuario',
+    description:
+      'Actualiza los datos de un usuario. Permite modificar nombre, apellido, email, rol, dependencia, estado activo y desbloquear cuenta bloqueada. Protecciones: el administrador no puede desactivarse ni cambiar su propio rol. Si no hay cambios reales, no ejecuta UPDATE ni escribe auditoría. Solo el Administrador puede acceder.',
+  })
+  @ApiParam({ name: 'id', description: 'UUID del usuario a actualizar', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario actualizado correctamente',
+    type: UsuarioDetalleDto,
+  })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Rol insuficiente — se requiere Administrador' })
+  @ApiResponse({ status: 404, description: 'Usuario, rol o dependencia no encontrados' })
+  @ApiResponse({ status: 409, description: 'Email ya registrado por otro usuario (EMAIL_IN_USE)' })
+  @ApiResponse({
+    status: 422,
+    description:
+      'Regla de negocio violada (SELF_DEACTIVATION_FORBIDDEN, SELF_ROLE_CHANGE_FORBIDDEN, ROL_INACTIVO, DEPENDENCIA_INACTIVA)',
+  })
+  async actualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ActualizarUsuarioDto,
+    @CurrentUser() actor: AuthUser,
+    @Req() req: Request,
+  ): Promise<UsuarioDetalleDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    const userAgent = (req.headers['user-agent'] ?? null) as string | null;
+    return this.actualizarUsuarioUseCase.execute({
+      id,
+      dto,
+      actorId: actor.id,
+      ipAddress,
+      userAgent,
+    });
   }
 }

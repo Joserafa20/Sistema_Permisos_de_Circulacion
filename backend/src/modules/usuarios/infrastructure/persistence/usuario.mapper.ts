@@ -20,6 +20,7 @@ export class UsuarioMapper {
     domain.rolNombre = entity.rol.nombre;
     domain.dependenciaId = entity.dependencia?.id ?? null;
     domain.dependenciaNombre = entity.dependencia?.nombre ?? null;
+    domain.bloqueadoHasta = entity.bloqueadoHasta;
     return domain;
   }
 

@@ -36,11 +36,26 @@ export interface DependenciaBrief {
   activo: boolean;
 }
 
+export interface UpdateUsuarioData {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  rolId?: string;
+  /** undefined = no cambiar; null = eliminar dependencia */
+  dependenciaId?: string | null;
+  activo?: boolean;
+  /** undefined = no cambiar; null = desbloquear */
+  bloqueadoHasta?: Date | null;
+  updatedById: string;
+}
+
 export interface IUsuarioRepository {
   findMany(query: ListarUsuariosQuery): Promise<{ items: UsuarioDomainEntity[]; total: number }>;
   findById(id: string): Promise<UsuarioDomainEntity | null>;
   existsByEmail(email: string): Promise<boolean>;
+  existsByEmailExcluding(email: string, excludeId: string): Promise<boolean>;
   findRol(rolId: string): Promise<RolBrief | null>;
   findDependencia(dependenciaId: string): Promise<DependenciaBrief | null>;
   save(data: CreateUsuarioData): Promise<UsuarioDomainEntity>;
+  update(id: string, data: UpdateUsuarioData): Promise<UsuarioDomainEntity>;
 }

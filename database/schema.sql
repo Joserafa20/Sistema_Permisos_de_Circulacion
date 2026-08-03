@@ -68,7 +68,9 @@ CREATE TYPE accion_auditoria AS ENUM (
   'cambiar_contrasena',
   'exportar_reporte',
   'usuario_consultado',
-  'usuario_creado'
+  'usuario_creado',
+  'usuario_actualizado',
+  'usuario_desbloqueado'
 );
 
 
