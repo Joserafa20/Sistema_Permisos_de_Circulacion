@@ -10,6 +10,8 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin Publicar]
 
 ### Añadido
+- `docs/ER_DIAGRAM.md` — Documentación técnica completa del modelo de datos: descripción general, módulos lógicos, 16 entidades con propósito, 20 relaciones con cardinalidades, FK circulares y auto-referencias, CHECK/UNIQUE constraints, 8 decisiones de diseño, métricas del modelo. Diagrama Mermaid embebido compatible con GitHub y Obsidian.
+- `docs/ER_DIAGRAM.mmd` — Diagrama Mermaid puro (`erDiagram`) con 16 entidades, columnas con marcadores PK/FK/UK y comentarios descriptivos, 20 relaciones con etiquetas, agrupado en 6 módulos con comentarios. Compatible con GitHub/Obsidian/mermaid.live. Excluye FK circulares (limitación Mermaid — documentadas en ER_DIAGRAM.md §6).
 - `backend/database/seeds/seed.ts` — Script de seeds inicial idempotente para PostgreSQL 15 + TypeORM. Incluye 6 secciones (ON CONFLICT DO NOTHING): roles (administrador, funcionario), municipio sede, dependencias (Secretaría de Movilidad + Secretaría General), 9 motivos de permiso, 9 parámetros de configuración del sistema, usuario administrador con contraseña temporal BCrypt 12 rounds. Variables configurables vía `.env`. Script: `npm run seed`.
 - `bcryptjs` agregado como dependencia (requerido para hash BCrypt en seeds y Fase 2 auth).
 - `backend/.env.example` — sección `Seeds iniciales` con todas las variables configurables.
@@ -29,9 +31,6 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - `database/schema.sql` — Script SQL completo y autocontenido para PostgreSQL 15+. Incluye: 5 tipos ENUM nativos, secuencia `seq_codigo_permiso`, 16 tablas con 30 FK (25 inline + 5 circulares via ALTER TABLE), 11 CHECK constraints, 27 índices regulares, 4 índices parciales y 1 índice único parcial (`uq_motocicletas_placa_activa`). Fuente: `docs/MODELO_DATOS.md`. 3 inconsistencias detectadas entre entidades ORM y MODELO_DATOS.md (INC-001: `hash_pdf` ausente en `PermisoEntity`; INC-002: `token_hash` unique en entidad vs non-unique en MODELO_DATOS.md; INC-003: nombre de índice compuesto en tokens).
 
 ### Por Hacer
-- Script SQL completo y migraciones TypeORM — Fase 1 (en progreso).
-- Seeds: roles, motivos, configuración, municipio, usuario admin — Fase 1.
-- Diagrama entidad-relación — Fase 1.
 - Autenticación JWT — Fase 2.
 - Módulo de solicitudes — Fase 3.
 - PDF + QR — Fase 4.

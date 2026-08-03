@@ -67,11 +67,7 @@ Estado: ✅ CERRADA — Mergeada a develop el 2026-08-02 (PR #2 → merge commit
 
 ## Tareas pendientes — Fase 1
 
-- [ ] Script SQL completo (`database/schema.sql`) — ✅ COMPLETADO
-- [ ] Migraciones TypeORM para todas las tablas
-- [ ] Índices de rendimiento aplicados desde el inicio
-- [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
-- [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
+✅ TODAS LAS TAREAS COMPLETADAS (7/7)
 
 ---
 
@@ -149,6 +145,12 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   Variables configurables vía .env (ver .env.example sección Seeds).
   Quality Gate: tsc --noEmit exit 0.
 
+✓ **Diagrama ER** — `docs/ER_DIAGRAM.md` y `docs/ER_DIAGRAM.mmd` ✅ 2026-08-02
+  16 entidades · 20 relaciones · 6 módulos lógicos · Mermaid nativo GitHub/Obsidian.
+  FK circulares (usuarios ↔ dependencias, self-refs) documentadas en §6.
+  Decisiones de diseño D-001 a D-007 documentadas en §8.
+  Fase 1 completada: 7/7 tareas.
+
 ## Última actualización
 
-2026-08-02 — Fase 1: seeds completados. 6 seeds idempotentes implementados. bcryptjs agregado. Progreso: 6/7 tareas.
+2026-08-02 — Fase 1: diagrama ER generado. Fase 1 completada (7/7 tareas). Esperando autorización para cierre y merge.
