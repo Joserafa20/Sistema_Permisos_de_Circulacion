@@ -208,9 +208,7 @@
 - [ ] CRUD de Roles
 - [ ] CRUD de Dependencias
 - [ ] CRUD de Motivos (con activación/desactivación sin borrar)
-- [ ] Configuración del sistema:
-  - [ ] Nombre de la alcaldía, municipio
-  - [ ] Logo / escudo (upload de imagen)
+- [ ] Configuración del Sistema (Parámetros Operativos):
   - [ ] Firma digital configurable (upload de imagen)
   - [ ] Sello institucional (upload de imagen)
   - [ ] Parámetros: días máximos permiso, plazos, color institucional
@@ -264,7 +262,7 @@
 | Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |
 | Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
-| Fase 7 | Panel Admin | 0 | 12 | ⬜ No iniciada |
+| Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
 
 **Duración total estimada:** 10 semanas para un equipo de 2–3 desarrolladores.

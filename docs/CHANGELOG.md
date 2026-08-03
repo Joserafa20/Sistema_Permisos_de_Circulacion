@@ -9,6 +9,19 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin Publicar]
 
+### Corregido
+- **Auditoría arquitectónica final — módulo Configuración Institucional** (INC-CI-001, INC-CI-002):
+  - `.claude/ROADMAP.md` y `.claude/TASKS.md` — bloque Fase 7 "Configuración del sistema" renombrado
+    a "Configuración del Sistema (Parámetros Operativos)". Eliminados sub-ítems "Nombre de la alcaldía,
+    municipio" y "Logo / escudo (upload de imagen)" que ahora pertenecen exclusivamente a
+    `ConfiguracionInstitucionalModule`. Conservados: firma digital, sello, parámetros operativos y
+    color institucional. Total Fase 7 ajustado a 10 ítems.
+  - `.claude/ARCHITECTURE.md` — `ConfiguracionInstitucionalModule` agregado a tabla de Módulos NestJS.
+    `IConfiguracionInstitucionalRepository` agregado a Driven Ports. Nueva sección "Separación de
+    Dominios" con tabla comparativa exhaustiva (`ConfiguracionModule` vs `ConfiguracionInstitucionalModule`)
+    y regla arquitectónica de no-mezcla entre repositorios de dominio.
+  - Auditoría cerrada sin inconsistencias pendientes. Documentación 100% consistente.
+
 ### Añadido
 - **Módulo Configuración Institucional** — nuevo requerimiento funcional incorporado en documentación:
   - `docs/PRD_Sistema_Permisos_de_Circulacion.md` — nuevo módulo documentado bajo §TIPOS DE USUARIOS > Administrador y sección §MÓDULO: CONFIGURACIÓN INSTITUCIONAL.

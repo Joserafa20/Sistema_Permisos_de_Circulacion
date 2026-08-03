@@ -159,6 +159,15 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   API.md, SECURITY.md, DECISION_LOG.md (ADR-017), TASKS.md, ROADMAP.md.
   Implementación programada: Fase 2 (migración + seed + módulo backend) + Fase 7 (UI admin).
 
+✓ **Auditoría arquitectónica final — módulo Configuración Institucional** ✅ 2026-08-02
+  INC-CI-001 resuelto: Fase 7 "Configuración del sistema" renombrada a "Configuración del Sistema
+  (Parámetros Operativos)"; eliminados sub-ítems "Nombre de la alcaldía/municipio" y "Logo/escudo"
+  que ahora pertenecen a ConfiguracionInstitucionalModule. Aplicado en ROADMAP.md y TASKS.md.
+  INC-CI-002 resuelto: ARCHITECTURE.md actualizado — agregado ConfiguracionInstitucionalModule a
+  tabla de módulos, IConfiguracionInstitucionalRepository a Driven Ports, y nueva sección
+  "Separación de Dominios" con tabla comparativa y regla arquitectónica.
+  Auditoría cerrada. Documentación 100% consistente. Listo para inicio de Fase 2.
+
 ## Última actualización
 
-2026-08-02 — Incorporación documental del módulo Configuración Institucional. Fase 1 sigue completada (7/7 tareas). Pendiente autorización para cierre y merge de feature/fase-1-base-datos.
+2026-08-02 — Cierre definitivo de auditoría del módulo Configuración Institucional. Todas las inconsistencias resueltas. Pendiente autorización para merge de feature/fase-1-base-datos a develop y arranque de Fase 2.

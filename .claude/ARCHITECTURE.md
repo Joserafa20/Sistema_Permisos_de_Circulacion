@@ -88,6 +88,7 @@ IMotocicletaRepository
 IUsuarioRepository
 IAuditoriaRepository
 IConfiguracionRepository
+IConfiguracionInstitucionalRepository
 
 // Servicios externos
 IStoragePort          // Guardar y recuperar archivos (MinIO/S3)
@@ -116,11 +117,34 @@ ICaptchaPort          // Validar token reCAPTCHA
 | `NotificacionesModule` | Cola de correos electrónicos |
 | `ReportesModule` | Dashboard, reportes y exportaciones |
 | `AuditoriaModule` | Bitácora de acciones del sistema |
-| `ConfiguracionModule` | Parámetros del sistema |
+| `ConfiguracionModule` | Parámetros operativos del sistema (clave-valor) |
+| `ConfiguracionInstitucionalModule` | Identidad institucional de la alcaldía (singleton): datos textuales, escudo y logo |
 | `MotivosModule` | CRUD de motivos configurables |
 | `DependenciasModule` | CRUD de dependencias de la alcaldía |
 | `StorageModule` | Abstracción sobre MinIO/S3 |
 | `HealthModule` | Health checks del sistema |
+
+---
+
+## Separación de Dominios: Configuración vs. Configuración Institucional
+
+Estos dos módulos son **semánticamente distintos e independientes**. Está **prohibido** reutilizar entidades, repositorios, servicios o endpoints entre ellos. Toda interacción entre dominios deberá realizarse exclusivamente mediante casos de uso definidos.
+
+| Dimensión | `ConfiguracionModule` | `ConfiguracionInstitucionalModule` |
+|---|---|---|
+| **Tabla** | `configuracion` | `configuracion_institucional` |
+| **Estructura** | Clave-valor genérico (`TipoConfig` ENUM) | Entidad tipada con columnas fijas |
+| **Responsabilidad** | Parámetros operativos del sistema | Identidad institucional de la alcaldía |
+| **Ejemplos** | Días máximos de permiso, plazos, color institucional, firma digital, sello | Nombre, NIT, código DANE, departamento, municipio, escudo, logo |
+| **Cardinalidad** | Múltiples registros | Singleton (exactamente 1 registro) |
+| **Escritura** | Solo Admin | Solo Admin |
+| **Eliminación** | Permitida (soft) | Prohibida (RN-106) |
+| **Historial** | No requerido | No requerido |
+| **Imágenes** | Firma y sello almacenados en MinIO vía `storage_key` en el valor | Escudo y logo almacenados en MinIO; `storage_key` en columnas propias |
+| **Uso en PDF** | Parámetros operativos (plazos, numeración) | Encabezado institucional (nombre, escudo) |
+| **Puerto driven** | `IConfiguracionRepository` | `IConfiguracionInstitucionalRepository` |
+
+> **Regla arquitectónica:** Si un caso de uso del módulo PDF necesita tanto el color institucional (operativo) como el escudo (institucional), debe invocar ambos puertos por separado. Nunca mezclar llamadas a ambos repositorios dentro del mismo módulo de dominio.
 
 ---
 
