@@ -103,22 +103,22 @@
 **Dependencia:** Fase 1 completada.
 **Estado:** ⬜ No iniciada
 
-- [ ] Migración TypeORM para tabla `configuracion_institucional`
-- [ ] Seed inicial de `configuracion_institucional` (configurable vía `.env`)
-- [ ] Variables de entorno `SEED_CI_*` en `.env.example`
-- [ ] Módulo NestJS `configuracion-institucional/` con arquitectura hexagonal
-- [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
-- [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
-- [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
+- [x] Migración TypeORM para tabla `configuracion_institucional` ✅ 2026-08-03
+- [x] Seed inicial de `configuracion_institucional` (configurable vía `.env`) ✅ 2026-08-03
+- [x] Variables de entorno `SEED_CI_*` en `.env.example` ✅ 2026-08-03
+- [x] Módulo NestJS `configuracion-institucional/` con arquitectura hexagonal ✅ 2026-08-03
+- [x] `POST /api/v1/auth/login` con JWT Access + Refresh Token ✅ 2026-08-03
+- [x] `POST /api/v1/auth/logout` (revocación de refresh token) ✅ 2026-08-03
+- [x] `POST /api/v1/auth/refresh` (rotación de refresh token) ✅ 2026-08-03
 - [ ] `POST /api/v1/auth/recuperar-contrasena`
 - [ ] `POST /api/v1/auth/restablecer-contrasena`
 - [ ] `POST /api/v1/auth/cambiar-contrasena`
 - [ ] `GET  /api/v1/auth/me`
-- [ ] JwtAuthGuard y RolesGuard globales
-- [ ] Rate limiting en `/auth/login` (5 intentos / 15 min por IP)
-- [ ] Bloqueo temporal de cuenta por intentos fallidos
+- [x] JwtAuthGuard y RolesGuard implementados y aplicados ✅ 2026-08-03
+- [x] Rate limiting en `/auth/login` (5 intentos / 15 min por IP) ✅ 2026-08-03
+- [x] Bloqueo temporal de cuenta por intentos fallidos (en LocalStrategy) ✅ 2026-08-03
 - [ ] Política de contraseñas aplicada en DTOs
-- [ ] Registro de auditoría: login, logout, login fallido, cambio de contraseña
+- [x] Registro de auditoría: login, logout, login fallido ✅ 2026-08-03
 - [ ] Global Exception Filter (sin exposición de internos)
 - [ ] Helmet + CORS configurados
 - [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
