@@ -9,6 +9,7 @@ import {
   RolBrief,
   UpdateUsuarioData,
 } from '../../domain/ports/usuario-repository.interface';
+import { UserRole } from '../../../../common/decorators/roles.decorator';
 import { UsuarioDomainEntity } from '../../domain/entities/usuario.domain-entity';
 import { UsuarioEntity } from './usuario.entity';
 import { UsuarioMapper } from './usuario.mapper';
@@ -87,6 +88,15 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
     return entity ? UsuarioMapper.toDomain(entity) : null;
   }
 
+  async findByIdWithDeleted(id: string): Promise<UsuarioDomainEntity | null> {
+    const entity = await this.repo.findOne({
+      where: { id },
+      relations: ['rol', 'dependencia'],
+      withDeleted: true,
+    });
+    return entity ? UsuarioMapper.toDomain(entity) : null;
+  }
+
   async existsByEmail(email: string): Promise<boolean> {
     const count = await this.repo.count({ where: { email } });
     return count > 0;
@@ -112,11 +122,18 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
     return { id: dep.id, nombre: dep.nombre, activo: dep.activo };
   }
 
+  async countAdminsActivos(): Promise<number> {
+    return this.repo
+      .createQueryBuilder('u')
+      .innerJoin('u.rol', 'rol')
+      .where('rol.nombre = :rol AND u.activo = true AND u.deletedAt IS NULL', {
+        rol: UserRole.ADMINISTRADOR,
+      })
+      .getCount();
+  }
+
   async update(id: string, data: UpdateUsuarioData): Promise<UsuarioDomainEntity> {
-    const entity = await this.repo.findOneOrFail({
-      where: { id },
-      relations: ['rol', 'dependencia'],
-    });
+    const entity = await this.loadWithRelations(id);
 
     if (data.nombre !== undefined) entity.nombre = data.nombre;
     if (data.apellido !== undefined) entity.apellido = data.apellido;
@@ -132,12 +149,7 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
     entity.updatedBy = { id: data.updatedById } as UsuarioEntity;
 
     await this.repo.save(entity);
-
-    const loaded = await this.repo.findOneOrFail({
-      where: { id },
-      relations: ['rol', 'dependencia'],
-    });
-    return UsuarioMapper.toDomain(loaded);
+    return UsuarioMapper.toDomain(await this.loadWithRelations(id));
   }
 
   async save(data: CreateUsuarioData): Promise<UsuarioDomainEntity> {
@@ -155,10 +167,26 @@ export class TypeOrmUsuarioRepository implements IUsuarioRepository {
       createdBy: { id: data.createdById } as UsuarioEntity,
     });
     const saved = await this.repo.save(entity);
-    const loaded = await this.repo.findOneOrFail({
-      where: { id: saved.id },
+    return UsuarioMapper.toDomain(await this.loadWithRelations(saved.id));
+  }
+
+  async softDelete(id: string, actorId: string): Promise<void> {
+    await this.repo.update(id, { updatedBy: { id: actorId } as UsuarioEntity });
+    await this.repo.softDelete(id);
+  }
+
+  async restore(id: string, actorId: string): Promise<UsuarioDomainEntity> {
+    await this.repo.restore(id);
+    await this.repo.update(id, { updatedBy: { id: actorId } as UsuarioEntity });
+    return UsuarioMapper.toDomain(await this.loadWithRelations(id));
+  }
+
+  // ─── Helper privado ────────────────────────────────────────────────────────
+
+  private async loadWithRelations(id: string): Promise<UsuarioEntity> {
+    return this.repo.findOneOrFail({
+      where: { id },
       relations: ['rol', 'dependencia'],
     });
-    return UsuarioMapper.toDomain(loaded);
   }
 }

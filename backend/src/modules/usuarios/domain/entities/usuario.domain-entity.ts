@@ -15,4 +15,6 @@ export class UsuarioDomainEntity {
   updatedAt: Date | null;
   /** Interno — nunca exponer en DTOs de respuesta */
   bloqueadoHasta: Date | null;
+  /** Interno — nunca exponer en DTOs de respuesta */
+  deletedAt: Date | null;
 }

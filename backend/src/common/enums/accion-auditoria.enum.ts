@@ -16,4 +16,6 @@ export enum AccionAuditoria {
   USUARIO_CREADO = 'usuario_creado',
   USUARIO_ACTUALIZADO = 'usuario_actualizado',
   USUARIO_DESBLOQUEADO = 'usuario_desbloqueado',
+  USUARIO_ELIMINADO = 'usuario_eliminado',
+  USUARIO_RESTAURADO = 'usuario_restaurado',
 }

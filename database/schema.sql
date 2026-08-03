@@ -70,7 +70,9 @@ CREATE TYPE accion_auditoria AS ENUM (
   'usuario_consultado',
   'usuario_creado',
   'usuario_actualizado',
-  'usuario_desbloqueado'
+  'usuario_desbloqueado',
+  'usuario_eliminado',
+  'usuario_restaurado'
 );
 
 

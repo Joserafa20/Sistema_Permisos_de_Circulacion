@@ -21,6 +21,7 @@ export class UsuarioMapper {
     domain.dependenciaId = entity.dependencia?.id ?? null;
     domain.dependenciaNombre = entity.dependencia?.nombre ?? null;
     domain.bloqueadoHasta = entity.bloqueadoHasta;
+    domain.deletedAt = entity.deletedAt;
     return domain;
   }
 

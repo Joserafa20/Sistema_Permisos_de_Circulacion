@@ -10,6 +10,8 @@ import { ListarUsuariosUseCase } from './application/use-cases/listar-usuarios/l
 import { ObtenerUsuarioPorIdUseCase } from './application/use-cases/obtener-usuario-por-id/obtener-usuario-por-id.use-case';
 import { CrearUsuarioUseCase } from './application/use-cases/crear-usuario/crear-usuario.use-case';
 import { ActualizarUsuarioUseCase } from './application/use-cases/actualizar-usuario/actualizar-usuario.use-case';
+import { EliminarUsuarioUseCase } from './application/use-cases/eliminar-usuario/eliminar-usuario.use-case';
+import { RestaurarUsuarioUseCase } from './application/use-cases/restaurar-usuario/restaurar-usuario.use-case';
 import { UsuariosController } from './infrastructure/controllers/usuarios.controller';
 
 @Module({
@@ -23,6 +25,8 @@ import { UsuariosController } from './infrastructure/controllers/usuarios.contro
     ObtenerUsuarioPorIdUseCase,
     CrearUsuarioUseCase,
     ActualizarUsuarioUseCase,
+    EliminarUsuarioUseCase,
+    RestaurarUsuarioUseCase,
     {
       provide: USUARIO_REPOSITORY_TOKEN,
       useClass: TypeOrmUsuarioRepository,

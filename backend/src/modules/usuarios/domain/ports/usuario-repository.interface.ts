@@ -52,10 +52,14 @@ export interface UpdateUsuarioData {
 export interface IUsuarioRepository {
   findMany(query: ListarUsuariosQuery): Promise<{ items: UsuarioDomainEntity[]; total: number }>;
   findById(id: string): Promise<UsuarioDomainEntity | null>;
+  findByIdWithDeleted(id: string): Promise<UsuarioDomainEntity | null>;
   existsByEmail(email: string): Promise<boolean>;
   existsByEmailExcluding(email: string, excludeId: string): Promise<boolean>;
   findRol(rolId: string): Promise<RolBrief | null>;
   findDependencia(dependenciaId: string): Promise<DependenciaBrief | null>;
+  countAdminsActivos(): Promise<number>;
   save(data: CreateUsuarioData): Promise<UsuarioDomainEntity>;
   update(id: string, data: UpdateUsuarioData): Promise<UsuarioDomainEntity>;
+  softDelete(id: string, actorId: string): Promise<void>;
+  restore(id: string, actorId: string): Promise<UsuarioDomainEntity>;
 }

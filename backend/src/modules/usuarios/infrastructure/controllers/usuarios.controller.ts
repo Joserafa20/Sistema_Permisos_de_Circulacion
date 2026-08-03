@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -25,8 +26,10 @@ import { UsuarioDetalleDto } from '../../application/dtos/usuario-detalle.dto';
 import { UsuarioListItemDto } from '../../application/dtos/usuario-list-item.dto';
 import { ActualizarUsuarioUseCase } from '../../application/use-cases/actualizar-usuario/actualizar-usuario.use-case';
 import { CrearUsuarioUseCase } from '../../application/use-cases/crear-usuario/crear-usuario.use-case';
+import { EliminarUsuarioUseCase } from '../../application/use-cases/eliminar-usuario/eliminar-usuario.use-case';
 import { ListarUsuariosUseCase } from '../../application/use-cases/listar-usuarios/listar-usuarios.use-case';
 import { ObtenerUsuarioPorIdUseCase } from '../../application/use-cases/obtener-usuario-por-id/obtener-usuario-por-id.use-case';
+import { RestaurarUsuarioUseCase } from '../../application/use-cases/restaurar-usuario/restaurar-usuario.use-case';
 
 @ApiTags('usuarios')
 @Controller('usuarios')
@@ -38,6 +41,8 @@ export class UsuariosController {
     private readonly obtenerUsuarioPorIdUseCase: ObtenerUsuarioPorIdUseCase,
     private readonly crearUsuarioUseCase: CrearUsuarioUseCase,
     private readonly actualizarUsuarioUseCase: ActualizarUsuarioUseCase,
+    private readonly eliminarUsuarioUseCase: EliminarUsuarioUseCase,
+    private readonly restaurarUsuarioUseCase: RestaurarUsuarioUseCase,
   ) {}
 
   @Get()
@@ -155,5 +160,60 @@ export class UsuariosController {
       ipAddress,
       userAgent,
     });
+  }
+
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Eliminar usuario (soft delete)',
+    description:
+      'Realiza una eliminación lógica del usuario. Nunca elimina físicamente el registro. Protecciones: no permite eliminarse a sí mismo ni eliminar al último administrador activo. Solo el Administrador puede acceder.',
+  })
+  @ApiParam({ name: 'id', description: 'UUID del usuario a eliminar', type: String })
+  @ApiResponse({ status: 200, description: 'Usuario eliminado correctamente' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Rol insuficiente — se requiere Administrador' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado o ya eliminado' })
+  @ApiResponse({
+    status: 422,
+    description: 'Regla de negocio violada (SELF_DELETE_FORBIDDEN, LAST_ADMIN_FORBIDDEN)',
+  })
+  async eliminar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthUser,
+    @Req() req: Request,
+  ): Promise<{ id: string }> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    const userAgent = (req.headers['user-agent'] ?? null) as string | null;
+    return this.eliminarUsuarioUseCase.execute({ id, actorId: actor.id, ipAddress, userAgent });
+  }
+
+  @Post(':id/restaurar')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Restaurar usuario eliminado',
+    description:
+      'Revierte el soft delete de un usuario. Solo puede restaurarse un usuario que esté previamente eliminado. No modifica ningún otro dato del usuario. Solo el Administrador puede acceder.',
+  })
+  @ApiParam({ name: 'id', description: 'UUID del usuario a restaurar', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario restaurado correctamente',
+    type: UsuarioDetalleDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Rol insuficiente — se requiere Administrador' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  @ApiResponse({
+    status: 422,
+    description: 'El usuario no está eliminado (USUARIO_NOT_DELETED)',
+  })
+  async restaurar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthUser,
+    @Req() req: Request,
+  ): Promise<UsuarioDetalleDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    const userAgent = (req.headers['user-agent'] ?? null) as string | null;
+    return this.restaurarUsuarioUseCase.execute({ id, actorId: actor.id, ipAddress, userAgent });
   }
 }
