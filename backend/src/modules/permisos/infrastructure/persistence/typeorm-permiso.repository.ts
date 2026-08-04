@@ -5,6 +5,7 @@ import {
   CrearPermisoParams,
   IPermisoRepository,
   ListarPermisosQuery,
+  RevocarPermisoParams,
 } from '../../domain/ports/permiso-repository.interface';
 import { PermisoDomainEntity } from '../../domain/entities/permiso.domain-entity';
 import { PermisoEntity } from './permiso.entity';
@@ -115,6 +116,66 @@ export class TypeOrmPermisoRepository implements IPermisoRepository {
       }),
       total,
     };
+  }
+
+  async findByCodigoQr(codigoQr: string): Promise<PermisoDomainEntity | null> {
+    const entity = await this.repo.findOne({
+      where: { codigoQr },
+      relations: ['solicitud', 'funcionario', 'funcionario.dependencia'],
+    });
+    return entity ? PermisoMapper.toDomain(entity) : null;
+  }
+
+  async revocar(params: RevocarPermisoParams): Promise<PermisoDomainEntity> {
+    await this.repo.update(params.id, {
+      estado: EstadoPermiso.REVOCADO,
+      motivoRevocacion: params.motivoRevocacion,
+      revocadoAt: params.revocadoAt,
+      revocadoPor: { id: params.revocadoPorId },
+    });
+
+    const entity = await this.repo.findOne({
+      where: { id: params.id },
+      relations: ['solicitud', 'funcionario', 'funcionario.dependencia', 'revocadoPor'],
+    });
+    return PermisoMapper.toDomain(entity!);
+  }
+
+  async actualizarCondiciones(
+    id: string,
+    condicionesRestricciones: string | null,
+  ): Promise<PermisoDomainEntity> {
+    await this.repo.update(id, { condicionesRestricciones });
+    const entity = await this.repo.findOne({
+      where: { id },
+      relations: ['solicitud', 'funcionario', 'funcionario.dependencia'],
+    });
+    return PermisoMapper.toDomain(entity!);
+  }
+
+  /**
+   * Marca como VENCIDO todos los permisos vigentes cuya fecha_vencimiento < fechaHoy.
+   * Retorna los IDs afectados para registro en auditoría.
+   */
+  async marcarVencidos(fechaHoy: string): Promise<string[]> {
+    const vigentes = await this.repo
+      .createQueryBuilder('p')
+      .select('p.id', 'id')
+      .where('p.estado = :estado', { estado: EstadoPermiso.VIGENTE })
+      .andWhere('p.fecha_vencimiento < :fecha', { fecha: fechaHoy })
+      .getRawMany<{ id: string }>();
+
+    if (vigentes.length === 0) return [];
+
+    const ids = vigentes.map((r) => r.id);
+    await this.repo
+      .createQueryBuilder()
+      .update(PermisoEntity)
+      .set({ estado: EstadoPermiso.VENCIDO })
+      .whereInIds(ids)
+      .execute();
+
+    return ids;
   }
 
   /** Retorna true si ya existe un permiso vigente con ese solicitud_id. */

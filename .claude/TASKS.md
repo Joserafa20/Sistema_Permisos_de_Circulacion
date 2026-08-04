@@ -180,27 +180,31 @@
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.
 **Semanas:** 4–5
 **Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — 13 / 18 tareas completadas ← (B7 completado 2026-08-04)
 
-- [ ] PDFModule: generación de PDF institucional con template
-  - [ ] Encabezado con logo/escudo desde configuración
-  - [ ] Número consecutivo formato `2026-PYP-00145`
-  - [ ] Snapshot de datos del ciudadano y moto
-  - [ ] Imagen del QR embebida en el PDF
-  - [ ] Firma y sello institucional configurables
-  - [ ] Pie de página institucional
-- [ ] QRModule: generación de código QR con identificador UUID+hash opaco
-- [ ] Almacenamiento seguro del PDF en MinIO (bucket privado)
-- [ ] `GET /api/v1/permisos/{id}/pdf` — URL firmada para descarga
-- [ ] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública del QR
-- [ ] Registro de cada escaneo en `qr_validaciones`
-- [ ] `POST /api/v1/permisos/{id}/revocar` — Revocación con motivo (Admin)
-- [ ] Job automático: marcar permisos en `VENCIDO` al superar `fecha_vencimiento`
-- [ ] NotificacionesModule: cola de correos con BullMQ
-  - [ ] Correo: solicitud recibida (con número de radicado)
-  - [ ] Correo: solicitud aprobada (con enlace de descarga)
-  - [ ] Correo: solicitud rechazada (con motivo)
-  - [ ] Correo: solicitud requiere corrección (con campos específicos)
+- [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04 (B6)
+  - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
+  - [x] Número consecutivo formato `2026-PYP-00145` ✅ 2026-08-04
+  - [x] Snapshot de datos del ciudadano y moto ✅ 2026-08-04
+  - [x] Imagen del QR embebida en el PDF ✅ 2026-08-04
+  - [x] Firma del funcionario ✅ 2026-08-04
+  - [x] Pie de página institucional ✅ 2026-08-04
+- [x] QRModule: SHA256 opaco (RN-05), imagen PNG ✅ 2026-08-04 (B6)
+- [x] Almacenamiento seguro del PDF en MinIO (bucket privado) ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos` — listado paginado con filtros ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}` — detalle sin storageKey ni codigoQr ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}/pdf` — URL firmada 5 min ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública (RN-34) ✅ 2026-08-04 (B7)
+- [x] Registro de cada escaneo en `qr_validaciones` (RN-35) ✅ 2026-08-04 (B7)
+- [x] `POST /api/v1/permisos/{id}/revocar` — Admin only (RN-37) ✅ 2026-08-04 (B7)
+- [x] `PATCH /api/v1/permisos/{id}/condiciones` — Funcionario/Admin (RN-38) ✅ 2026-08-04 (B7)
+- [x] Job automático: marcar permisos `VENCIDO` diario 00:01 COT (RN-08) ✅ 2026-08-04 (B7)
+- [x] NotificacionesModule: persistencia desacoplada en BD ✅ 2026-08-04 (B7)
+  - [ ] Envío real de correos (SMTP + BullMQ) — deuda técnica B8+
+  - [ ] Correo: solicitud recibida
+  - [ ] Correo: solicitud aprobada con enlace descarga
+  - [ ] Correo: solicitud rechazada con motivo
+  - [ ] Correo: solicitud requiere corrección
 
 ### Pendientes de Diseño — Fase 4
 

@@ -1,4 +1,15 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
@@ -9,9 +20,15 @@ import {
   PermisoDetalleDto,
   PermisoPdfUrlDto,
 } from '../../application/dtos/permiso-list-item.dto';
+import { RevocarPermisoDto } from '../../application/dtos/revocar-permiso.dto';
+import { RevocarPermisoResponseDto } from '../../application/dtos/revocar-permiso-response.dto';
+import { ActualizarCondicionesDto } from '../../application/dtos/actualizar-condiciones.dto';
+import { ActualizarCondicionesResponseDto } from '../../application/use-cases/actualizar-condiciones-permiso.use-case';
 import { ListarPermisosUseCase } from '../../application/use-cases/listar-permisos.use-case';
 import { ObtenerPermisoPorIdUseCase } from '../../application/use-cases/obtener-permiso-por-id.use-case';
 import { ObtenerPdfPermisoUseCase } from '../../application/use-cases/obtener-pdf-permiso.use-case';
+import { RevocarPermisoUseCase } from '../../application/use-cases/revocar-permiso.use-case';
+import { ActualizarCondicionesPermisoUseCase } from '../../application/use-cases/actualizar-condiciones-permiso.use-case';
 
 interface JwtUser {
   sub: string;
@@ -28,6 +45,8 @@ export class PermisosController {
     private readonly listarPermisosUseCase: ListarPermisosUseCase,
     private readonly obtenerPermisoPorIdUseCase: ObtenerPermisoPorIdUseCase,
     private readonly obtenerPdfPermisoUseCase: ObtenerPdfPermisoUseCase,
+    private readonly revocarPermisoUseCase: RevocarPermisoUseCase,
+    private readonly actualizarCondicionesPermisoUseCase: ActualizarCondicionesPermisoUseCase,
   ) {}
 
   @Get()
@@ -82,5 +101,53 @@ export class PermisosController {
   ): Promise<PermisoPdfUrlDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
     return this.obtenerPdfPermisoUseCase.ejecutar(id, user.sub, ipAddress);
+  }
+
+  @Post(':id/revocar')
+  @HttpCode(200)
+  @Roles(UserRole.ADMINISTRADOR)
+  @ApiOperation({
+    summary: 'Revocar un permiso vigente',
+    description:
+      'Solo el administrador puede revocar un permiso. ' +
+      'El permiso debe estar en estado vigente. ' +
+      'El QR queda inválido de inmediato (RN-37).',
+  })
+  @ApiResponse({ status: 200, description: 'Permiso revocado', type: RevocarPermisoResponseDto })
+  @ApiResponse({ status: 404, description: 'Permiso no encontrado' })
+  @ApiResponse({ status: 422, description: 'Permiso ya vencido o ya revocado' })
+  revocar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RevocarPermisoDto,
+    @CurrentUser() user: JwtUser,
+    @Req() req: Request,
+  ): Promise<RevocarPermisoResponseDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    return this.revocarPermisoUseCase.ejecutar(id, dto, user.sub, ipAddress);
+  }
+
+  @Patch(':id/condiciones')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Actualizar condiciones y restricciones de un permiso vigente',
+    description:
+      'Registra o actualiza el campo condicionesRestricciones. ' +
+      'No regenera el PDF (RN-33). El QR siempre muestra el valor actual (RN-39).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Condiciones actualizadas',
+    type: ActualizarCondicionesResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Permiso no encontrado' })
+  @ApiResponse({ status: 422, description: 'Permiso no vigente' })
+  actualizarCondiciones(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ActualizarCondicionesDto,
+    @CurrentUser() user: JwtUser,
+    @Req() req: Request,
+  ): Promise<ActualizarCondicionesResponseDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    return this.actualizarCondicionesPermisoUseCase.ejecutar(id, dto, user.sub, ipAddress);
   }
 }

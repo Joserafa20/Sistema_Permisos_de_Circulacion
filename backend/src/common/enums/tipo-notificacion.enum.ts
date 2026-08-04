@@ -4,4 +4,5 @@ export enum TipoNotificacion {
   APROBADA = 'aprobada',
   RECHAZADA = 'rechazada',
   CORRECCION = 'correccion',
+  PERMISO_REVOCADO = 'permiso_revocado',
 }

@@ -8,13 +8,13 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 3 — Módulo de Solicitudes (Backend)
+Fase: Fase 4 — Generación de Permiso (PDF + QR)
 
-Bloque actual: B5C4 ✅ COMPLETADO — Aprobación, rechazo y corrección de solicitudes
+Bloque actual: B7 ✅ COMPLETADO — Ciclo de vida del permiso (revocación, condiciones, verificación QR, job de vencimiento, NotificacionesModule)
 
-Rama: `feature/fase-2-auth` (rama de desarrollo activa para Fases 2 y 3)
+Rama: `feature/fase-2-auth`
 
-Estado: 🔄 En progreso — 12/16 tareas de Fase 3 completadas. Pendiente B6 (PermisosModule).
+Estado: 🔄 En progreso — 13/18 tareas de Fase 4 completadas. Pendiente: envío real de correos (BullMQ+SMTP).
 
 ---
 
@@ -239,7 +239,42 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   - Consulta pública QR: GET /public/verificar/{codigoQr}
   - Verificación de integridad escudo al iniciar (seed debe incluir escudo placeholder)
 
+✓ **B7 — Ciclo de vida del permiso completo** ✅ 2026-08-04
+  Rama: `feature/fase-2-auth`
+  Archivos nuevos:
+  - `permisos/application/dtos/revocar-permiso.dto.ts`
+  - `permisos/application/dtos/revocar-permiso-response.dto.ts`
+  - `permisos/application/dtos/actualizar-condiciones.dto.ts`
+  - `permisos/application/dtos/verificar-qr-response.dto.ts`
+  - `permisos/application/use-cases/revocar-permiso.use-case.ts` — RN-37, RN-36
+  - `permisos/application/use-cases/actualizar-condiciones-permiso.use-case.ts` — RN-38, RN-39
+  - `permisos/application/use-cases/verificar-qr.use-case.ts` — RN-34, RN-35
+  - `permisos/infrastructure/persistence/qr-validacion.repository.ts`
+  - `permisos/infrastructure/controllers/permisos-public.controller.ts` — GET /public/verificar/:qr
+  - `permisos/infrastructure/jobs/vencer-permisos.job.ts` — cron 00:01 COT (RN-08)
+  - `notificaciones/notificaciones.service.ts` — encolar() desacoplado
+  - `notificaciones/notificaciones.module.ts`
+  Archivos modificados:
+  - `permisos/domain/entities/permiso.domain-entity.ts` — + revocadoPorNombre/Apellido
+  - `permisos/domain/ports/permiso-repository.interface.ts` — + revocar, actualizarCondiciones, findByCodigoQr, marcarVencidos
+  - `permisos/infrastructure/persistence/typeorm-permiso.repository.ts` — implementa 4 nuevos métodos
+  - `permisos/infrastructure/persistence/permiso.mapper.ts` — enriquece revocadoPor
+  - `permisos/infrastructure/controllers/permisos.controller.ts` — + POST /revocar, PATCH /condiciones
+  - `permisos/permisos.module.ts` — ScheduleModule, QrValidacionEntity, NotificacionesModule, 4 nuevos providers
+  - `common/enums/accion-auditoria.enum.ts` — + EDITAR_CONDICIONES_PERMISO, VENCIMIENTO_AUTOMATICO
+  - `common/enums/tipo-notificacion.enum.ts` — + PERMISO_REVOCADO
+  - `app.module.ts` — + NotificacionesModule
+  - `backend/package.json` — + @nestjs/schedule
+  Quality gates: tsc --noEmit ✅, eslint 0 errores ✅, nest build ✅
+
+  Deuda técnica → B8+:
+  - Envío real de correos (SMTP/BullMQ) — tabla notificaciones ya lista con estado PENDIENTE
+  - Job vencimiento solicitudes (RN-08 parte 1) — análogo al job de permisos
+  - Auth: recuperar/restablecer/cambiar contraseña, GET /me
+  - CRUD Usuarios Admin
+  - StorageModule: adjuntar documentos a solicitudes
+
 ## Última actualización
 
-2026-08-04 — B6 completado. PermisosModule con PDF escarapela + QR + MinIO integrado.
-Próximo: B7 — definir alcance (revocación, notificaciones, recuperar contraseña) — aguardando autorización.
+2026-08-04 — B7 completado. Ciclo de vida del permiso cerrado: revocar, condiciones, QR público, job vencimiento, notificaciones desacopladas.
+Próximo: aguardando autorización para B8.

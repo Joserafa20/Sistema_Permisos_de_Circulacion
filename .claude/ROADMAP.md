@@ -265,7 +265,7 @@
 | Fase 1 | Base de Datos | 7 | 7 | ✅ Completada |
 | Fase 2 | Auth y Seguridad | 9 | 15 | 🔄 En progreso |
 | Fase 3 | Solicitudes Backend | 12 | 16 | 🔄 En progreso |
-| Fase 4 | Permisos PDF/QR | 9 | 18 | 🔄 En progreso ← |
+| Fase 4 | Permisos PDF/QR | 13 | 18 | 🔄 En progreso ← |
 | Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |

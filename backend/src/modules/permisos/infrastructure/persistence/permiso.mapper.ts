@@ -23,6 +23,10 @@ export class PermisoMapper {
     domain.motivoRevocacion = entity.motivoRevocacion;
     domain.revocadoAt = entity.revocadoAt;
     domain.revocadoPorId = entity.revocadoPor?.id ?? null;
+    if (entity.revocadoPor) {
+      domain.revocadoPorNombre = entity.revocadoPor.nombre;
+      domain.revocadoPorApellido = entity.revocadoPor.apellido;
+    }
     domain.snapshotCiudadano = entity.snapshotCiudadano as unknown as SnapshotCiudadano;
     domain.snapshotMotocicleta = entity.snapshotMotocicleta as unknown as SnapshotMotocicleta;
     domain.snapshotMotivo = entity.snapshotMotivo as unknown as SnapshotMotivo;

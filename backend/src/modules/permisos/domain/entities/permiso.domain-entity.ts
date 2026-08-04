@@ -47,4 +47,6 @@ export class PermisoDomainEntity {
   funcionarioApellido?: string;
   funcionarioDependencia?: string;
   numeroRadicado?: string;
+  revocadoPorNombre?: string;
+  revocadoPorApellido?: string;
 }

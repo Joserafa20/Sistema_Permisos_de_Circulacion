@@ -37,8 +37,22 @@ export interface ListarPermisosQuery {
   documento?: string;
 }
 
+export interface RevocarPermisoParams {
+  id: string;
+  motivoRevocacion: string;
+  revocadoPorId: string;
+  revocadoAt: Date;
+}
+
 export interface IPermisoRepository {
   crear(params: CrearPermisoParams): Promise<PermisoDomainEntity>;
   findById(id: string): Promise<PermisoDomainEntity | null>;
+  findByCodigoQr(codigoQr: string): Promise<PermisoDomainEntity | null>;
   findMany(query: ListarPermisosQuery): Promise<{ items: PermisoDomainEntity[]; total: number }>;
+  revocar(params: RevocarPermisoParams): Promise<PermisoDomainEntity>;
+  actualizarCondiciones(
+    id: string,
+    condicionesRestricciones: string | null,
+  ): Promise<PermisoDomainEntity>;
+  marcarVencidos(fechaHoy: string): Promise<string[]>;
 }

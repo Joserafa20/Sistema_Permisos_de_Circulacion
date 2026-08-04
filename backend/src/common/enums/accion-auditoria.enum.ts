@@ -22,4 +22,6 @@ export enum AccionAuditoria {
   LISTADO_CIUDADANOS = 'listado_ciudadanos',
   MOTOCICLETA_CONSULTADA = 'motocicleta_consultada',
   LISTADO_MOTOS = 'listado_motos',
+  EDITAR_CONDICIONES_PERMISO = 'editar_condiciones_permiso',
+  VENCIMIENTO_AUTOMATICO = 'vencimiento_automatico',
 }
