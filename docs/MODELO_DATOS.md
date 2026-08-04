@@ -19,6 +19,9 @@
 7. [Módulo de Permisos](#7-módulo-de-permisos)
 8. [Módulo de Comunicaciones](#8-módulo-de-comunicaciones)
 9. [Módulo de Auditoría y Configuración](#9-módulo-de-auditoría-y-configuración)
+   - [9.1 `auditoria`](#91-auditoria)
+   - [9.2 `configuracion`](#92-configuracion)
+   - [9.3 `configuracion_institucional`](#93-configuracion_institucional)
 10. [Índices](#10-índices)
 11. [Restricciones de Integridad](#11-restricciones-de-integridad)
 12. [Soft Delete — Estrategia Global](#12-soft-delete--estrategia-global)
@@ -225,6 +228,28 @@ Secretarías o dependencias de la alcaldía a las que pertenecen los funcionario
 | `deleted_at` | TIMESTAMPTZ | | Soft delete |
 | `created_by` | UUID | FK usuarios | |
 | `updated_by` | UUID | FK usuarios | |
+
+### 4.5 `catalogo_restricciones` *(Fase futura — no implementar en Fase 2)*
+
+> **Estado:** Documentado para preparación arquitectónica. La tabla **no debe crearse** en las migraciones de Fase 2. Su implementación queda reservada para una fase posterior.
+
+Catálogo institucional de restricciones predefinidas por la Alcaldía. Permite estandarizar las condiciones más comunes sin depender del texto libre del funcionario.
+
+| Columna | Tipo | Restricción | Descripción |
+|---------|------|-------------|-------------|
+| `id` | UUID | PK | Identificador único |
+| `codigo` | VARCHAR(30) | UNIQUE NOT NULL | Código interno (ej: `HORARIO_0600_1800`) |
+| `descripcion` | TEXT | NOT NULL | Texto de la restricción como aparecerá en el permiso |
+| `categoria` | VARCHAR(50) | | Agrupación temática (ej: `horario`, `zona`, `documento`) |
+| `activo` | BOOLEAN | NOT NULL DEFAULT true | Visible en el selector del funcionario |
+| `orden` | INTEGER | NOT NULL DEFAULT 0 | Orden de aparición |
+| `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT NOW() | |
+| `updated_at` | TIMESTAMPTZ | | |
+| `created_by` | UUID | FK usuarios | |
+
+**Estrategia de evolución sin romper compatibilidad:**
+
+En Fase 2, el campo `permisos.condiciones_restricciones` almacena texto libre. Cuando se implemente el catálogo, se añadirá una tabla de relación `permisos_restricciones` (N:M entre `permisos` y `catalogo_restricciones`), manteniendo `condiciones_restricciones` para notas adicionales libres. El contrato de la API se extiende de forma aditiva: el campo `condicionesRestricciones` permanece; se añade `restriccionesCatalogo: []` en el response. Los clientes que aún no consumen el nuevo campo no se ven afectados.
 
 ---
 
@@ -440,6 +465,7 @@ Documento oficial generado al aprobar una solicitud. Entidad independiente con s
 | `snapshot_ciudadano` | JSONB | NOT NULL | Copia exacta de los datos del ciudadano al momento de aprobación |
 | `snapshot_motocicleta` | JSONB | NOT NULL | Copia exacta de los datos de la moto al momento de aprobación |
 | `snapshot_motivo` | JSONB | NOT NULL | Copia del motivo autorizado al momento de aprobación |
+| `condiciones_restricciones` | TEXT | NULL | Condiciones y restricciones específicas impuestas por el funcionario al emitir el permiso. Opcional. Máximo 500 caracteres validado en aplicación. Solo editable por funcionario o administrador |
 | `hash_pdf` | VARCHAR(64) | | Hash SHA-256 del PDF generado (integridad documental) |
 | `created_at` | TIMESTAMPTZ | NOT NULL DEFAULT NOW() | |
 | `updated_at` | TIMESTAMPTZ | | |
@@ -447,6 +473,10 @@ Documento oficial generado al aprobar una solicitud. Entidad independiente con s
 **Constraints:**
 - `fecha_vencimiento > fecha_expedicion::DATE`
 - `codigo_permiso` sigue secuencia global nunca reutilizable
+
+**Nota sobre `condiciones_restricciones` y el PDF:** El campo se incluye en el PDF en el momento de su generación (sección condicional). Si el campo se modifica con posterioridad a la generación, el PDF existente **no** se regenera (RN-33). La validación QR siempre muestra el valor actual de la base de datos.
+
+**Nota de evolución arquitectónica (RFC-002):** En fases futuras se añadirá el catálogo institucional `catalogo_restricciones` (§4.5) y la tabla de relación `permisos_restricciones`. El campo `condiciones_restricciones` se mantiene para notas libres del funcionario y permanece en la tabla `permisos` sin cambios. La extensión es aditiva y no rompe compatibilidad con clientes existentes.
 
 **Regla RN-05:** Si se regenera un permiso tras revocación, el nuevo `codigo_qr` es diferente al anterior.  
 **Regla RN-06:** El PDF se genera con los datos del snapshot, no consultando las tablas en tiempo real.  
@@ -545,17 +575,62 @@ Parámetros operativos del sistema gestionados por el administrador sin necesida
 
 **Parámetros semilla requeridos:**
 
-| Clave | Tipo | Default |
-|-------|------|---------|
-| `nombre_alcaldia` | texto | — |
-| `municipio` | texto | — |
-| `logo_url` | texto | — |
-| `firma_url` | imagen_base64 | — |
-| `sello_url` | imagen_base64 | — |
-| `dias_max_permiso` | numero | 30 |
-| `plazo_revision_horas` | numero | 48 |
-| `plazo_correccion_dias` | numero | 5 |
-| `color_institucional` | texto | #1a56db |
+| Clave | Tipo | Default | Estado |
+|-------|------|---------|--------|
+| `nombre_alcaldia` | texto | — | ⚠️ **Deprecado** — migrar a `configuracion_institucional.nombre_alcaldia` |
+| `municipio` | texto | — | ⚠️ **Deprecado** — migrar a `configuracion_institucional.municipio` |
+| `logo_url` | texto | — | ⚠️ **Deprecado** — migrar a `configuracion_institucional.logo_storage_key` |
+| `firma_url` | imagen_base64 | — | Vigente |
+| `sello_url` | imagen_base64 | — | Vigente |
+| `dias_max_permiso` | numero | 30 | Vigente |
+| `plazo_revision_horas` | numero | 48 | Vigente |
+| `plazo_correccion_dias` | numero | 5 | Vigente |
+| `color_institucional` | texto | #1a56db | Vigente |
+
+> **Nota de migración:** Las claves `nombre_alcaldia`, `municipio` y `logo_url` serán eliminadas de `configuracion` en la migración que cree la tabla `configuracion_institucional`. Los servicios que las consulten deben actualizarse para leer desde `configuracion_institucional`.
+
+---
+
+### 9.3 `configuracion_institucional`
+
+Datos de identidad de la Alcaldía que instala el sistema. **Registro único (singleton) por instalación.** Toda información oficial utilizada en documentos (PDF del permiso, correos institucionales, portal público) se obtiene desde esta tabla.
+
+> **Estado de implementación:** Documentada. Pendiente de migración TypeORM y seed — programado para Fase 2.
+
+| Columna | Tipo | Restricción | Descripción |
+|---------|------|-------------|-------------|
+| `id` | UUID | PK | Identificador único |
+| `nombre_alcaldia` | VARCHAR(200) | NOT NULL | Nombre oficial de la Alcaldía (ej: Alcaldía Municipal de Neiva) |
+| `nit` | VARCHAR(20) | NOT NULL | NIT con dígito de verificación (ej: 800.099.999-9) |
+| `codigo_dane` | VARCHAR(10) | NOT NULL | Código DANE del municipio sede |
+| `departamento` | VARCHAR(100) | NOT NULL | Nombre del departamento |
+| `municipio` | VARCHAR(100) | NOT NULL | Nombre del municipio sede |
+| `direccion` | VARCHAR(255) | NOT NULL | Dirección física de la sede principal |
+| `telefono` | VARCHAR(20) | NOT NULL | Teléfono institucional |
+| `correo_institucional` | VARCHAR(150) | NOT NULL | Correo de contacto oficial |
+| `sitio_web` | VARCHAR(255) | | Sitio web oficial (opcional) |
+| `escudo_storage_key` | VARCHAR(500) | NOT NULL | Ruta MinIO del escudo oficial. **NUNCA exponer en API** — usar URL firmada TTL 5 min |
+| `logo_storage_key` | VARCHAR(500) | | Ruta MinIO del logo institucional (opcional). **NUNCA exponer en API** |
+| `escudo_hash` | VARCHAR(64) | | Hash SHA-256 del archivo de escudo (integridad) |
+| `logo_hash` | VARCHAR(64) | | Hash SHA-256 del archivo de logo (integridad) |
+| `updated_at` | TIMESTAMPTZ | | Última actualización |
+| `updated_by` | UUID | FK usuarios | Administrador que realizó la última modificación |
+
+**Reglas de negocio aplicadas:**
+
+- **Singleton:** Solo existe UN registro por instalación. No se permite crear un segundo registro (aplicación bloquea `INSERT` si ya existe un registro).
+- No tiene `deleted_at`. **No puede eliminarse.**
+- No tiene `created_by` — el seed de despliegue es el creador implícito.
+- Solo el rol `administrador` puede ejecutar `UPDATE` sobre este registro.
+- Toda modificación genera registro en `auditoria` (`datos_anteriores` + `datos_nuevos`).
+- El PDF del permiso lee `nombre_alcaldia` y descarga el escudo desde `escudo_storage_key` via URL firmada.
+- Los correos institucionales usan `nombre_alcaldia`, `direccion` y `correo_institucional`.
+- El portal público muestra `nombre_alcaldia` y la URL firmada del escudo en el encabezado.
+- Los `storage_key` de imágenes se almacenan en MinIO bucket privado `institucional/`. El acceso se realiza exclusivamente con URLs firmadas (TTL 5 minutos para el portal y TTL corto para el PDF).
+
+**Sin relaciones directas hacia otras tablas** (diseño autocontenido para evitar acoplamiento con catálogos).
+
+**Seed requerido:** El seed de despliegue inicial (`npm run seed`) debe crear este registro con los datos de la alcaldía que instala el sistema. Los valores se configuran mediante variables de entorno (ver `.env.example`, sección "Configuración Institucional").
 
 ---
 
@@ -581,7 +656,7 @@ idx_ciudadanos_email                (email)
 ── motocicletas ────────────────────────────────────────────────────
 idx_motocicletas_placa              (placa)
 idx_motocicletas_ciudadano_id       (ciudadano_id)
-idx_motocicletas_placa_activo       (placa) WHERE deleted_at IS NULL   Partial
+uq_motocicletas_placa_activa        (placa) WHERE deleted_at IS NULL   Partial UNIQUE
 
 ── permisos ────────────────────────────────────────────────────────
 idx_permisos_codigo_qr              (codigo_qr)                 UNIQUE
@@ -617,6 +692,9 @@ idx_qr_validaciones_created_at      (created_at DESC)
 
 ── notificaciones ──────────────────────────────────────────────────
 idx_notificaciones_estado_envio     (estado_envio)
+
+── configuracion_institucional ─────────────────────────────────────
+(tabla singleton — sin índices adicionales requeridos)
 idx_notificaciones_solicitud_id     (solicitud_id)
 ```
 
@@ -638,7 +716,7 @@ idx_tokens_activos        ON tokens(token_hash, expira_at)
 WHERE revocado = false
 
 -- Motos activas sin soft delete (para validar unicidad de placa)
-idx_motocicletas_activas  ON motocicletas(placa)
+uq_motocicletas_placa_activa  ON motocicletas(placa) UNIQUE
 WHERE deleted_at IS NULL
 ```
 
@@ -949,6 +1027,7 @@ erDiagram
         timestamptz fecha_expedicion
         date fecha_vencimiento
         estado_permiso estado
+        text condiciones_restricciones
         text motivo_revocacion
         timestamptz revocado_at
         uuid revocado_por FK
@@ -1181,6 +1260,7 @@ erDiagram
         timestamptz fecha_expedicion
         date fecha_vencimiento
         estado_permiso estado
+        text condiciones_restricciones
         text motivo_revocacion
         uuid revocado_por FK
         jsonb snapshot_ciudadano

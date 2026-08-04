@@ -1,0 +1,15 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# docker-compose.override.yml — Sobrescrituras opcionales para desarrollo local
+#
+# Este archivo es cargado automáticamente junto con docker-compose.yml.
+# Úsalo para cambiar puertos si hay conflictos con servicios locales instalados.
+#
+# Ejemplo: si tienes PostgreSQL nativo corriendo en 5432, cambia a 5433:
+#   postgres:
+#     ports:
+#       - "5433:5432"
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Sin sobrescrituras activas por defecto.
+# Agrega secciones según necesites en tu entorno local.
+services: {}

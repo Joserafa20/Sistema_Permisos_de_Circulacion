@@ -417,3 +417,36 @@ usuario administrador inicial (contraseña temporal)
 - La tabla `auditoria` es de solo inserción (append-only). No se permite UPDATE ni DELETE sobre ella.
 - Los hashes de contraseña usan BCrypt con 12 rounds mínimo.
 - El campo `historial_contrasenas` en `usuarios` almacena los últimos 5 hashes para evitar reutilización.
+
+---
+
+# Regla de consistencia del modelo
+
+La definición oficial del modelo de datos seguirá obligatoriamente el siguiente orden de prioridad:
+
+1. MODELO_DATOS.md (Fuente oficial del modelo funcional)
+2. Entidades del ORM oficial (Implementación del modelo)
+3. Migraciones (Evolución controlada del esquema)
+4. schema.sql (Representación SQL de referencia)
+
+Todos estos artefactos deberán permanecer sincronizados.
+
+Si durante el desarrollo se detecta una inconsistencia entre ellos, la implementación deberá detenerse y presentar un informe de diferencias para aprobación del usuario antes de continuar.
+
+No está permitido modificar automáticamente uno de estos artefactos para hacerlo coincidir con otro sin autorización expresa.
+
+Toda modificación estructural del modelo deberá comenzar actualizando MODELO_DATOS.md y, posteriormente, propagarse al resto de los artefactos siguiendo el orden de prioridad establecido.
+
+## Regla de propagación de cambios
+
+Toda modificación del modelo de datos deberá seguir obligatoriamente esta secuencia:
+
+1. Actualizar MODELO_DATOS.md.
+2. Actualizar las entidades del ORM.
+3. Actualizar las migraciones.
+4. Actualizar schema.sql.
+5. Validar la consistencia entre los cuatro artefactos.
+6. Actualizar CHANGELOG.md.
+7. Si la modificación representa una decisión arquitectónica, registrar un nuevo ADR en DECISION_LOG.md.
+
+No se permitirá alterar este orden.

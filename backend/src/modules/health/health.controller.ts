@@ -1,13 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  HealthCheck,
-  HealthCheckService,
-  TypeOrmHealthIndicator,
-} from '@nestjs/terminus';
+import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('health')
 @Controller('health')
+@Public()
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
@@ -32,8 +30,6 @@ export class HealthController {
   })
   @ApiResponse({ status: 503, description: 'Uno o más servicios no disponibles' })
   check(): Promise<unknown> {
-    return this.health.check([
-      () => this.db.pingCheck('database'),
-    ]);
+    return this.health.check([() => this.db.pingCheck('database')]);
   }
 }

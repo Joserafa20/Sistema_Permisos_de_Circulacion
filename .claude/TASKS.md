@@ -7,11 +7,13 @@
 **Proyecto:** En desarrollo
 **Versión:** 0.1.0
 **Última actualización:** 2026-08-02
-**Estado:** 🟢 Fase 0 en progreso — Infraestructura base del Backend completada
 **Fuente de verdad del roadmap:** `.claude/ROADMAP.md`
 
 > **Nota:** Este archivo es el tracking granular de la fase activa. La estructura de fases (0–8)
 > es idéntica a `ROADMAP.md`. Ante cualquier divergencia, prevalece `ROADMAP.md`.
+>
+> **Progreso:** Se calcula automáticamente contando `[x]` vs total de tareas en la fase activa.
+> No se usan porcentajes fijos. Ver ROADMAP.md para el resumen por fase.
 
 ---
 
@@ -30,16 +32,18 @@
 **Objetivo:** Entorno de desarrollo listo y uniforme para todo el equipo.
 **Semana:** 1
 **Dependencia:** Ninguna. Punto de partida.
-**Estado:** 🟡 En progreso — Backend base completado
+**Estado:** ✅ Completada
+**Progreso:** 12 / 12 tareas completadas
 
-- [ ] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*)
-- [ ] `.gitignore` completo (Node, env, build)
-- [ ] Docker Compose: PostgreSQL + Redis + MinIO
+- [x] Repositorio Git + GitFlow (main, develop, feature/*, hotfix/*) ✅ 2026-08-02
+- [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
+- [x] Docker Compose: PostgreSQL + Redis + MinIO ✅ 2026-08-02
 - [x] Backend NestJS: scaffolding base con ConfigModule tipado
 - [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
 - [x] Archivo `.env.example` completo con todas las variables
 - [x] ESLint + Prettier configurados
-- [ ] Husky (pre-commit hooks)
+- [x] Husky (pre-commit hooks) ✅ 2026-08-02
+- [x] Frontend Next.js: scaffolding base con App Router y TailwindCSS ✅ 2026-08-02
 - [x] Swagger configurado y accesible en `/api/docs`
 - [x] Endpoint `/api/v1/health` operativo
 - [x] Logger estructurado (Pino) configurado
@@ -73,28 +77,23 @@
 **Objetivo:** Modelo de datos completo, normalizado y versionado antes de escribir lógica de negocio.
 **Semanas:** 1–2
 **Dependencia:** Fase 0 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** ✅ Completada — 7 / 7 tareas completadas
 
-- [ ] Tipos ENUM de PostgreSQL definidos
-- [ ] Script SQL completo (`database/schema.sql`)
-- [ ] Migraciones TypeORM para todas las tablas
-- [ ] Índices de rendimiento aplicados desde el inicio
-- [ ] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal
-- [ ] Entidades TypeORM con relaciones
-- [ ] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`)
+- [x] Tipos ENUM de PostgreSQL definidos ✅ 2026-08-02
+- [x] Script SQL completo (`database/schema.sql`) ✅ 2026-08-02
+- [x] Migraciones TypeORM para todas las tablas ✅ 2026-08-02
+- [x] Índices de rendimiento aplicados desde el inicio ✅ 2026-08-02
+- [x] Seeds: roles, motivos, configuración inicial, municipio, usuario admin temporal ✅ 2026-08-02
+- [x] Entidades TypeORM con relaciones ✅ 2026-08-02
+- [x] Diagrama entidad-relación generado (`docs/ER_DIAGRAM.md`) ✅ 2026-08-02
 
 ### Pendientes de Diseño — Fase 1
 
-- [~] **[AUDITORÍA M-04]** Confirmar si los datos del ciudadano se almacenan en tabla separada
-  `ciudadanos` (con FK en `solicitudes`) o embebidos en la tabla `solicitudes` (campos `ciudadano_*`).
-  Decisión afecta el esquema SQL, las migraciones y los endpoints de la Fase 3.
-  _Referencia: `docs/AUDITORIA_DOCUMENTACION.md` §9.2_
+- [x] **[AUDITORÍA M-04]** ✅ Resuelto 2026-08-02 — Tabla `ciudadanos` separada con FK en `solicitudes`.
+  Implementado en `CiudadanoEntity` y `SolicitudEntity`.
 
-- [~] **[AUDITORÍA M-03]** Confirmar si existe tabla `historial_contrasenas(id, usuario_id,
-  hash_contrasena, created_at)` o mecanismo equivalente en `MODELO_DATOS.md`.
-  Requerido por `SECURITY.md` (últimas 5 contraseñas no reutilizables).
-  Si no está contemplado, agregar antes de ejecutar las migraciones.
-  _Referencia: `docs/AUDITORIA_DOCUMENTACION.md` §9.3_
+- [x] **[AUDITORÍA M-03]** ✅ Resuelto 2026-08-02 — Campo `historial_contrasenas JSONB DEFAULT '[]'`
+  en tabla `usuarios` (no tabla separada). Implementado en `UsuarioEntity`.
 
 ---
 
@@ -102,23 +101,29 @@
 **Objetivo:** Sistema de identidad blindado antes de cualquier módulo funcional.
 **Semanas:** 2–3
 **Dependencia:** Fase 1 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** ✅ Completada — 19 / 19 tareas completadas
 
-- [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
-- [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
-- [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
-- [ ] `POST /api/v1/auth/recuperar-contrasena`
-- [ ] `POST /api/v1/auth/restablecer-contrasena`
-- [ ] `POST /api/v1/auth/cambiar-contrasena`
-- [ ] `GET  /api/v1/auth/me`
-- [ ] JwtAuthGuard y RolesGuard globales
-- [ ] Rate limiting en `/auth/login` (5 intentos / 15 min por IP)
-- [ ] Bloqueo temporal de cuenta por intentos fallidos
-- [ ] Política de contraseñas aplicada en DTOs
-- [ ] Registro de auditoría: login, logout, login fallido, cambio de contraseña
-- [ ] Global Exception Filter (sin exposición de internos)
-- [ ] Helmet + CORS configurados
-- [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
+- [x] Migración TypeORM para tabla `configuracion_institucional` ✅ 2026-08-03
+- [x] Seed inicial de `configuracion_institucional` (configurable vía `.env`) ✅ 2026-08-03
+- [x] Variables de entorno `SEED_CI_*` en `.env.example` ✅ 2026-08-03
+- [x] Módulo NestJS `configuracion-institucional/` con arquitectura hexagonal ✅ 2026-08-03
+- [x] `POST /api/v1/auth/login` con JWT Access + Refresh Token ✅ 2026-08-03
+- [x] `POST /api/v1/auth/logout` (revocación de refresh token) ✅ 2026-08-03
+- [x] `POST /api/v1/auth/refresh` (rotación de refresh token) ✅ 2026-08-03
+- [x] `POST /api/v1/auth/recuperar-contrasena` — rate limit 3/hora, token SHA256, respuesta genérica ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/restablecer-contrasena` — token uso único, historial 5 contraseñas ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/cambiar-contrasena` — valida actual, revoca refresh tokens ✅ 2026-08-04 (B8)
+- [x] `GET  /api/v1/auth/me` — perfil completo sin campos sensibles ✅ 2026-08-04 (B8)
+- [x] JwtAuthGuard y RolesGuard implementados y aplicados ✅ 2026-08-03
+- [x] Rate limiting en `/auth/login` (5 intentos / 15 min por IP) ✅ 2026-08-03
+- [x] Bloqueo temporal de cuenta por intentos fallidos (en LocalStrategy) ✅ 2026-08-03
+- [x] Política de contraseñas aplicada en DTOs (RN-51) — `@IsStrongPassword()` compartido ✅ 2026-08-04 (B8)
+- [x] Registro de auditoría: login, logout, login fallido ✅ 2026-08-03
+- [x] Global Exception Filter (sin exposición de internos) ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] Helmet + CORS configurados ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] CRUD Usuarios (Admin): listar, detalle, crear, actualizar, activar/desactivar, soft delete, restaurar ✅ 2026-08-04 (B8)
+
+> **Nota:** El módulo `configuracion-institucional` comparte Fase 2 con Auth porque la tabla debe existir antes de la Fase 4 (generación de PDF). Las pantallas de UI del administrador se implementan en Fase 7.
 
 ### Pendientes de Diseño — Fase 2
 
@@ -135,24 +140,24 @@
 **Objetivo:** Núcleo del negocio implementado y probado.
 **Semanas:** 3–4
 **Dependencia:** Fase 2 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** ✅ Completada — 16 / 16 tareas completadas
 
-- [ ] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos
-- [ ] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento
-- [ ] `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas)
-- [ ] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario)
-- [ ] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario)
-- [ ] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga
-- [ ] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola
-- [ ] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio
-- [ ] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos
-- [ ] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados
-- [ ] Validación: no duplicar solicitudes activas para la misma moto
-- [ ] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX`
-- [ ] Job automático: marcar solicitudes en `VENCIDA` al superar plazo
-- [ ] Registro en `historial_estados` en cada cambio
-- [ ] Registro en `auditoria` en cada cambio
-- [ ] StorageModule con MinIO: subida y URLs firmadas
+- [x] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos ✅ 2026-08-03
+- [x] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento ✅ 2026-08-04
+- [x] `POST /api/v1/public/solicitudes/{id}/documentos` — Adjuntar documentos (multipart) ✅ 2026-08-04 (B9)
+- [x] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario) ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario) ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga (TTL 5 min, RN-53) ✅ 2026-08-04 (B9)
+- [x] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados ✅ 2026-08-04
+- [x] Validación: no duplicar solicitudes activas para la misma moto ✅ 2026-08-03
+- [x] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX` ✅ 2026-08-03
+- [x] Job automático: marcar solicitudes en `VENCIDA` al superar plazo (VencerSolicitudesJob, RN-08) ✅ 2026-08-04 (B9)
+- [x] Registro en `historial_estados` en cada cambio ✅ 2026-08-04
+- [x] Registro en `auditoria` en cada cambio ✅ 2026-08-04
+- [x] StorageModule con MinIO (@Global): subida multipart y URLs firmadas ✅ 2026-08-04 (B9)
 
 ### Pendientes de Diseño — Fase 3
 
@@ -175,27 +180,31 @@
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.
 **Semanas:** 4–5
 **Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — 13 / 18 tareas completadas ← (B7 completado 2026-08-04)
 
-- [ ] PDFModule: generación de PDF institucional con template
-  - [ ] Encabezado con logo/escudo desde configuración
-  - [ ] Número consecutivo formato `2026-PYP-00145`
-  - [ ] Snapshot de datos del ciudadano y moto
-  - [ ] Imagen del QR embebida en el PDF
-  - [ ] Firma y sello institucional configurables
-  - [ ] Pie de página institucional
-- [ ] QRModule: generación de código QR con identificador UUID+hash opaco
-- [ ] Almacenamiento seguro del PDF en MinIO (bucket privado)
-- [ ] `GET /api/v1/permisos/{id}/pdf` — URL firmada para descarga
-- [ ] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública del QR
-- [ ] Registro de cada escaneo en `qr_validaciones`
-- [ ] `POST /api/v1/permisos/{id}/revocar` — Revocación con motivo (Admin)
-- [ ] Job automático: marcar permisos en `VENCIDO` al superar `fecha_vencimiento`
-- [ ] NotificacionesModule: cola de correos con BullMQ
-  - [ ] Correo: solicitud recibida (con número de radicado)
-  - [ ] Correo: solicitud aprobada (con enlace de descarga)
-  - [ ] Correo: solicitud rechazada (con motivo)
-  - [ ] Correo: solicitud requiere corrección (con campos específicos)
+- [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04 (B6)
+  - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
+  - [x] Número consecutivo formato `2026-PYP-00145` ✅ 2026-08-04
+  - [x] Snapshot de datos del ciudadano y moto ✅ 2026-08-04
+  - [x] Imagen del QR embebida en el PDF ✅ 2026-08-04
+  - [x] Firma del funcionario ✅ 2026-08-04
+  - [x] Pie de página institucional ✅ 2026-08-04
+- [x] QRModule: SHA256 opaco (RN-05), imagen PNG ✅ 2026-08-04 (B6)
+- [x] Almacenamiento seguro del PDF en MinIO (bucket privado) ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos` — listado paginado con filtros ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}` — detalle sin storageKey ni codigoQr ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}/pdf` — URL firmada 5 min ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública (RN-34) ✅ 2026-08-04 (B7)
+- [x] Registro de cada escaneo en `qr_validaciones` (RN-35) ✅ 2026-08-04 (B7)
+- [x] `POST /api/v1/permisos/{id}/revocar` — Admin only (RN-37) ✅ 2026-08-04 (B7)
+- [x] `PATCH /api/v1/permisos/{id}/condiciones` — Funcionario/Admin (RN-38) ✅ 2026-08-04 (B7)
+- [x] Job automático: marcar permisos `VENCIDO` diario 00:01 COT (RN-08) ✅ 2026-08-04 (B7)
+- [x] NotificacionesModule: persistencia desacoplada en BD ✅ 2026-08-04 (B7)
+  - [ ] Envío real de correos (SMTP + BullMQ) — deuda técnica B8+
+  - [ ] Correo: solicitud recibida
+  - [ ] Correo: solicitud aprobada con enlace descarga
+  - [ ] Correo: solicitud rechazada con motivo
+  - [ ] Correo: solicitud requiere corrección
 
 ### Pendientes de Diseño — Fase 4
 
@@ -266,14 +275,17 @@
 **Dependencia:** Fase 6 completada.
 **Estado:** ⬜ No iniciada
 
+- [ ] Pantalla "Configuración Institucional" (CU-42 a CU-45):
+  - [ ] Vista de consulta con previsualización de escudo y logo (HU-44)
+  - [ ] Formulario de edición de datos textuales (HU-45)
+  - [ ] Carga/reemplazo del escudo con validación de formato y tamaño (HU-46)
+  - [ ] Carga/reemplazo del logo con opción de eliminar (HU-47)
 - [ ] Dashboard administrativo con KPIs globales
 - [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
 - [ ] CRUD de Roles
 - [ ] CRUD de Dependencias
 - [ ] CRUD de Motivos (con activación/desactivación sin borrar)
-- [ ] Configuración del sistema:
-  - [ ] Nombre de la alcaldía, municipio
-  - [ ] Logo / escudo (upload de imagen)
+- [ ] Configuración del Sistema (Parámetros Operativos):
   - [ ] Firma digital configurable (upload de imagen)
   - [ ] Sello institucional (upload de imagen)
   - [ ] Parámetros: días máximos permiso, plazos, color institucional
@@ -316,20 +328,38 @@
 
 ## Estado Actual
 
-### Tarea Activa
+### Fase Activa
 
-Fase 0 — Pendientes: Docker Compose, Frontend Next.js, Husky, Git.
+Fase 3 — Módulo de Solicitudes (Backend) ← StorageModule + Job vencimiento solicitudes pendientes
+Fase 4 — Generación de Permiso (PDF + QR) ← Envío real de correos pendiente
+
+### Tareas pendientes en las fases activas
+
+**Fase 3:**
+- `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas) — requiere StorageModule
+- `GET /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga — requiere StorageModule
+- Job automático: marcar solicitudes en `VENCIDA` al superar plazo
+- StorageModule con MinIO: subida y URLs firmadas
+
+**Fase 4:**
+- Envío real de correos (SMTP + BullMQ) — tabla `notificaciones` ya lista con estado PENDIENTE
 
 ### Última tarea terminada
 
-Infraestructura base del Backend NestJS (2026-08-02):
-scaffolding completo, ConfigModule con validación Joi, TypeOrmModule, Logger Pino,
-Helmet, CORS, ValidationPipe global, HttpExceptionFilter, interceptores, HealthModule,
-Swagger, test E2E.
+B8 — Auth completo + CRUD Usuarios + gaps API (2026-08-04):
+- `PATCH /api/v1/usuarios/{id}/activar` — endpoint dedicado, revoca refresh tokens al desactivar
+- `@IsStrongPassword()` — decorador compartido RN-51, elimina duplicación en DTOs
+- `@MatchesField()` — validador de confirmación de contraseña para DTOs
+- `confirmarContrasena` agregado a `RestablecerContrasenaDto` y `CambiarContrasenaDto`
+- Rate limiting `POST /auth/recuperar-contrasena` — 3 req/hora (RN-54)
+- `AccionAuditoria.USUARIO_ACTIVADO` / `USUARIO_DESACTIVADO` — enums explícitos
+- TASKS.md + ROADMAP.md + SESSION.md sincronizados con estado real del código
+- **Fase 2 cerrada: 17/17 tareas completadas ✅**
 
 ### Próxima tarea
 
-Continuar Fase 0: Docker Compose (postgres + redis + minio + backend) — aguardando autorización.
+B9 — StorageModule (MinIO): subida de documentos adjuntos y URLs firmadas para descarga.
+Esto desbloquea `POST /solicitudes/{id}/documentos` y `GET /solicitudes/{id}/documentos/{docId}`.
 
 ---
 

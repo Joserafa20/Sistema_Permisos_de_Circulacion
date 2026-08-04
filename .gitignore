@@ -4,11 +4,16 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# ── Husky ───────────────────────────────────────────────────────
+# .husky/_/ es generado por husky init — no versionar
+.husky/_/
+
 # ── Compilados ──────────────────────────────────────────────────
 dist/
 build/
 .next/
 out/
+*.tsbuildinfo
 
 # ── Variables de entorno ────────────────────────────────────────
 .env
@@ -34,8 +39,10 @@ desktop.ini
 *.log
 logs/
 
-# ── Docker volumes locales ──────────────────────────────────────
+# ── Docker ──────────────────────────────────────────────────────
 docker/volumes/
+docker/.env.docker
+# .env.example se sube al repo (es la plantilla documentada)
 
 # ── Archivos de memoria de Claude (no son código del proyecto) ──
 memory/

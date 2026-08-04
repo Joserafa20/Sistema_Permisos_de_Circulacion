@@ -18,6 +18,7 @@
 - [É-06 Panel Administrativo](#é-06-panel-administrativo)
 - [É-07 Automatización del Sistema](#é-07-automatización-del-sistema)
 - [É-08 Notificaciones](#é-08-notificaciones)
+- [É-09 Configuración Institucional](#é-09-configuración-institucional)
 
 ### Tabla de Historias por Épica
 
@@ -66,6 +67,11 @@
 | HU-41 | Recibir correo cuando mi permiso es aprobado | É-08 | 4 |
 | HU-42 | Recibir correo cuando mi solicitud es rechazada | É-08 | 3 |
 | HU-43 | Recibir correo con instrucciones de corrección | É-08 | 3 |
+| HU-44 | Consultar la configuración institucional actual | É-09 | 7 |
+| HU-45 | Editar los datos institucionales de la alcaldía | É-09 | 7 |
+| HU-46 | Cargar o reemplazar el escudo oficial | É-09 | 7 |
+| HU-47 | Cargar o reemplazar el logo institucional | É-09 | 7 |
+| HU-48 | Registrar condiciones y restricciones de un permiso | É-02 | 4 |
 
 ---
 
@@ -348,6 +354,30 @@
 
 **Sprint:** 3 · **Prioridad:** Crítica · **Puntos de historia:** 5  
 **Referencia:** CU-15, `POST /api/v1/solicitudes/{id}/aprobar`
+
+---
+
+### HU-48 — Registrar Condiciones y Restricciones de un Permiso
+
+> **Como** funcionario autorizado de la Secretaría de Movilidad,  
+> **quiero** poder registrar condiciones o restricciones específicas al aprobar o después de aprobar un permiso,  
+> **para** comunicarle al ciudadano y a las autoridades de tránsito limitaciones particulares de circulación que el permiso general no cubre.
+
+**Criterios de Aceptación:**
+
+- [ ] **CA-48-1:** El modal de confirmación de aprobación (CU-15) incluye un campo de texto opcional etiquetado "Condiciones y Restricciones" con placeholder *"Ej: Válido únicamente entre 06:00 y 18:00. Portar cédula de ciudadanía en todo momento."*
+- [ ] **CA-48-2:** El campo tiene un contador de caracteres visible y no permite superar 500 caracteres (validado en frontend y backend).
+- [ ] **CA-48-3:** El campo es de llenado opcional: si el funcionario no escribe nada, el permiso se aprueba normalmente sin condiciones.
+- [ ] **CA-48-4:** Una vez aprobado el permiso, el funcionario puede editar el campo desde el detalle del permiso mediante el botón "Editar Condiciones", disponible solo para roles `funcionario` y `administrador`.
+- [ ] **CA-48-5:** Cada edición queda registrada en `auditoria` con el valor anterior y el valor nuevo.
+- [ ] **CA-48-6:** Al escanear el QR del permiso, si hay condiciones registradas, se muestran en una sección destacada "⚠️ Condiciones y Restricciones" con el valor actual (no el valor del PDF).
+- [ ] **CA-48-7:** El PDF generado incluye la sección "Condiciones y Restricciones" solo si el campo tenía valor al momento de generación; las ediciones posteriores no regeneran el PDF (RN-33).
+- [ ] **CA-48-8:** El campo `condicionesRestricciones` no está incluido en el DTO público del ciudadano (RN-38).
+
+**Reglas de Negocio:** RN-38, RN-39, RN-33.
+
+**Sprint:** 4 · **Prioridad:** Media · **Puntos de historia:** 3  
+**Referencia:** CU-15, `PATCH /api/v1/permisos/{id}/condiciones`
 
 ---
 
@@ -1017,6 +1047,94 @@
 
 ---
 
+## É-09 Configuración Institucional
+
+**Descripción:** Como administrador necesito gestionar la identidad institucional de la alcaldía para que el sistema genere documentos oficiales con la información correcta sin depender del equipo técnico.
+
+---
+
+### HU-44 — Consultar la Configuración Institucional Actual
+
+> **Como** administrador,  
+> **quiero** ver todos los datos institucionales actuales de la alcaldía (nombre, NIT, dirección, escudo, logo),  
+> **para** verificar que la información del sistema esté actualizada antes de emitir permisos oficiales.
+
+**Criterios de Aceptación:**
+
+- [ ] **CA-44-1:** La página muestra todos los campos de `configuracion_institucional` con sus valores actuales.
+- [ ] **CA-44-2:** El escudo y el logo se muestran como previsualización de imagen (obtenida mediante URL firmada).
+- [ ] **CA-44-3:** La página es accesible únicamente para el rol `administrador`.
+- [ ] **CA-44-4:** Los datos de contacto (NIT, código DANE, teléfono, correo, sitio web) se muestran claramente etiquetados.
+- [ ] **CA-44-5:** Se indica la fecha de la última modificación y el usuario que la realizó.
+
+**Sprint:** 7 · **Prioridad:** Alta · **Puntos de historia:** 2  
+**Referencia:** CU-42, `GET /api/v1/admin/configuracion-institucional`
+
+---
+
+### HU-45 — Editar los Datos Institucionales de la Alcaldía
+
+> **Como** administrador,  
+> **quiero** actualizar los datos textuales de la configuración institucional (nombre, NIT, dirección, contacto, etc.),  
+> **para** mantener la identidad institucional del sistema al día sin modificar el código fuente.
+
+**Criterios de Aceptación:**
+
+- [ ] **CA-45-1:** El formulario muestra todos los campos editables con sus valores actuales precargados.
+- [ ] **CA-45-2:** Todos los campos obligatorios (nombre_alcaldia, nit, codigo_dane, departamento, municipio, direccion, telefono, correo_institucional) son validados antes de guardar.
+- [ ] **CA-45-3:** El campo `sitio_web` es opcional y acepta una URL válida.
+- [ ] **CA-45-4:** Al guardar, el cambio tiene efecto inmediato en el sistema (caché de Redis invalidado).
+- [ ] **CA-45-5:** El cambio queda registrado en `auditoria` con los valores anteriores y los nuevos.
+- [ ] **CA-45-6:** Se muestra un mensaje de confirmación tras guardar exitosamente.
+
+**Sprint:** 7 · **Prioridad:** Alta · **Puntos de historia:** 5  
+**Referencia:** CU-43, `PUT /api/v1/admin/configuracion-institucional`
+
+---
+
+### HU-46 — Cargar o Reemplazar el Escudo Oficial
+
+> **Como** administrador,  
+> **quiero** subir o reemplazar el escudo oficial de la alcaldía,  
+> **para** que todos los permisos PDF emitidos desde ese momento incluyan el escudo correcto.
+
+**Criterios de Aceptación:**
+
+- [ ] **CA-46-1:** Se puede subir un archivo de imagen en formato PNG, SVG o JPG con tamaño máximo de 5 MB.
+- [ ] **CA-46-2:** El sistema muestra una previsualización del escudo antes de confirmar la carga.
+- [ ] **CA-46-3:** Al confirmar, el escudo anterior es reemplazado. Los permisos PDF ya emitidos no se modifican.
+- [ ] **CA-46-4:** No se permite eliminar el escudo sin reemplazarlo por otro (es un campo obligatorio).
+- [ ] **CA-46-5:** El cambio queda registrado en `auditoria`.
+- [ ] **CA-46-6:** El sistema valida que el archivo sea una imagen válida (no se aceptan archivos disfrazados de imagen).
+
+**Reglas de Negocio:** RN-104, RN-107, RN-108.
+
+**Sprint:** 7 · **Prioridad:** Alta · **Puntos de historia:** 5  
+**Referencia:** CU-44, `PATCH /api/v1/admin/configuracion-institucional/escudo`
+
+---
+
+### HU-47 — Cargar o Reemplazar el Logo Institucional
+
+> **Como** administrador,  
+> **quiero** subir o reemplazar el logo institucional de la alcaldía (opcional),  
+> **para** que el portal ciudadano y las comunicaciones usen el logotipo oficial.
+
+**Criterios de Aceptación:**
+
+- [ ] **CA-47-1:** Se puede subir un archivo de imagen en formato PNG, SVG o JPG con tamaño máximo de 5 MB.
+- [ ] **CA-47-2:** El sistema muestra una previsualización del logo antes de confirmar la carga.
+- [ ] **CA-47-3:** El logo es opcional. Se puede eliminar sin que el sistema falle (el escudo siempre es el elemento obligatorio).
+- [ ] **CA-47-4:** Al reemplazar el logo, los correos y el portal usan el nuevo logo a partir de ese momento.
+- [ ] **CA-47-5:** El cambio queda registrado en `auditoria`.
+
+**Reglas de Negocio:** RN-107, RN-108.
+
+**Sprint:** 7 · **Prioridad:** Media · **Puntos de historia:** 3  
+**Referencia:** CU-45, `PATCH /api/v1/admin/configuracion-institucional/logo`
+
+---
+
 ## Resumen de Estimación por Sprint
 
 | Sprint | Épicas trabajadas | Puntos de historia | Historias |
@@ -1026,8 +1144,8 @@
 | Sprint 4 | É-03 Permiso + É-04 QR + É-07 + É-08 (parcial) | 30 | HU-06, HU-18 a HU-23, HU-39, HU-41 |
 | Sprint 5 | É-01 Ciudadano (UX) | 5 | HU-07, HU-08 |
 | Sprint 6 | É-02 Dashboard Funcionario | 3 | HU-17 |
-| Sprint 7 | É-06 Panel Admin | 42 | HU-30 a HU-37 |
-| **Total** | | **153** | **43 historias** |
+| Sprint 7 | É-06 Panel Admin + É-09 Config. Institucional | 57 | HU-30 a HU-37, HU-44 a HU-47 |
+| **Total** | | **168** | **47 historias** |
 
 ---
 

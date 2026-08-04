@@ -62,6 +62,12 @@
 - [CU-40 Exportar Reporte](#cu-40-exportar-reporte)
 - [CU-41 Gestionar Configuración del Sistema](#cu-41-gestionar-configuración-del-sistema)
 
+### Módulo 6 — Configuración Institucional
+- [CU-42 Consultar Configuración Institucional](#cu-42-consultar-configuración-institucional)
+- [CU-43 Actualizar Datos Institucionales](#cu-43-actualizar-datos-institucionales)
+- [CU-44 Reemplazar Escudo Oficial](#cu-44-reemplazar-escudo-oficial)
+- [CU-45 Reemplazar Logo Institucional](#cu-45-reemplazar-logo-institucional)
+
 ### Diagrama General
 - [Diagrama de Casos de Uso por Actor](#diagrama-de-casos-de-uso-por-actor)
 - [Diagrama del Flujo Principal](#diagrama-del-flujo-principal)
@@ -364,7 +370,7 @@ flowchart TD
 **Flujos Alternativos — según resultado:**
 
 - **FA-06A — Permiso VIGENTE:**  
-  Pantalla verde con ✅ y datos: nombre del titular, tipo y número de documento, placa, marca, modelo, color, motivo autorizado, fechas de expedición y vencimiento, funcionario que autorizó.
+  Pantalla verde con ✅ y datos: nombre del titular, tipo y número de documento, placa, marca, modelo, color, motivo autorizado, fechas de expedición y vencimiento, funcionario que autorizó. Si el permiso tiene condiciones y restricciones registradas, se muestran en una sección destacada "⚠️ Condiciones y Restricciones" con el valor actual de la base de datos (valor en tiempo real, no el valor congelado en el PDF — ver RN-39).
 
 - **FA-06B — Permiso VENCIDO:**  
   Pantalla roja con ❌ y mensaje: *"PERMISO VENCIDO — Este permiso venció el [fecha] y ya no es válido para circular."*
@@ -661,8 +667,9 @@ flowchart TD
 **Flujo Principal:**
 
 1. El funcionario hace clic en "Aprobar".
-2. El sistema presenta un modal de confirmación con resumen de los datos clave (nombre, placa, motivo, fechas).
-3. El funcionario confirma la aprobación.
+2. El sistema presenta un modal de confirmación con resumen de los datos clave (nombre, placa, motivo, fechas) y un campo de texto opcional: **"Condiciones y Restricciones"** (máximo 500 caracteres).
+3. El funcionario, si lo considera necesario, registra condiciones o restricciones específicas del permiso en el campo opcional (ej: "Válido únicamente entre 06:00 y 18:00. Portar cédula de ciudadanía").
+4. El funcionario confirma la aprobación.
 4. El sistema cambia el estado de la solicitud a `aprobada`.
 5. El sistema registra el cambio en `historial_estados` y `auditoria` con acción `aprobar`.
 6. El sistema encola el job de generación del permiso (CU-24, CU-25).
@@ -917,6 +924,7 @@ flowchart TD
 - Datos de la motocicleta: placa, marca, línea, modelo, color.
 - Motivo autorizado.
 - Periodo de vigencia.
+- **Sección condicional "Condiciones y Restricciones":** se incluye únicamente si el campo `condiciones_restricciones` tiene valor al momento de generación del PDF (RN-38). Si el funcionario agrega o edita este campo con posterioridad, el PDF ya generado NO se regenera (RN-33); la versión actualizada sólo es visible vía QR.
 - Imagen del código QR con URL de verificación.
 - Nombre y cargo del funcionario que autorizó.
 - Firma digital del funcionario (imagen de firma configurable).
@@ -1410,6 +1418,10 @@ graph TD
         CU39[CU-39 Generar Reporte]
         CU40[CU-40 Exportar Reporte]
         CU41[CU-41 Configuración]
+        CU42[CU-42 Ver Config. Institucional]
+        CU43[CU-43 Editar Datos Institucionales]
+        CU44[CU-44 Reemplazar Escudo]
+        CU45[CU-45 Reemplazar Logo]
     end
 
     CU15 -->|dispara| CU24
@@ -1482,6 +1494,133 @@ sequenceDiagram
     S->>S: Busca permiso, registra en qr_validaciones
     S->>AT: Pantalla verde: PERMISO VIGENTE con datos
 ```
+
+---
+
+---
+
+## Módulo 6 — Configuración Institucional
+
+---
+
+### CU-42 Consultar Configuración Institucional
+
+| Campo | Descripción |
+|-------|-------------|
+| **ID** | CU-42 |
+| **Nombre** | Consultar Configuración Institucional |
+| **Actor principal** | Administrador |
+| **Prioridad** | Alta |
+| **Precondiciones** | El administrador tiene sesión activa |
+| **Postcondiciones** | El administrador visualiza los datos institucionales actuales |
+
+**Flujo Principal:**
+
+1. El administrador navega al módulo "Configuración Institucional".
+2. El sistema consulta el único registro en `configuracion_institucional`.
+3. El sistema genera URLs firmadas (TTL 5 min) para el escudo y el logo.
+4. El sistema muestra todos los datos con las vistas previas de las imágenes.
+5. Se muestra la fecha de última modificación y el administrador responsable.
+
+**Flujos Alternativos:**
+
+- **4a. El registro no existe todavía:** El sistema muestra un formulario vacío con el mensaje "Configure los datos institucionales de la alcaldía para comenzar a emitir permisos."
+
+**Referencia:** HU-44, `GET /api/v1/admin/configuracion-institucional`
+
+---
+
+### CU-43 Actualizar Datos Institucionales
+
+| Campo | Descripción |
+|-------|-------------|
+| **ID** | CU-43 |
+| **Nombre** | Actualizar Datos Textuales de la Configuración Institucional |
+| **Actor principal** | Administrador |
+| **Prioridad** | Alta |
+| **Precondiciones** | El administrador tiene sesión activa y existe un registro en `configuracion_institucional` |
+| **Postcondiciones** | Los datos institucionales quedan actualizados; el cambio queda auditado |
+
+**Flujo Principal:**
+
+1. El administrador accede al formulario de edición de datos institucionales.
+2. El sistema precarga todos los valores actuales.
+3. El administrador modifica uno o más campos.
+4. El administrador envía el formulario.
+5. El sistema valida todos los campos obligatorios.
+6. El sistema ejecuta `UPDATE` sobre el registro existente.
+7. El sistema registra el cambio en `auditoria` (`datos_anteriores` + `datos_nuevos`).
+8. El sistema invalida el caché de Redis para la configuración institucional.
+9. El sistema muestra mensaje de éxito con la fecha de actualización.
+
+**Flujos Alternativos:**
+
+- **5a. Validación falla:** El sistema resalta los campos inválidos y no persiste ningún cambio.
+- **5b. El administrador no tiene permisos (rol `funcionario`):** El sistema retorna `403 FORBIDDEN`.
+
+**Reglas de Negocio:** RN-101, RN-102, RN-105.
+
+**Referencia:** HU-45, `PUT /api/v1/admin/configuracion-institucional`
+
+---
+
+### CU-44 Reemplazar Escudo Oficial
+
+| Campo | Descripción |
+|-------|-------------|
+| **ID** | CU-44 |
+| **Nombre** | Cargar o Reemplazar el Escudo Oficial de la Alcaldía |
+| **Actor principal** | Administrador |
+| **Prioridad** | Alta |
+| **Precondiciones** | El administrador tiene sesión activa |
+| **Postcondiciones** | El escudo institucional queda actualizado en MinIO; los nuevos PDFs lo usan |
+
+**Flujo Principal:**
+
+1. El administrador selecciona un archivo de imagen (PNG, SVG o JPG, máx 5 MB).
+2. El sistema valida formato y tamaño.
+3. El sistema muestra previsualización del archivo seleccionado.
+4. El administrador confirma la carga.
+5. El sistema sube el archivo al bucket `institucional/` de MinIO.
+6. El sistema actualiza `escudo_storage_key` y `escudo_hash` en `configuracion_institucional`.
+7. El sistema registra el cambio en `auditoria`.
+8. El sistema muestra la nueva previsualización del escudo.
+
+**Flujos Alternativos:**
+
+- **2a. Formato inválido o tamaño excedido:** El sistema muestra error sin cargar el archivo.
+- **4a. El administrador cancela:** No se realiza ningún cambio.
+
+**Reglas de Negocio:** RN-104, RN-107, RN-108.
+
+**Referencia:** HU-46, `PATCH /api/v1/admin/configuracion-institucional/escudo`
+
+---
+
+### CU-45 Reemplazar Logo Institucional
+
+| Campo | Descripción |
+|-------|-------------|
+| **ID** | CU-45 |
+| **Nombre** | Cargar, Reemplazar o Eliminar el Logo Institucional |
+| **Actor principal** | Administrador |
+| **Prioridad** | Media |
+| **Precondiciones** | El administrador tiene sesión activa |
+| **Postcondiciones** | El logo institucional queda actualizado o eliminado en MinIO |
+
+**Flujo Principal:**
+
+1. El administrador selecciona un archivo de imagen (PNG, SVG o JPG, máx 5 MB) o elige "Eliminar logo".
+2. El sistema valida formato y tamaño (si se seleccionó un archivo).
+3. El sistema muestra previsualización.
+4. El administrador confirma.
+5. El sistema sube el archivo a MinIO o elimina la referencia (según la acción).
+6. El sistema actualiza `logo_storage_key` y `logo_hash` (o los establece en NULL si se eliminó).
+7. El sistema registra el cambio en `auditoria`.
+
+**Reglas de Negocio:** RN-107, RN-108. A diferencia del escudo, el logo puede eliminarse (es opcional).
+
+**Referencia:** HU-47, `PATCH /api/v1/admin/configuracion-institucional/logo`
 
 ---
 
