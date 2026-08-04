@@ -313,14 +313,38 @@ Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado,
 - [x] Tailwind content: añadido src/modules/** y src/contexts/** ✅ 2026-08-04 (B15)
 - [x] Badge variante 'info' añadida ✅ 2026-08-04 (B15)
 
-### Pendiente — B16
-- [ ] Cola de solicitudes: listado paginado con filtros (estado, fecha, radicado, placa, documento)
-- [ ] Vista de detalle de solicitud con documentos, historial, datos ciudadano y moto
-- [ ] Modal de aprobación
-- [ ] Modal de rechazo con motivo obligatorio
-- [ ] Modal de corrección con campos específicos
-- [ ] Visualización y descarga del permiso generado
-- [ ] Botón de impresión del PDF
+### B16 — Cola de Solicitudes y Detalle (✅ 2026-08-04)
+- [x] Tipos backend correctos: SolicitudListItem, SolicitudDetalle, DocumentoItem, HistorialEstadoItem, PaginatedSolicitudesResponse, SolicitudesFiltros ✅ 2026-08-04 (B16)
+- [x] getSolicitudes(), getSolicitudDetalle(), getDocumentoUrl() en funcionario.service.ts ✅ 2026-08-04 (B16)
+- [x] useSolicitudes() + useSolicitudesFiltros() con sync URL ✅ 2026-08-04 (B16)
+- [x] useSolicitudDetalle(), useDocumentoUrl() — TanStack Query v5 ✅ 2026-08-04 (B16)
+- [x] SolicitudStatusBadge — todos los estados con variantes de color ✅ 2026-08-04 (B16)
+- [x] SolicitudesTable — sticky header, aria-sort, skeletons, sorting, empty/error states ✅ 2026-08-04 (B16)
+- [x] SolicitudFilters — chips multi-selección, búsqueda debounced, rango fechas, orden ✅ 2026-08-04 (B16)
+- [x] SearchToolbar — debounce configurable, limpiar, aria-label ✅ 2026-08-04 (B16)
+- [x] Pagination — primera/prev/next/última, conteo total ✅ 2026-08-04 (B16)
+- [x] EmptyResults — empty state reutilizable con botón reset ✅ 2026-08-04 (B16)
+- [x] SolicitudTimeline — historial visual con camposCorreccion expandidos ✅ 2026-08-04 (B16)
+- [x] DocumentoViewer — URL firmada on-demand, preview PDF/imagen, descarga ✅ 2026-08-04 (B16)
+- [x] DetalleCard — tarjeta reutilizable dl/dt/dd, columnas configurables ✅ 2026-08-04 (B16)
+- [x] ConfirmationModal — WCAG focus trap, Escape, overlay, variante danger ✅ 2026-08-04 (B16)
+- [x] SolicitudesView — módulo lista con Suspense + filtros + tabla + paginación ✅ 2026-08-04 (B16)
+- [x] SolicitudDetalleView — ciudadano, moto, motivo, documentos, historial, modales acción ✅ 2026-08-04 (B16)
+- [x] /funcionario/solicitudes page ✅ 2026-08-04 (B16)
+- [x] /funcionario/solicitudes/[id] page ✅ 2026-08-04 (B16)
+- [x] Fix bugs B15: tipos, parámetros API, countSolicitudes, getActividadReciente ✅ 2026-08-04 (B16)
+- [x] HeaderFunc: prop extra (backward compatible) ✅ 2026-08-04 (B16)
+- [x] ADR-020: corrección tipos frontend-backend ✅ 2026-08-04 (B16)
+- [x] WCAG: aria-sort, aria-busy, aria-live, aria-label, aria-modal, focus trap ✅ 2026-08-04 (B16)
+
+### Pendiente — B17
+- [ ] Ejecutar acción aprobar solicitud (POST /solicitudes/{id}/aprobar)
+- [ ] Ejecutar acción rechazar solicitud con motivo obligatorio (POST /solicitudes/{id}/rechazar)
+- [ ] Ejecutar acción solicitar corrección con campos específicos (POST /solicitudes/{id}/correccion)
+- [ ] Toast de confirmación post-acción
+- [ ] Invalidar caché y refrescar lista tras acción
+- [ ] Visualización del permiso generado (URL firmada PDF)
+- [ ] Formularios RHF+Zod dentro de modales (motivo rechazar, campos corrección)
 
 ---
 

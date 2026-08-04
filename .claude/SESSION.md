@@ -8,13 +8,40 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 4 ✅ COMPLETADA — 18/18 tareas
+Fase: Fase 6 🔄 EN PROGRESO — 27/27 tareas (B15+B16 completados)
 
-Bloque actual: B10 ✅ COMPLETADO — BullMQ worker + SMTP Nodemailer + RedisModule + EmailModule + 7 templates HTML + integración con use-cases
+Bloque actual: B16 ✅ COMPLETADO — Cola de solicitudes, detalle, documentos, modales de acción, componentes reutilizables
 
 Rama: `feature/fase-2-auth`
 
-Estado: Fase 3: 16/16 ✅. Fase 4: 18/18 ✅. Backend completo. Siguiente: Fase 5 (Frontend Ciudadano) o Fase 8 (Calidad).
+Estado: B15+B16 completados. Portal Funcionario operativo (login, dashboard, cola solicitudes, detalle). Siguiente: B17 (acciones: aprobar/rechazar/correccion).
+
+### B16 — Cola de Solicitudes y Detalle (2026-08-04)
+✓ Tipos backend correctos: SolicitudListItem, SolicitudDetalle, CiudadanoDetalle, MotocicletaDetalle, MotivoDetalle, DocumentoItem, HistorialEstadoItem, PaginatedSolicitudesResponse, SolicitudesFiltros (ADR-020)
+✓ Corrección bug B15: SolicitudListItem tenía campos incorrectos que no coincidían con el backend DTO real
+✓ Corrección bug B15: countSolicitudes usaba ApiListResponse (meta.total) — backend usa ApiResponse<PaginatedSolicitudesResponse> (data.pagination.total)
+✓ Corrección bug B15: countSolicitudes usaba parámetro erróneo "fechaDesde" → correcto "fechaInicio"
+✓ Corrección bug B15: getActividadReciente usaba "order=fechaCreacion:DESC" → correcto "sortBy=createdAt&sortOrder=DESC"
+✓ getSolicitudes(), getSolicitudDetalle(), getDocumentoUrl() añadidos a funcionario.service.ts
+✓ useSolicitudes() + useSolicitudesFiltros() con sincronización URL (useSearchParams + useRouter)
+✓ useSolicitudDetalle() — TanStack Query v5, staleTime 60s
+✓ useDocumentoUrl() — enabled on demand, staleTime 4 min (URL firmada TTL 5 min)
+✓ SolicitudStatusBadge — mapeo estado → color/label, exporta ESTADOS_OPTIONS
+✓ SolicitudesTable — sticky header, aria-sort, skeletons, empty/error states, sorting por columna
+✓ SolicitudFilters — chips de estado multi-selección, búsqueda debounced x3, rango fechas, orden
+✓ SolicitudTimeline — visualización historial con motivo y campos corrección
+✓ DocumentoViewer — URL firmada on-demand, preview PDF (iframe), preview imagen, descarga
+✓ DetalleCard — tarjeta reutilizable para secciones de información (dl/dt/dd)
+✓ ConfirmationModal — modal WCAG con focus trap, Escape, overlay, variante danger
+✓ SearchToolbar — input con debounce configurable, limpiar, aria
+✓ Pagination — primera/prev/next/última, conteo total
+✓ EmptyResults — empty state reutilizable
+✓ SolicitudesView — vista lista con Suspense, filtros, tabla, paginación
+✓ SolicitudDetalleView — ciudadano, moto, motivo, documentos, historial, modales acción (B17 placeholder)
+✓ /funcionario/solicitudes page + /funcionario/solicitudes/[id] page
+✓ HeaderFunc: prop extra añadida (backward compatible) para botón "Volver"
+✓ dashboard-view.tsx: campo ciudadanoNombre → ciudadano.nombre; radicado → numeroRadicado; fechaCreacion → createdAt
+✓ ADR-020: Corrección tipos frontend vs backend DTOs
 
 ---
 

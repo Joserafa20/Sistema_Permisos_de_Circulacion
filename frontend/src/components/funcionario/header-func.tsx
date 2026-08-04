@@ -9,9 +9,15 @@ interface HeaderFuncProps {
   breadcrumbs?: BreadcrumbItem[];
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  extra?: React.ReactNode;
 }
 
-export function HeaderFunc({ breadcrumbs = [], onRefresh, isRefreshing = false }: HeaderFuncProps) {
+export function HeaderFunc({
+  breadcrumbs = [],
+  onRefresh,
+  isRefreshing = false,
+  extra,
+}: HeaderFuncProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-neutral-200 bg-white px-6 shrink-0">
       {/* Breadcrumb — desplazado a la derecha del hamburguesa en mobile */}
@@ -20,6 +26,7 @@ export function HeaderFunc({ breadcrumbs = [], onRefresh, isRefreshing = false }
       </div>
 
       <div className="flex items-center gap-2">
+        {extra}
         {onRefresh && (
           <Button
             variant="ghost"

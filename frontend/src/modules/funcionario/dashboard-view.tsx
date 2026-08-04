@@ -175,10 +175,10 @@ export function DashboardView() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-neutral-800 truncate">
-                          {s.ciudadanoNombre}
+                          {s.ciudadano.nombre}
                         </p>
                         <p className="text-xs text-neutral-400">
-                          {s.radicado} · {formatDate(s.fechaCreacion)}
+                          {s.numeroRadicado} · {formatDate(s.createdAt)}
                         </p>
                       </div>
                       <Badge variant={badge.variant} className="shrink-0 text-xs">

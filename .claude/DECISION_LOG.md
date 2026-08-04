@@ -18,6 +18,36 @@ Su objetivo es mantener la coherencia del desarrollo y evitar que se reevalúen 
 
 ---
 
+## ADR-020 — Corrección de tipos frontend vs. DTOs del backend
+
+**Fecha:** 2026-08-04
+**Bloque:** B16
+**Estado:** Aprobado
+
+### Contexto
+
+En B15 se creó el tipo `SolicitudListItem` en `frontend/src/types/funcionario.ts` con campos planos (e.g., `ciudadanoNombre`, `radicado`, `fechaCreacion`) que no coincidían con el backend `SolicitudListItemDto` real, el cual usa una estructura anidada (`ciudadano.nombre`, `numeroRadicado`, `createdAt`).
+
+También se usaba `ApiListResponse<T>` (espera `meta.total` plano) para el endpoint de listado, cuando el backend devuelve `ApiResponse<PaginatedSolicitudesResponse>` (con `data.pagination.total` anidado). Esto hacía que `getDashboardStats()` siempre devolviera 0.
+
+Parámetro `fechaDesde` era incorrecto — el backend acepta `fechaInicio`. El orden `order=createdAt:DESC` tampoco era el formato correcto del backend (`sortBy=createdAt&sortOrder=DESC`).
+
+### Decisión
+
+- `SolicitudListItem` se actualizó para reflejar exactamente el `SolicitudListItemDto` del backend: `numeroRadicado`, `ciudadano: { nombre, numeroDocumento }`, `motocicleta: { placa, marca, modelo }`, `motivo: string`, `tiempoEspera`, `createdAt`.
+- Se añadieron nuevos tipos: `SolicitudDetalle`, `CiudadanoDetalle`, `MotocicletaDetalle`, `MotivoDetalle`, `DocumentoItem`, `HistorialEstadoItem`, `DocumentoUrl`, `PaginatedSolicitudesResponse`, `SolicitudesFiltros`.
+- `countSolicitudes` y `countPermisos` usan `ApiResponse<PaginatedSolicitudesResponse>` y acceden a `res.data.pagination.total`.
+- `getActividadReciente` usa `sortBy=createdAt&sortOrder=DESC`.
+- `dashboard-view.tsx` actualizado para usar los campos correctos del nuevo tipo.
+
+### Consecuencias
+
+- Los datos del dashboard ahora se cargan correctamente desde el backend.
+- Los tipos del frontend son fuente de verdad derivada de los DTOs del backend.
+- Se establece el patrón: cuando se crea un tipo de respuesta, verificar el backend DTO real antes de asumir la estructura.
+
+---
+
 ## ADR-019 — Estrategia de almacenamiento de tokens en el Portal Funcionario
 
 **Fecha:** 2026-08-04
