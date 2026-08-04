@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import {
   ICiudadanoRepository,
   ListarCiudadanosQuery,
@@ -66,8 +66,20 @@ export class TypeOrmCiudadanoRepository implements ICiudadanoRepository {
   }
 
   async findById(id: string): Promise<CiudadanoDomainEntity | null> {
+    return this.loadDetail({ id });
+  }
+
+  async findByNumeroDocumento(numeroDocumento: string): Promise<CiudadanoDomainEntity | null> {
+    return this.loadDetail({ numeroDocumento });
+  }
+
+  // ─── Helper privado ────────────────────────────────────────────────────────
+
+  private async loadDetail(
+    where: FindOptionsWhere<CiudadanoEntity>,
+  ): Promise<CiudadanoDomainEntity | null> {
     const entity = await this.repo.findOne({
-      where: { id },
+      where,
       relations: ['municipio', 'motocicletas'],
       withDeleted: false,
     });
@@ -85,7 +97,7 @@ export class TypeOrmCiudadanoRepository implements ICiudadanoRepository {
     }));
 
     domain.totalSolicitudes = await this.solicitudRepo.count({
-      where: { ciudadano: { id } },
+      where: { ciudadano: { id: entity.id } },
     });
 
     return domain;

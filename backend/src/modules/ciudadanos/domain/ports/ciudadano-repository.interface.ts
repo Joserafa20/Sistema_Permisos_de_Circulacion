@@ -19,4 +19,6 @@ export interface ICiudadanoRepository {
   ): Promise<{ items: CiudadanoDomainEntity[]; total: number }>;
   /** Carga relaciones motocicletas y totalSolicitudes */
   findById(id: string): Promise<CiudadanoDomainEntity | null>;
+  /** Carga relaciones motocicletas y totalSolicitudes. Excluye soft-deleted */
+  findByNumeroDocumento(numeroDocumento: string): Promise<CiudadanoDomainEntity | null>;
 }

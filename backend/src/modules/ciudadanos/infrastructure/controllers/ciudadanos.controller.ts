@@ -10,6 +10,7 @@ import { CiudadanoListItemDto } from '../../application/dtos/ciudadano-list-item
 import { CiudadanoDetalleDto } from '../../application/dtos/ciudadano-detalle.dto';
 import { ListarCiudadanosUseCase } from '../../application/use-cases/listar-ciudadanos/listar-ciudadanos.use-case';
 import { ObtenerCiudadanoPorIdUseCase } from '../../application/use-cases/obtener-ciudadano-por-id/obtener-ciudadano-por-id.use-case';
+import { ObtenerCiudadanoPorDocumentoUseCase } from '../../application/use-cases/obtener-ciudadano-por-documento/obtener-ciudadano-por-documento.use-case';
 
 @ApiTags('ciudadanos')
 @Controller('ciudadanos')
@@ -19,6 +20,7 @@ export class CiudadanosController {
   constructor(
     private readonly listarCiudadanosUseCase: ListarCiudadanosUseCase,
     private readonly obtenerCiudadanoPorIdUseCase: ObtenerCiudadanoPorIdUseCase,
+    private readonly obtenerCiudadanoPorDocumentoUseCase: ObtenerCiudadanoPorDocumentoUseCase,
   ) {}
 
   @Get()
@@ -43,6 +45,45 @@ export class CiudadanosController {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
     const userAgent = (req.headers['user-agent'] ?? null) as string | null;
     return this.listarCiudadanosUseCase.execute({ query, actorId: actor.id, ipAddress, userAgent });
+  }
+
+  // IMPORTANTE: Esta ruta debe declararse ANTES de /:id para que NestJS
+  // no interprete "documento" como un UUID válido y falle el ParseUUIDPipe.
+  @Get('documento/:numero')
+  @ApiOperation({
+    summary: 'Buscar ciudadano por número de documento',
+    description:
+      'Retorna el detalle completo de un ciudadano buscando por su número de documento. Útil en el panel del funcionario para verificación rápida sin conocer el UUID. Acceso: Administrador y Funcionario. Registra auditoría CIUDADANO_CONSULTADO.',
+  })
+  @ApiParam({
+    name: 'numero',
+    description: 'Número de documento del ciudadano (ej: 12345678)',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ciudadano obtenido correctamente',
+    type: CiudadanoDetalleDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Rol insuficiente' })
+  @ApiResponse({
+    status: 404,
+    description: 'Ciudadano no encontrado con ese número de documento',
+  })
+  async obtenerPorDocumento(
+    @Param('numero') numero: string,
+    @CurrentUser() actor: AuthUser,
+    @Req() req: Request,
+  ): Promise<CiudadanoDetalleDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    const userAgent = (req.headers['user-agent'] ?? null) as string | null;
+    return this.obtenerCiudadanoPorDocumentoUseCase.execute({
+      numeroDocumento: numero,
+      actorId: actor.id,
+      ipAddress,
+      userAgent,
+    });
   }
 
   @Get(':id')
