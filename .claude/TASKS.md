@@ -140,23 +140,23 @@
 **Objetivo:** Núcleo del negocio implementado y probado.
 **Semanas:** 3–4
 **Dependencia:** Fase 2 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — 12 / 16 tareas completadas
 
-- [ ] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos
-- [ ] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento
+- [x] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos ✅ 2026-08-03
+- [x] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento ✅ 2026-08-04
 - [ ] `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas)
-- [ ] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario)
-- [ ] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario)
+- [x] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario) ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario) ✅ 2026-08-04
 - [ ] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga
-- [ ] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola
-- [ ] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio
-- [ ] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos
-- [ ] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados
-- [ ] Validación: no duplicar solicitudes activas para la misma moto
-- [ ] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX`
+- [x] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados ✅ 2026-08-04
+- [x] Validación: no duplicar solicitudes activas para la misma moto ✅ 2026-08-03
+- [x] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX` ✅ 2026-08-03
 - [ ] Job automático: marcar solicitudes en `VENCIDA` al superar plazo
-- [ ] Registro en `historial_estados` en cada cambio
-- [ ] Registro en `auditoria` en cada cambio
+- [x] Registro en `historial_estados` en cada cambio ✅ 2026-08-04
+- [x] Registro en `auditoria` en cada cambio ✅ 2026-08-04
 - [ ] StorageModule con MinIO: subida y URLs firmadas
 
 ### Pendientes de Diseño — Fase 3
@@ -326,26 +326,29 @@
 
 ### Fase Activa
 
-Fase 0 — Fundamentos
+Fase 3 — Módulo de Solicitudes (Backend)
 
 ### Tareas pendientes en la fase activa
 
-Ninguna. Fase 0 completada (12/12).
+- `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas) — deferred StorageModule
+- `GET /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga — deferred StorageModule
+- Job automático: marcar solicitudes en `VENCIDA` al superar plazo — pendiente BullMQ
+- StorageModule con MinIO: subida y URLs firmadas — Fase 4 (PermisosModule)
 
 ### Última tarea terminada
 
-Frontend Next.js scaffolding (2026-08-02):
-`frontend/` con Next.js 14, App Router, TailwindCSS 3, TypeScript estricto.
-`src/app/` con layout.tsx, page.tsx, not-found.tsx, error.tsx.
-`src/lib/` con api-client.ts y constants.ts.
-`src/types/index.ts` con contratos de ApiResponse.
-`frontend/Dockerfile` multi-stage (development/build/production).
-Servicio `frontend` agregado a docker-compose.yml.
-lint-staged actualizado para cubrir archivos del frontend.
+B5C4 — Aprobación, rechazo y corrección de solicitudes (2026-08-04):
+- `POST /api/v1/solicitudes/{id}/aprobar` — RN-15, RN-17, RN-01 (HTTP 202)
+- `POST /api/v1/solicitudes/{id}/rechazar` — RN-04, RN-10, RN-15 (HTTP 200)
+- `POST /api/v1/solicitudes/{id}/correccion` — RN-04, RN-15, RN-16 (HTTP 200)
+- `SolicitudStateMachine` — máquina de estados centralizada
+- `cambiarEstado()` — transición atómica con pessimistic_write lock
+- `tienePermisoVigenteConSolapamiento()` — RN-17 raw SQL JOIN
+- Historial de estados + auditoría en cada transición
 
 ### Próxima tarea
 
-Fase 1 — Base de Datos (resolver primero los [~] M-04 y M-03) — aguardando autorización.
+B6 — Generación del permiso: `PermisosModule` con PDF + QR — aguardando autorización.
 
 ---
 

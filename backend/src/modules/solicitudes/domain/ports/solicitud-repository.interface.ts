@@ -62,4 +62,36 @@ export interface ISolicitudRepository {
     usuarioId: string | null,
     ipAddress: string | null,
   ): Promise<boolean>;
+
+  /**
+   * Cambia el estado de la solicitud de forma atómica.
+   * Usa conditional UPDATE (WHERE estado IN estadosPermitidos) como guarda anti-concurrencia.
+   * Inserta en historial_estados dentro de la misma transacción.
+   * Retorna false si el estado actual no coincide con estadosPermitidos (ya fue procesada).
+   */
+  cambiarEstado(params: CambiarEstadoParams): Promise<boolean>;
+
+  /**
+   * RN-17: verifica si la motocicleta tiene un permiso vigente cuyas fechas se solapan
+   * con el rango [fechaInicio, fechaFin] de la solicitud a aprobar.
+   */
+  tienePermisoVigenteConSolapamiento(
+    motocicletaId: string,
+    fechaInicio: string,
+    fechaFin: string,
+  ): Promise<{ solapamiento: boolean; codigoPermiso?: string }>;
+}
+
+export interface CambiarEstadoParams {
+  id: string;
+  estadoNuevo: EstadoSolicitud;
+  /** El UPDATE solo aplica si el estado actual es uno de estos valores. Anti-race condition. */
+  estadosPermitidos: EstadoSolicitud[];
+  motivo: string | null;
+  /** Serializado como objeto JSONB: { items: [...] } o null. */
+  camposCorreccion: Record<string, unknown> | null;
+  usuarioId: string;
+  ipAddress: string | null;
+  /** Si la fecha_inicio debe ajustarse (RN-01 al aprobar). */
+  fechaInicioAjustada?: string;
 }

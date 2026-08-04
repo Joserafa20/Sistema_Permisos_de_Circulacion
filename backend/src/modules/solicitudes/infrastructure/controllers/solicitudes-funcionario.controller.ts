@@ -1,4 +1,15 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
@@ -7,11 +18,17 @@ import { ListarSolicitudesQueryDto } from '../../application/dtos/listar-solicit
 import { SolicitudDetalleDto } from '../../application/dtos/solicitud-detalle.dto';
 import { HistorialCompletoItemDto } from '../../application/dtos/historial-completo-item.dto';
 import { DocumentoItemDto } from '../../application/dtos/documento-item.dto';
+import { RechazarSolicitudDto } from '../../application/dtos/rechazar-solicitud.dto';
+import { SolicitarCorreccionDto } from '../../application/dtos/solicitar-correccion.dto';
+import { AccionSolicitudResponseDto } from '../../application/dtos/accion-solicitud-response.dto';
 import { ListarSolicitudesUseCase } from '../../application/use-cases/listar-solicitudes.use-case';
 import type { PaginatedSolicitudesDto } from '../../application/use-cases/listar-solicitudes.use-case';
 import { ObtenerSolicitudPorIdUseCase } from '../../application/use-cases/obtener-solicitud-por-id.use-case';
 import { ObtenerHistorialUseCase } from '../../application/use-cases/obtener-historial.use-case';
 import { ListarDocumentosUseCase } from '../../application/use-cases/listar-documentos.use-case';
+import { AprobarSolicitudUseCase } from '../../application/use-cases/aprobar-solicitud.use-case';
+import { RechazarSolicitudUseCase } from '../../application/use-cases/rechazar-solicitud.use-case';
+import { SolicitarCorreccionUseCase } from '../../application/use-cases/solicitar-correccion.use-case';
 
 interface JwtUser {
   sub: string;
@@ -29,6 +46,9 @@ export class SolicitudesFuncionarioController {
     private readonly obtenerSolicitudPorIdUseCase: ObtenerSolicitudPorIdUseCase,
     private readonly obtenerHistorialUseCase: ObtenerHistorialUseCase,
     private readonly listarDocumentosUseCase: ListarDocumentosUseCase,
+    private readonly aprobarSolicitudUseCase: AprobarSolicitudUseCase,
+    private readonly rechazarSolicitudUseCase: RechazarSolicitudUseCase,
+    private readonly solicitarCorreccionUseCase: SolicitarCorreccionUseCase,
   ) {}
 
   @Get()
@@ -95,5 +115,103 @@ export class SolicitudesFuncionarioController {
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
   listarDocumentos(@Param('id', ParseUUIDPipe) id: string): Promise<DocumentoItemDto[]> {
     return this.listarDocumentosUseCase.ejecutar(id);
+  }
+
+  @Post(':id/aprobar')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: 'Aprobar una solicitud (RN-15, RN-17, RN-01)',
+    description:
+      'Aprueba la solicitud y dispara la generación asíncrona del permiso (PDF + QR). ' +
+      'La solicitud debe estar en estado en_revision o pendiente_correccion. ' +
+      'Verifica solapamiento con permisos vigentes (RN-17). ' +
+      'Si fechaInicio < hoy(COT), la ajusta a la fecha actual (RN-01).',
+  })
+  @ApiResponse({
+    status: 202,
+    description: 'Solicitud aprobada. Permiso en generación.',
+    type: AccionSolicitudResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Sin permisos suficientes' })
+  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiResponse({ status: 409, description: 'Permiso vigente con fechas solapadas (RN-17)' })
+  @ApiResponse({
+    status: 422,
+    description: 'Estado inválido para aprobar (SOLICITUD_ESTADO_INVALIDO)',
+  })
+  aprobar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtUser,
+    @Req() req: Request,
+  ): Promise<AccionSolicitudResponseDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    return this.aprobarSolicitudUseCase.ejecutar(id, user.sub, ipAddress);
+  }
+
+  @Post(':id/rechazar')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rechazar una solicitud (RN-04, RN-10, RN-15)',
+    description:
+      'Rechaza la solicitud de forma definitiva. ' +
+      'La solicitud debe estar en en_revision o pendiente_correccion. ' +
+      'El motivo es obligatorio y debe tener al menos 20 caracteres (RN-04). ' +
+      'El estado rechazada es terminal (RN-10).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Solicitud rechazada',
+    type: AccionSolicitudResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Motivo demasiado corto o faltante (RN-04)' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Sin permisos suficientes' })
+  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiResponse({
+    status: 422,
+    description: 'Estado inválido para rechazar (SOLICITUD_ESTADO_INVALIDO)',
+  })
+  rechazar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RechazarSolicitudDto,
+    @CurrentUser() user: JwtUser,
+    @Req() req: Request,
+  ): Promise<AccionSolicitudResponseDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    return this.rechazarSolicitudUseCase.ejecutar(id, dto, user.sub, ipAddress);
+  }
+
+  @Post(':id/correccion')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Solicitar corrección al ciudadano (RN-04, RN-15, RN-16)',
+    description:
+      'Solicita al ciudadano que corrija campos o documentos específicos. ' +
+      'La solicitud debe estar en estado en_revision. ' +
+      'Los campos a corregir se almacenan en historial_estados.campos_correccion (RN-16). ' +
+      'El motivo y al menos 1 campo son obligatorios (RN-04).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Solicitud marcada para corrección',
+    type: AccionSolicitudResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Sin permisos suficientes' })
+  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiResponse({
+    status: 422,
+    description: 'Estado inválido para solicitar corrección (SOLICITUD_ESTADO_INVALIDO)',
+  })
+  solicitarCorreccion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SolicitarCorreccionDto,
+    @CurrentUser() user: JwtUser,
+    @Req() req: Request,
+  ): Promise<AccionSolicitudResponseDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    return this.solicitarCorreccionUseCase.ejecutar(id, dto, user.sub, ipAddress);
   }
 }

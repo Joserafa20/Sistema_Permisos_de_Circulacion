@@ -8,17 +8,21 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 2 — Autenticación y Seguridad
+Fase: Fase 3 — Módulo de Solicitudes (Backend)
 
-Estado: ⬜ Pendiente de inicio — Rama a crear: `feature/fase-2-auth`
+Bloque actual: B5C4 ✅ COMPLETADO — Aprobación, rechazo y corrección de solicitudes
+
+Rama: `feature/fase-2-auth` (rama de desarrollo activa para Fases 2 y 3)
+
+Estado: 🔄 En progreso — 12/16 tareas de Fase 3 completadas. Pendiente B6 (PermisosModule).
 
 ---
 
 ## Fase anterior
 
-Fase: Fase 1 — Base de Datos y Migraciones
+Fase: Fase 2 — Autenticación y Seguridad
 
-Estado: ✅ CERRADA — Pendiente merge de `feature/fase-1-base-datos` → `develop` (PR a crear)
+Estado: ✅ COMPLETADA (parcial) — Login/Logout/Refresh implementados. Pendientes: recuperar/restablecer/cambiar contraseña, GET /me, CRUD Usuarios.
 
 ---
 
@@ -175,7 +179,30 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   Working tree limpio. Rama sincronizada. Sin conflictos con develop. PR pendiente de creación.
   Release v0.2.0 generada. Documentación congelada activa.
 
+✓ **B5C4 — Aprobación, rechazo y corrección de solicitudes** ✅ 2026-08-04
+  Commit: `feat(solicitudes): implementar aprobación y rechazo de solicitudes`
+  Rama: `feature/fase-2-auth`
+  Archivos nuevos:
+  - `domain/services/solicitud-state-machine.ts` — máquina de estados centralizada (RN-15)
+  - `application/dtos/rechazar-solicitud.dto.ts` — motivo ≥20 chars (RN-04)
+  - `application/dtos/solicitar-correccion.dto.ts` — motivo + camposCorreccion (RN-04, RN-16)
+  - `application/dtos/accion-solicitud-response.dto.ts` — respuesta unificada acciones
+  - `application/use-cases/aprobar-solicitud.use-case.ts` — RN-15, RN-17, RN-01 (HTTP 202)
+  - `application/use-cases/rechazar-solicitud.use-case.ts` — RN-04, RN-10, RN-15 (HTTP 200)
+  - `application/use-cases/solicitar-correccion.use-case.ts` — RN-04, RN-15, RN-16 (HTTP 200)
+  Archivos modificados:
+  - `domain/ports/solicitud-repository.interface.ts` — CambiarEstadoParams + 2 métodos nuevos
+  - `infrastructure/persistence/typeorm-solicitud.repository.ts` — cambiarEstado + tienePermisoVigenteConSolapamiento
+  - `infrastructure/controllers/solicitudes-funcionario.controller.ts` — 3 endpoints POST
+  - `solicitudes.module.ts` — 3 use cases nuevos registrados
+  Quality gates: tsc --noEmit ✅, npm run lint ✅ (0 errores), nest build ✅
+
+  Deuda técnica → B6:
+  - condicionesRestricciones (RN-38): PATCH /permisos/{id}/condiciones post-aprobación
+  - Notificaciones BullMQ: enqueue en aprobar/rechazar/correccion
+  - AccionAuditoria.EDITAR usado para auto-transición recibida→en_revision (sin enum propio)
+
 ## Última actualización
 
-2026-08-02 — Auditoría final Fase 1 completada. CHANGELOG consolidado en v0.2.0. SESSION actualizado.
-Fase 1 lista para cierre oficial mediante PR feature/fase-1-base-datos → develop.
+2026-08-04 — B5C4 completado. Flujo de aprobación/rechazo/corrección implementado.
+Próximo: B6 — PermisosModule (PDF + QR) — aguardando autorización.

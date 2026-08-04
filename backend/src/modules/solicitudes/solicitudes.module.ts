@@ -22,6 +22,9 @@ import { ObtenerSolicitudPorIdUseCase } from './application/use-cases/obtener-so
 import { ObtenerHistorialUseCase } from './application/use-cases/obtener-historial.use-case';
 import { ListarDocumentosUseCase } from './application/use-cases/listar-documentos.use-case';
 import { ConsultarEstadoPublicoUseCase } from './application/use-cases/consultar-estado-publico.use-case';
+import { AprobarSolicitudUseCase } from './application/use-cases/aprobar-solicitud.use-case';
+import { RechazarSolicitudUseCase } from './application/use-cases/rechazar-solicitud.use-case';
+import { SolicitarCorreccionUseCase } from './application/use-cases/solicitar-correccion.use-case';
 
 /**
  * Módulo central del trámite ciudadano.
@@ -61,6 +64,9 @@ import { ConsultarEstadoPublicoUseCase } from './application/use-cases/consultar
     ObtenerHistorialUseCase,
     ListarDocumentosUseCase,
     ConsultarEstadoPublicoUseCase,
+    AprobarSolicitudUseCase,
+    RechazarSolicitudUseCase,
+    SolicitarCorreccionUseCase,
   ],
   // SolicitudBusquedaService exportado para PermisosModule y futuros módulos
   // que necesiten consultar el estado de una solicitud sin acceder al repo directamente.

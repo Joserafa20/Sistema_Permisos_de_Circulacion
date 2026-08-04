@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import {
+  CambiarEstadoParams,
   ISolicitudRepository,
   ListarSolicitudesQuery,
 } from '../../domain/ports/solicitud-repository.interface';
@@ -174,6 +175,79 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
 
       return true;
     });
+  }
+
+  async cambiarEstado(params: CambiarEstadoParams): Promise<boolean> {
+    const {
+      id,
+      estadoNuevo,
+      estadosPermitidos,
+      motivo,
+      camposCorreccion,
+      usuarioId,
+      ipAddress,
+      fechaInicioAjustada,
+    } = params;
+
+    return this.dataSource.transaction(async (em) => {
+      // Leer el estado actual DENTRO de la transacción para obtenerlo como estadoAnterior
+      const current = await em.findOne(SolicitudEntity, {
+        where: { id },
+        select: ['id', 'estado'],
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!current || !estadosPermitidos.includes(current.estado)) return false;
+
+      const setFields: Record<string, unknown> = { estado: estadoNuevo };
+      if (fechaInicioAjustada) {
+        setFields.fechaInicio = fechaInicioAjustada;
+      }
+
+      await em
+        .createQueryBuilder()
+        .update(SolicitudEntity)
+        .set(setFields)
+        .where('id = :id', { id })
+        .execute();
+
+      await em.save(
+        HistorialEstadoEntity,
+        em.create(HistorialEstadoEntity, {
+          estadoNuevo,
+          estadoAnterior: current.estado,
+          motivo,
+          camposCorreccion: camposCorreccion ?? null,
+          ipAddress,
+          solicitud: { id } as SolicitudEntity,
+          usuario: usuarioId ? ({ id: usuarioId } as UsuarioEntity) : null,
+        }),
+      );
+
+      return true;
+    });
+  }
+
+  async tienePermisoVigenteConSolapamiento(
+    motocicletaId: string,
+    fechaInicio: string,
+    fechaFin: string,
+  ): Promise<{ solapamiento: boolean; codigoPermiso?: string }> {
+    const row = await this.dataSource
+      .createQueryBuilder()
+      .select(['p.id AS id', 'p.codigo_permiso AS "codigoPermiso"'])
+      .from('permisos', 'p')
+      .innerJoin('solicitudes', 's', 'p.solicitud_id = s.id')
+      .innerJoin('motocicletas', 'm', 's.motocicleta_id = m.id')
+      .where('m.id = :motocicletaId', { motocicletaId })
+      .andWhere("p.estado = 'vigente'")
+      .andWhere(':fechaInicio::date <= p.fecha_vencimiento::date', { fechaInicio })
+      .andWhere(':fechaFin::date >= s.fecha_inicio::date', { fechaFin })
+      .andWhere('s.deleted_at IS NULL')
+      .getRawOne<{ id: string; codigoPermiso: string } | undefined>();
+
+    if (!row) return { solapamiento: false };
+    return { solapamiento: true, codigoPermiso: row.codigoPermiso };
   }
 
   // ─── Helper privado ────────────────────────────────────────────────────────

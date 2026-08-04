@@ -5,7 +5,7 @@
 **Proyecto:** Sistema Web de Permisos de Circulación de Motocicletas (Pico y Placa)  
 **Versión:** 0.1.0  
 **Progreso Total:** Calculado automáticamente desde TASKS.md  
-**Última actualización:** 2026-08-02
+**Última actualización:** 2026-08-04
 **Auditoría documental:** `docs/AUDITORIA_DOCUMENTACION.md` (2026-08-02 — 93/100 ✅)  
 **Análisis técnico:** `docs/ANALISIS_TECNICO.md`
 
@@ -55,22 +55,23 @@
 ## Fase 2 — Autenticación y Seguridad
 **Objetivo:** Sistema de identidad blindado antes de cualquier módulo funcional.  
 **Duración estimada:** Semanas 2–3  
-**Dependencia:** Fase 1 completada.
+**Dependencia:** Fase 1 completada.  
+**Estado:** 🔄 En progreso — 9 / 15 tareas completadas
 
-- [ ] Migración TypeORM y seed para `configuracion_institucional` (debe existir antes de Fase 4 — PDF)
-- [ ] Módulo backend `configuracion-institucional/` con endpoints CRUD e imagen
-- [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
-- [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
-- [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
+- [x] Migración TypeORM y seed para `configuracion_institucional` ✅ 2026-08-03
+- [x] Módulo backend `configuracion-institucional/` con endpoints CRUD e imagen ✅ 2026-08-03
+- [x] `POST /api/v1/auth/login` con JWT Access + Refresh Token ✅ 2026-08-03
+- [x] `POST /api/v1/auth/logout` (revocación de refresh token) ✅ 2026-08-03
+- [x] `POST /api/v1/auth/refresh` (rotación de refresh token) ✅ 2026-08-03
 - [ ] `POST /api/v1/auth/recuperar-contrasena`
 - [ ] `POST /api/v1/auth/restablecer-contrasena`
 - [ ] `POST /api/v1/auth/cambiar-contrasena`
 - [ ] `GET  /api/v1/auth/me`
-- [ ] JwtAuthGuard y RolesGuard globales
-- [ ] Rate limiting en `/auth/login` (5 intentos / 15 min por IP)
-- [ ] Bloqueo temporal de cuenta por intentos fallidos
+- [x] JwtAuthGuard y RolesGuard globales ✅ 2026-08-03
+- [x] Rate limiting en `/auth/login` (5 intentos / 15 min por IP) ✅ 2026-08-03
+- [x] Bloqueo temporal de cuenta por intentos fallidos ✅ 2026-08-03
 - [ ] Política de contraseñas aplicada en DTOs
-- [ ] Registro de auditoría: login, logout, login fallido, cambio de contraseña
+- [x] Registro de auditoría: login, logout, login fallido ✅ 2026-08-03
 - [ ] Global Exception Filter (sin exposición de internos)
 - [ ] Helmet + CORS configurados
 - [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
@@ -87,23 +88,24 @@
 ## Fase 3 — Módulo de Solicitudes (Backend)
 **Objetivo:** Núcleo del negocio implementado y probado.  
 **Duración estimada:** Semanas 3–4  
-**Dependencia:** Fase 2 completada.
+**Dependencia:** Fase 2 completada.  
+**Estado:** 🔄 En progreso — 12 / 16 tareas completadas
 
-- [ ] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos
-- [ ] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento
+- [x] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos ✅ 2026-08-03
+- [x] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento ✅ 2026-08-04
 - [ ] `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas)
-- [ ] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario)
-- [ ] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario)
+- [x] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario) ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario) ✅ 2026-08-04
 - [ ] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga
-- [ ] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola
-- [ ] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio
-- [ ] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos
-- [ ] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados
-- [ ] Validación: no duplicar solicitudes activas para la misma moto
-- [ ] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX`
+- [x] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados ✅ 2026-08-04
+- [x] Validación: no duplicar solicitudes activas para la misma moto ✅ 2026-08-03
+- [x] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX` ✅ 2026-08-03
 - [ ] Job automático: marcar solicitudes en `VENCIDA` al superar plazo
-- [ ] Registro en `historial_estados` en cada cambio
-- [ ] Registro en `auditoria` en cada cambio
+- [x] Registro en `historial_estados` en cada cambio ✅ 2026-08-04
+- [x] Registro en `auditoria` en cada cambio ✅ 2026-08-04
 - [ ] StorageModule con MinIO: subida y URLs firmadas
 
 ### Pendientes de Diseño — Fase 3
@@ -256,9 +258,9 @@
 | Fase | Descripción | Completadas | Total | Estado |
 |------|-------------|:-----------:|:-----:|--------|
 | Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
-| Fase 1 | Base de Datos | 7 | 7 | ✅ Completada ← |
-| Fase 2 | Auth y Seguridad | 0 | 15 | ⬜ No iniciada |
-| Fase 3 | Solicitudes Backend | 0 | 16 | ⬜ No iniciada |
+| Fase 1 | Base de Datos | 7 | 7 | ✅ Completada |
+| Fase 2 | Auth y Seguridad | 9 | 15 | 🔄 En progreso |
+| Fase 3 | Solicitudes Backend | 12 | 16 | 🔄 En progreso ← |
 | Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |
 | Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
