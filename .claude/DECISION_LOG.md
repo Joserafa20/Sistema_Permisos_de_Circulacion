@@ -18,6 +18,36 @@ Su objetivo es mantener la coherencia del desarrollo y evitar que se reevalúen 
 
 ---
 
+## ADR-019 — Estrategia de almacenamiento de tokens en el Portal Funcionario
+
+**Fecha:** 2026-08-04
+**Bloque:** B15
+**Estado:** Aprobado
+
+### Contexto
+
+El Portal Funcionario requiere persistencia de sesión autenticada. Se evaluaron tres estrategias:
+
+1. **httpOnly cookie** para access token — requeriría cambios en el backend para leer cookies en lugar de Authorization header.
+2. **localStorage** para tokens — expuesto a XSS; access token jamás debe persistirse en storage accesible desde JS.
+3. **Híbrido**: access token solo en memoria, refresh token en sessionStorage (o localStorage con "recordarme").
+
+### Decisión
+
+- **Access token**: en memoria únicamente (variable de módulo en `api-client.ts`).
+- **Refresh token**: `sessionStorage['_f_rt']` por defecto; `localStorage['_f_rt']` si "recordarme" está activo.
+- **Cookie de presencia** `_f_session=1`: set desde el cliente, usada por el middleware Next.js para evitar flash de contenido protegido. No contiene tokens.
+- **Token rotation tracking**: `setTokenUpdateCallback()` en api-client permite que el AuthProvider sincronice el storage cuando el interceptor 401 rota los tokens automáticamente.
+
+### Consecuencias
+
+- Cierre de tab = sesión terminada (sessionStorage se borra). Comportamiento más seguro para un portal gubernamental.
+- Con "recordarme" la sesión sobrevive al cierre del browser (localStorage persiste).
+- El middleware puede redirigir a login sin esperar la hidratación del cliente (mejor UX).
+- Si el backend rota refresh tokens (como está implementado), el nuevo refresh se guarda en storage inmediatamente vía callback, evitando que la siguiente página recargada use un token ya rotado.
+
+---
+
 ## ADR-018 — Librería QR scanner: @zxing/browser
 
 **Fecha:** 2026-08-04  

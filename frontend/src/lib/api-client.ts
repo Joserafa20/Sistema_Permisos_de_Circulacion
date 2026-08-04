@@ -19,6 +19,15 @@ let _failedQueue: Array<{
   reject: (reason: unknown) => void;
 }> = [];
 
+/* Callback invocado cada vez que los tokens son rotados por el interceptor 401.
+   El AuthProvider lo registra para mantener el storage sincronizado. */
+export type TokenUpdateCallback = (access: string, refresh: string) => void;
+let _tokenUpdateCallback: TokenUpdateCallback | null = null;
+
+export function setTokenUpdateCallback(cb: TokenUpdateCallback | null): void {
+  _tokenUpdateCallback = cb;
+}
+
 export function setTokens(access: string, refresh: string): void {
   _accessToken = access;
   _refreshToken = refresh;
@@ -95,6 +104,7 @@ apiClient.interceptors.response.use(
 
       const { access_token, refresh_token } = data.data;
       setTokens(access_token, refresh_token);
+      _tokenUpdateCallback?.(access_token, refresh_token);
       processQueue(null, access_token);
 
       originalRequest.headers['Authorization'] = `Bearer ${access_token}`;

@@ -37,3 +37,21 @@ export const ROUTES = {
   contacto: '/contacto',
   ayuda: '/ayuda',
 } as const;
+
+/** Rutas del portal funcionario */
+export const FUNC_ROUTES = {
+  login: '/funcionario/login',
+  dashboard: '/funcionario',
+  solicitudes: '/funcionario/solicitudes',
+  permisos: '/funcionario/permisos',
+  perfil: '/funcionario/perfil',
+} as const;
+
+/** Keys de sessionStorage / localStorage para tokens del funcionario */
+export const FUNC_STORAGE = {
+  refreshToken: '_f_rt',
+  rememberMe: '_f_rm',
+} as const;
+
+/** Cookie de presencia de sesión (no contiene datos sensibles, usada por middleware) */
+export const SESSION_COOKIE_NAME = '_f_session';

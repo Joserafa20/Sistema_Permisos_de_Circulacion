@@ -273,7 +273,7 @@
 | Fase 3 | Solicitudes Backend | 16 | 16 | ✅ Completada (B9) |
 | Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
 | Fase 5 | Frontend Ciudadano | 33 | 33 | ✅ Completada (B14) |
-| Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
+| Fase 6 | Frontend Funcionario | 20 | 27 | 🔄 En progreso (B15) |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
 

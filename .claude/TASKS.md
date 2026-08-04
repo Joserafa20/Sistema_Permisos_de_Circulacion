@@ -289,19 +289,36 @@ Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado,
 **Objetivo:** Herramienta operativa para la gestión diaria de solicitudes.
 **Semanas:** 6–7
 **Dependencia:** Fases 3 y 4 completadas.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B15 completado
 
-- [ ] Pantalla de login con manejo de sesión JWT
-- [ ] Dashboard: KPIs del día (recibidas, pendientes, aprobadas, rechazadas, vencidas)
-- [ ] Cola de solicitudes ordenada por antigüedad con indicadores de urgencia
-- [ ] Filtros: estado, fecha, documento, placa, radicado
-- [ ] Vista de detalle de solicitud:
-  - [ ] Todos los datos personales y de la moto
-  - [ ] Previsualización de documentos adjuntos (PDF e imagen inline)
-  - [ ] Historial de estados
-- [ ] Modal de aprobación con resumen y confirmación
+### B15 — Infraestructura base Portal Funcionario (✅ 2026-08-04)
+- [x] /funcionario/login: RHF+Zod, toggle contraseña, manejo JWT, error messages, WCAG ✅ 2026-08-04 (B15)
+- [x] AuthProvider con Context API, bootstrap refresh token silencioso, logout ✅ 2026-08-04 (B15)
+- [x] Persistencia tokens: sessionStorage por defecto, localStorage con "recordarme" ✅ 2026-08-04 (B15)
+- [x] Rotación de refresh tokens: callback en api-client sincroniza storage en cada 401 ✅ 2026-08-04 (B15)
+- [x] Middleware Next.js: protección /funcionario/* con cookie _f_session, redirect a login ✅ 2026-08-04 (B15)
+- [x] ProtectedRoute: loading skeleton, redirect unauthenticated, acceso denegado por rol ✅ 2026-08-04 (B15)
+- [x] PermissionGate: renderizado condicional por rol sin redirigir ✅ 2026-08-04 (B15)
+- [x] Sidebar: desktop sticky + mobile drawer + hamburguesa, nav items con badge de pendientes ✅ 2026-08-04 (B15)
+- [x] HeaderFunc: breadcrumb, botón refresh, ProfileMenu ✅ 2026-08-04 (B15)
+- [x] ProfileMenu: dropdown avatar, info usuario, logout ✅ 2026-08-04 (B15)
+- [x] BreadcrumbNav: aria-current, teclado completo ✅ 2026-08-04 (B15)
+- [x] Dashboard: 6 KPIs StatCard (colores por tipo), actividad reciente, accesos rápidos ✅ 2026-08-04 (B15)
+- [x] funcionario.service.ts: login, logout, refresh, getMe, getDashboardStats, getActividadReciente ✅ 2026-08-04 (B15)
+- [x] Hooks: useLogin, useLogout, useProfile, useDashboardStats, useActividadReciente, useRefreshToken ✅ 2026-08-04 (B15)
+- [x] Componentes reutilizables: StatCard, DashboardCard, PageContainer, SidebarItem ✅ 2026-08-04 (B15)
+- [x] WCAG: aria-current, aria-expanded, aria-haspopup, aria-live, focus management, teclado ✅ 2026-08-04 (B15)
+- [x] Layout nested: (panel)/layout.tsx con ProtectedRoute + Sidebar ✅ 2026-08-04 (B15)
+- [x] ADR-019: estrategia de almacenamiento de tokens ✅ 2026-08-04 (B15)
+- [x] Tailwind content: añadido src/modules/** y src/contexts/** ✅ 2026-08-04 (B15)
+- [x] Badge variante 'info' añadida ✅ 2026-08-04 (B15)
+
+### Pendiente — B16
+- [ ] Cola de solicitudes: listado paginado con filtros (estado, fecha, radicado, placa, documento)
+- [ ] Vista de detalle de solicitud con documentos, historial, datos ciudadano y moto
+- [ ] Modal de aprobación
 - [ ] Modal de rechazo con motivo obligatorio
-- [ ] Modal de corrección con selección de campos a corregir
+- [ ] Modal de corrección con campos específicos
 - [ ] Visualización y descarga del permiso generado
 - [ ] Botón de impresión del PDF
 

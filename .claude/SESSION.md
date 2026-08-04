@@ -440,8 +440,55 @@ Commit: `feat(frontend): portal ciudadano consultas y validacion QR — B14`
 
 ---
 
+## Bloque B15 — Infraestructura Portal Funcionario (2026-08-04)
+
+### Archivos creados
+- `frontend/src/types/funcionario.ts` — UsuarioPerfil, LoginResponse, RefreshResponse, DashboardStats, SolicitudListItem, AuthStatus
+- `frontend/src/schemas/login.schemas.ts` — loginSchema (correo + contrasena + recordarme)
+- `frontend/src/services/funcionario.service.ts` — login, logout, refresh, getMe, getDashboardStats (6 queries en paralelo), getActividadReciente
+- `frontend/src/contexts/auth-context.tsx` — AuthProvider, useAuth, bootstrap silencioso, TokenUpdateCallback
+- `frontend/src/hooks/use-login.ts` — useMutation, manejo de errores por código HTTP, redirect post-login
+- `frontend/src/hooks/use-logout.ts` — useMutation wrapper
+- `frontend/src/hooks/use-profile.ts` — useQuery, 5 min staleTime
+- `frontend/src/hooks/use-dashboard.ts` — useDashboardStats + useActividadReciente, refetchInterval 2 min
+- `frontend/src/hooks/use-refresh-token.ts` — refresh manual, sincroniza storage
+- `frontend/src/components/funcionario/protected-route.tsx` — loading skeleton, redirect, role check
+- `frontend/src/components/funcionario/permission-gate.tsx` — render condicional por rol
+- `frontend/src/components/funcionario/page-container.tsx` — layout wrapper con title/description/actions
+- `frontend/src/components/funcionario/stat-card.tsx` — KPI card con 6 variantes de color, skeleton
+- `frontend/src/components/funcionario/dashboard-card.tsx` — card genérica con icon header
+- `frontend/src/components/funcionario/sidebar-item.tsx` — link con aria-current, badge de conteo
+- `frontend/src/components/funcionario/sidebar.tsx` — desktop sticky + mobile drawer + hamburguesa
+- `frontend/src/components/funcionario/header-func.tsx` — breadcrumb + refresh + ProfileMenu
+- `frontend/src/components/funcionario/profile-menu.tsx` — dropdown con avatar, info, logout
+- `frontend/src/components/funcionario/breadcrumb-nav.tsx` — nav con aria-current, links intermedios
+- `frontend/src/modules/funcionario/login-form.tsx` — formulario login completo con toggle contraseña
+- `frontend/src/modules/funcionario/dashboard-view.tsx` — dashboard con KPIs + actividad + accesos rápidos
+- `frontend/src/app/funcionario/layout.tsx` — AuthProvider wrapper
+- `frontend/src/app/funcionario/login/page.tsx` — página login
+- `frontend/src/app/funcionario/(panel)/layout.tsx` — ProtectedRoute + Sidebar
+- `frontend/src/app/funcionario/(panel)/page.tsx` — dashboard page
+- `frontend/src/middleware.ts` — protección /funcionario/* con cookie _f_session
+
+### Archivos modificados
+- `frontend/src/lib/api-client.ts` — +setTokenUpdateCallback, _tokenUpdateCallback invocado en interceptor 401
+- `frontend/src/lib/constants.ts` — +FUNC_ROUTES, +FUNC_STORAGE, +SESSION_COOKIE_NAME
+- `frontend/src/components/ui/badge.tsx` — +variante 'info'
+- `frontend/src/tailwind.config.ts` — +src/modules/**, +src/contexts/**
+- `.claude/TASKS.md` — B15 completado, B16 pendiente
+- `.claude/ROADMAP.md` — Fase 6: 20/27
+
+### ADR registrado: ADR-019 — Estrategia de almacenamiento de tokens funcionario
+
+### Quality gates
+- `tsc --noEmit`: ✅ exit 0
+- `next lint`: ✅ 0 errores
+- `next build`: ✅ 11/11 páginas, /funcionario 8.97 kB, /funcionario/login 5.27 kB
+
+---
+
 ## Última actualización
 
-2026-08-04 — B14 completado. Fase 5 cerrada (33/33). Portal ciudadano 100% funcional:
-/, /solicitud, /estado, /verificar, /contacto, /ayuda.
-Siguiente: Fase 6 (Panel Funcionario) o Fase 8 (Calidad). Requiere autorización.
+2026-08-04 — B15 completado. Fase 6 iniciada (20/27). Portal Funcionario: infraestructura
+completa (auth, layout, dashboard). Próximo: B16 — Cola de solicitudes y flujos de gestión.
+Requiere autorización.
