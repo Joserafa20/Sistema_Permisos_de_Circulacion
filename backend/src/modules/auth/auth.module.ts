@@ -3,7 +3,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
 
 import { UsuarioEntity } from '../usuarios/infrastructure/persistence/usuario.entity';
 import { TokenEntity } from './infrastructure/persistence/token.entity';
@@ -41,7 +40,6 @@ import { AuthController } from './infrastructure/controllers/auth.controller';
         signOptions: { expiresIn: 900 },
       }),
     }),
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 900000, limit: 5 }]),
     TypeOrmModule.forFeature([TokenEntity, UsuarioEntity]),
   ],
   controllers: [AuthController],

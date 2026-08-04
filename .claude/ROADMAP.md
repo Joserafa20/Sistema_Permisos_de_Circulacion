@@ -237,6 +237,16 @@
 **Duración estimada:** Semanas 8–10  
 **Dependencia:** Fases 5, 6 y 7 completadas.
 
+### Adelantado en B11 (2026-08-04)
+
+- [x] `GET /api/v1/health` verifica PostgreSQL + Redis + MinIO + SMTP (Terminus) ✅ 2026-08-04 (B11)
+- [x] ThrottlerModule global en AppModule (100 req/min) + endpoints críticos con límites propios ✅ 2026-08-04 (B11)
+- [x] Mailpit en docker-compose.yml para captura de correos en desarrollo ✅ 2026-08-04 (B11)
+- [x] `docker-compose.prod.yml` con Nginx, redes internas aisladas, restart:always ✅ 2026-08-04 (B11)
+- [x] `.env.production.example` con todos los secretos y guía de generación ✅ 2026-08-04 (B11)
+- [x] `README_DEPLOY.md` con flujo completo: variables, migraciones, backup, rollback ✅ 2026-08-04 (B11)
+- [x] `MinioStorageAdapter.ping()` para health check sin acoplamiento ✅ 2026-08-04 (B11)
+
 - [ ] Pruebas unitarias backend (cobertura ≥ 80%)
   - [ ] Use cases críticos
   - [ ] Guards y validaciones
@@ -269,7 +279,7 @@
 | Fase 1 | Base de Datos | 7 | 7 | ✅ Completada |
 | Fase 2 | Auth y Seguridad | 17 | 17 | ✅ Completada (B8) |
 | Fase 3 | Solicitudes Backend | 16 | 16 | ✅ Completada (B9) |
-| Fase 4 | Permisos PDF/QR | 13 | 18 | 🔄 En progreso ← |
+| Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
 | Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |

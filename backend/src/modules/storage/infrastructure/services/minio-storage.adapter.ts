@@ -54,4 +54,9 @@ export class MinioStorageAdapter implements OnModuleInit {
   async getSignedUrl(bucket: string, key: string, ttlSeconds: number): Promise<string> {
     return this.client.presignedGetObject(bucket, key, ttlSeconds);
   }
+
+  /** Verifica conectividad con MinIO comprobando que el bucket principal existe. */
+  async ping(): Promise<boolean> {
+    return this.client.bucketExists(this.bucketPdfs);
+  }
 }

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import configuration from './config/configuration';
@@ -80,6 +81,16 @@ import { RedisModule } from './modules/redis/redis.module';
       }),
     }),
 
+    // ── Rate Limiting global (ThrottlerGuard como APP_GUARD) ──────
+    // default: 100 req/min por IP — los endpoints críticos definen su propio @Throttle()
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: () => ({
+        // 'default' coincide con el nombre usado en @Throttle({default: ...}) de los controllers
+        throttlers: [{ name: 'default', ttl: 60000, limit: 100 }],
+      }),
+    }),
+
     // ── Redis global + BullMQ root ─────────────────────────────────
     RedisModule,
     BullModule.forRootAsync({
@@ -110,6 +121,7 @@ import { RedisModule } from './modules/redis/redis.module';
     // ── Guards globales ────────────────────────────────────────────
     // Orden: JwtAuthGuard valida el token (o lo omite en rutas @Public()).
     // RolesGuard verifica el rol requerido por @Roles() sobre req.user.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

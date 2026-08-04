@@ -114,6 +114,28 @@ services:
       "
     restart: on-failure
 
+  # ── Mailpit — Captura de correos en desarrollo ────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: pyp-mailpit
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+    networks:
+      - picoyplaca-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8025"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
   # ── Backend NestJS ─────────────────────────────────────────────────────────
   backend:
     build:
@@ -151,11 +173,11 @@ services:
       JWT_EXPIRES_IN:          ${JWT_EXPIRES_IN:-15m}
       JWT_REFRESH_SECRET:      ${JWT_REFRESH_SECRET}
       JWT_REFRESH_EXPIRES_IN:  ${JWT_REFRESH_EXPIRES_IN:-7d}
-      # Email
-      MAIL_HOST: ${MAIL_HOST:-smtp.example.com}
-      MAIL_PORT: ${MAIL_PORT:-587}
+      # Email (en desarrollo apunta a Mailpit; en producción usar SMTP real)
+      MAIL_HOST: ${MAIL_HOST:-mailpit}
+      MAIL_PORT: ${MAIL_PORT:-1025}
       MAIL_USER: ${MAIL_USER:-noreply@alcaldia.gov.co}
-      MAIL_PASS: ${MAIL_PASS:-placeholder}
+      MAIL_PASS: ${MAIL_PASS:-}
       MAIL_FROM: ${MAIL_FROM:-"Alcaldía PYP <noreply@alcaldia.gov.co>"}
       # reCAPTCHA
       RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-disabled}
@@ -181,6 +203,8 @@ services:
         condition: service_healthy
       createbuckets:
         condition: service_completed_successfully
+      mailpit:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/v1/health"]
       interval: 15s

@@ -734,3 +734,60 @@ Antes de modificar una decisión existente:
 2. Verificar si la decisión continúa vigente.
 3. Si se requiere un cambio, registrar una nueva entrada explicando el motivo.
 4. Nunca eliminar decisiones anteriores; conservar el historial para auditoría.
+
+---
+
+## ADR-B11-001 — Health Checks con indicadores custom (sin @nestjs/axios)
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** `@nestjs/terminus` v10 ofrece `HttpHealthIndicator` para verificar servicios HTTP, pero requiere `@nestjs/axios` como dependencia adicional. Redis y MinIO no tienen endpoints HTTP nativos accesibles desde el backend.
+
+**Decisión:** Tres `HealthIndicator` personalizados sin `@nestjs/axios`:
+- `RedisHealthIndicator`: `ioredis.ping()` con REDIS_CLIENT inyectado (ya disponible vía @Global)
+- `MinioHealthIndicator`: `MinioStorageAdapter.ping()` (nuevo método público sobre el cliente Minio ya existente)
+- `SmtpHealthIndicator`: TCP socket probe al host:port del SMTP (sin abrir sesión SMTP completa, mínimo overhead)
+
+**Consecuencias:** Sin nuevas dependencias. Reutiliza clientes ya instanciados. SMTP probe es TCP-only (no valida credenciales, solo verifica alcanzabilidad de red), lo cual es apropiado para un health check — la validación real de credenciales ocurre al enviar el primer email.
+
+---
+
+## ADR-B11-002 — ThrottlerModule global en AppModule
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** `ThrottlerModule` estaba registrado solo en `AuthModule`, lo que significaba que únicamente los endpoints de autenticación tenían rate limiting. Endpoints públicos como `POST /solicitudes` y `GET /public/verificar/:qr` eran vulnerables a flood.
+
+**Decisión:** `ThrottlerModule.forRootAsync()` movido a `AppModule` con `ThrottlerGuard` como `APP_GUARD`. Configuración: 100 req/min por IP como límite global. Los endpoints críticos definen su propio `@Throttle()` con límites más estrictos (login: 5/15min, recuperar-contrasena: 3/hora).
+
+**Consecuencias:** Protección por defecto en todos los endpoints. El nombre `'default'` se mantiene para compatibilidad con los `@Throttle({default: ...})` existentes en auth.controller.ts y permisos-public.controller.ts.
+
+---
+
+## ADR-B11-003 — Red `internal: true` en docker-compose.prod.yml
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** En producción, PostgreSQL, Redis y MinIO no deben ser accesibles desde fuera del servidor Docker. Solo el backend necesita comunicarse con ellos. Nginx es el único punto de entrada externo.
+
+**Decisión:** Dos redes en `docker-compose.prod.yml`:
+- `internal` (driver: bridge, internal: true): PostgreSQL + Redis + MinIO + Backend. No tiene ruta hacia internet.
+- `web` (driver: bridge): Solo Nginx y Backend. Nginx expone los puertos 80/443.
+
+**Consecuencias:** Los servicios de infraestructura no son accesibles desde el host ni desde internet, incluso si el servidor tiene la IP expuesta. El backend vive en ambas redes: consume los servicios internos y recibe tráfico de Nginx.
+
+---
+
+## ADR-B11-004 — Mailpit como capturador de emails en desarrollo
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** El sistema necesita enviar emails en desarrollo para probar las 7 plantillas HTML sin riesgo de enviar correos reales a ciudadanos. Mailhog (alternativa anterior) no tiene mantenimiento activo.
+
+**Decisión:** `axllent/mailpit:latest` en `docker-compose.yml` (desarrollo). El backend apunta a `MAIL_HOST=mailpit, MAIL_PORT=1025` por defecto. UI disponible en http://localhost:8025.
+
+**Consecuencias:** Todos los correos enviados en desarrollo son capturados y visibles en la UI de Mailpit. No se requieren credenciales SMTP reales. En producción el valor de `MAIL_HOST` en `.env.production` apunta al SMTP institucional real.

@@ -343,6 +343,18 @@ El próximo desarrollo es Frontend (Fases 5, 6, 7) o Fase 8 (calidad y producci�
 
 ### Última tarea terminada
 
+B11 — Hardening del Backend + Preparación para Producción (2026-08-04):
+- Health checks completos: GET /api/v1/health verifica DB + Redis + MinIO + SMTP (Terminus)
+- RedisHealthIndicator, MinioHealthIndicator, SmtpHealthIndicator (TCP probe sin dependencia HTTP)
+- ThrottlerModule movido a AppModule como guard global (100 req/min por IP)
+- Mailpit agregado a docker-compose.yml (captura de correos en desarrollo, UI en :8025)
+- docker-compose.prod.yml creado: Nginx proxy, redes internas aisladas, restart:always, volúmenes
+- .env.production.example con todos los secretos, instrucciones de generación y reglas críticas
+- README_DEPLOY.md: guía completa de despliegue, migraciones, backup, rollback, troubleshooting
+- MinioStorageAdapter.ping() expuesto para health check sin acoplamiento
+- Variables SEED_CI_* y Mailpit agregadas al .env.example existente
+- ROADMAP.md corregido: Fase 4 actualizada de 13/18 a 18/18
+
 B10 — Sistema de Notificaciones Reales (BullMQ + SMTP) (2026-08-04):
 - RedisModule (@Global) reutilizable — IORedis singleton
 - BullModule.forRootAsync en AppModule — configuración única centralizada
