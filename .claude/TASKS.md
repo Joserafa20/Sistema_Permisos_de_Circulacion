@@ -343,6 +343,20 @@ El próximo desarrollo es Frontend (Fases 5, 6, 7) o Fase 8 (calidad y producci�
 
 ### Última tarea terminada
 
+B11.1 — Cierre de Infraestructura de Producción (2026-08-04):
+- docker/nginx/nginx.conf creado: gzip, proxy_buffering, keepalive, rate limiting Nginx, headers de seguridad completos (X-Frame-Options, X-Content-Type-Options, CSP, Permissions-Policy, COEP), HSTS listo (comentado hasta confirmar SSL), WebSocket upgrade, manejo de errores 404/500 en JSON, TLS 1.2/1.3 Mozilla Modern
+- docker/nginx/ssl/.gitkeep: directorio versionado, certificados excluidos
+- .gitignore: +.env.production, +.env.staging, +docker/.env.production, +docker/nginx/ssl/*.pem/*.crt/*.key (hallazgo crítico — no estaba cubierto)
+- backend/Dockerfile mejorado: stage 'deps' separado para prod deps / stage 'build' para dev+compilación / HEALTHCHECK integrado / no duplicación de npm prune
+- frontend/Dockerfile mejorado: mismo patrón deps/build/development/production + HEALTHCHECK
+- ConfiguracionInstitucionalSeeder (OnApplicationBootstrap): inserta registro inicial desde SEED_CI_* vars si la tabla está vacía — hallazgo crítico: SEED_CI vars existían en env pero no había código que las leyera
+- configuration.ts: +seed.ci.* namespace completo
+- validation.schema.ts: +SEED_CI_* como opcionales con tipos correctos
+- configuracion-institucional.module.ts: +ConfiguracionInstitucionalSeeder como provider
+- .env.example y .env.production.example: +SEED_CI_NIT, +SEED_CI_CODIGO_DANE
+- docker-compose.prod.yml: +SEED_CI_NIT, +SEED_CI_CODIGO_DANE en environment del backend
+- README_DEPLOY.md: +sección SSL (Let's Encrypt + institucional), +checklist pre-producción (12 items), +checklist post-despliegue (10 items), índice renumerado
+
 B11 — Hardening del Backend + Preparación para Producción (2026-08-04):
 - Health checks completos: GET /api/v1/health verifica DB + Redis + MinIO + SMTP (Terminus)
 - RedisHealthIndicator, MinioHealthIndicator, SmtpHealthIndicator (TCP probe sin dependencia HTTP)

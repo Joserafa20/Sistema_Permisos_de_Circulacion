@@ -57,4 +57,15 @@ export const validationSchema = Joi.object({
 
   // Seguridad
   BCRYPT_ROUNDS: Joi.number().min(10).max(14).default(12),
+
+  // Seed de configuración institucional (opcionales — se usan si la tabla está vacía)
+  SEED_CI_NOMBRE_ALCALDIA: Joi.string().optional(),
+  SEED_CI_MUNICIPIO: Joi.string().optional(),
+  SEED_CI_DEPARTAMENTO: Joi.string().optional(),
+  SEED_CI_DIRECCION: Joi.string().optional(),
+  SEED_CI_TELEFONO: Joi.string().optional(),
+  SEED_CI_CORREO: Joi.string().email().optional(),
+  SEED_CI_SITIO_WEB: Joi.string().uri().optional().allow(''),
+  SEED_CI_NIT: Joi.string().optional(),
+  SEED_CI_CODIGO_DANE: Joi.string().optional(),
 });

@@ -791,3 +791,55 @@ Antes de modificar una decisión existente:
 **Decisión:** `axllent/mailpit:latest` en `docker-compose.yml` (desarrollo). El backend apunta a `MAIL_HOST=mailpit, MAIL_PORT=1025` por defecto. UI disponible en http://localhost:8025.
 
 **Consecuencias:** Todos los correos enviados en desarrollo son capturados y visibles en la UI de Mailpit. No se requieren credenciales SMTP reales. En producción el valor de `MAIL_HOST` en `.env.production` apunta al SMTP institucional real.
+
+---
+
+## ADR-B11.1-001 — nginx.conf con rate limiting en capa Nginx (doble capa con ThrottlerGuard)
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** ThrottlerGuard de NestJS opera a nivel de aplicación — en el momento en que NestJS recibe la request, ya consumió recursos de red y CPU. Para ataques volumétricos, el rate limiting debe actuar antes en la pila.
+
+**Decisión:** Dos zonas de rate limiting en Nginx: `api_general` (100 req/s, burst 200) para todos los endpoints, y `api_auth` (5 req/s, burst 10) para `/auth/login` y `/auth/recuperar-contrasena`. Esto complementa — no reemplaza — el ThrottlerGuard de NestJS.
+
+**Consecuencias:** Los ataques de fuerza bruta sobre el login son bloqueados en Nginx antes de alcanzar NestJS. Los límites son deliberadamente más permisivos que los de NestJS para evitar bloquear usuarios legítimos con conexiones lentas.
+
+---
+
+## ADR-B11.1-002 — HSTS comentado hasta confirmar SSL estable
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** HSTS con `max-age=31536000` es irreversible para los navegadores que lo reciben durante ese período. Si el certificado SSL vence o hay un error de configuración, el dominio queda inaccesible hasta que expire el HSTS en los navegadores de los ciudadanos.
+
+**Decisión:** La línea HSTS está en `nginx.conf` pero comentada. El administrador debe activarla explícitamente después de verificar que el SSL funciona correctamente en producción durante al menos 24 horas.
+
+**Consecuencias:** Sin HSTS en el primer despliegue. Riesgo de downgrade attack durante ese período. Aceptable para MVP — la activación posterior es un paso documentado en README_DEPLOY.md.
+
+---
+
+## ADR-B11.1-003 — ConfiguracionInstitucionalSeeder en OnApplicationBootstrap
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** Las variables `SEED_CI_*` existían en `.env.example` y `docker-compose.prod.yml` desde B11, pero no había código que las leyera. La tabla `configuracion_institucional` quedaba vacía después de las migraciones, lo cual haría fallar la generación de PDF institucional al primer uso.
+
+**Decisión:** `ConfiguracionInstitucionalSeeder` implementa `OnApplicationBootstrap`. Comprueba `count()` y si es 0, inserta un registro con los valores de `SEED_CI_*` o defaults documentados. El `escudoStorageKey` se inicializa como `'_placeholder_sin_escudo_'` — el admin debe subir el escudo desde el panel antes de aprobar solicitudes.
+
+**Consecuencias:** El sistema arranca en estado funcional (tabla no vacía). El PDF falla gracefully si el escudo no existe en MinIO — no bloquea el arranque del backend. Se añadieron `SEED_CI_NIT` y `SEED_CI_CODIGO_DANE` que faltaban en las variables de entorno.
+
+---
+
+## ADR-B11.1-004 — Dockerfile multi-stage con stage 'deps' separado
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** El Dockerfile anterior tenía un único stage `base` que copiaba `package*.json` y luego se derivaban `development` y `build` — ambos ejecutando `npm ci` con distintos conjuntos. La imagen de producción copiaba `node_modules` del stage `build` y luego ejecutaba `npm prune --production`, lo cual es redundante y extiende el tiempo de build.
+
+**Decisión:** Stage `deps` separado ejecuta `npm ci --omit=dev` una vez y la imagen de producción copia sus `node_modules`. Stage `build` ejecuta `npm ci` (con dev deps) y compila TypeScript. La imagen final copia `dist/` de `build` y `node_modules/` de `deps`. Zero `npm prune`.
+
+**Consecuencias:** Layer cache más efectivo — cambios en código fuente no invalidan el layer de producción deps. Imagen final no contiene dev deps, `src/`, ni herramientas de TypeScript.

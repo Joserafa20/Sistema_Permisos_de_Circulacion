@@ -176,6 +176,8 @@ services:
       SEED_CI_TELEFONO:        ${SEED_CI_TELEFONO}
       SEED_CI_CORREO:          ${SEED_CI_CORREO}
       SEED_CI_SITIO_WEB:       ${SEED_CI_SITIO_WEB}
+      SEED_CI_NIT:             ${SEED_CI_NIT}
+      SEED_CI_CODIGO_DANE:     ${SEED_CI_CODIGO_DANE}
     networks:
       - internal
       - web

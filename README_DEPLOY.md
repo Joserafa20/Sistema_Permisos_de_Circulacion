@@ -4,14 +4,17 @@
 
 1. [Prerequisitos](#1-prerequisitos)
 2. [Variables de Entorno](#2-variables-de-entorno)
-3. [Primer Despliegue](#3-primer-despliegue)
-4. [Migraciones](#4-migraciones)
-5. [Verificación de Salud](#5-verificación-de-salud)
-6. [Comandos de Operación](#6-comandos-de-operación)
-7. [Actualización de la Aplicación](#7-actualización-de-la-aplicación)
-8. [Rollback](#8-rollback)
-9. [Backup y Restore](#9-backup-y-restore)
-10. [Resolución de Problemas](#10-resolución-de-problemas)
+3. [Certificados SSL](#3-certificados-ssl)
+4. [Primer Despliegue](#4-primer-despliegue)
+5. [Migraciones](#5-migraciones)
+6. [Verificación de Salud](#6-verificación-de-salud)
+7. [Comandos de Operación](#7-comandos-de-operación)
+8. [Actualización de la Aplicación](#8-actualización-de-la-aplicación)
+9. [Rollback](#9-rollback)
+10. [Backup y Restore](#10-backup-y-restore)
+11. [Resolución de Problemas](#11-resolución-de-problemas)
+12. [Checklist Pre-Producción](#12-checklist-pre-producción)
+13. [Checklist Post-Despliegue](#13-checklist-post-despliegue)
 
 ---
 
@@ -56,7 +59,48 @@ node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
 
 ---
 
-## 3. Primer Despliegue
+## 3. Certificados SSL
+
+### Opción A — Let's Encrypt (recomendada, gratuita)
+
+```bash
+# Instalar Certbot en el servidor host
+apt-get install -y certbot
+
+# Obtener certificado (el dominio debe apuntar a la IP del servidor)
+certbot certonly --standalone -d permisos.municipio.gov.co
+
+# Copiar certificados al directorio de Nginx
+mkdir -p docker/nginx/ssl
+cp /etc/letsencrypt/live/permisos.municipio.gov.co/fullchain.pem docker/nginx/ssl/cert.pem
+cp /etc/letsencrypt/live/permisos.municipio.gov.co/privkey.pem   docker/nginx/ssl/key.pem
+chmod 600 docker/nginx/ssl/*.pem
+```
+
+**Renovación automática** (agregar a cron del servidor):
+
+```bash
+# /etc/cron.d/certbot-renewal
+0 3 1 * * root certbot renew --quiet && \
+  cp /etc/letsencrypt/live/permisos.municipio.gov.co/fullchain.pem /ruta/docker/nginx/ssl/cert.pem && \
+  cp /etc/letsencrypt/live/permisos.municipio.gov.co/privkey.pem   /ruta/docker/nginx/ssl/key.pem && \
+  docker restart pyp-nginx-prod
+```
+
+### Opción B — Certificado institucional existente
+
+```bash
+mkdir -p docker/nginx/ssl
+cp /ruta/al/certificado.crt docker/nginx/ssl/cert.pem
+cp /ruta/a/la/clave.key     docker/nginx/ssl/key.pem
+chmod 600 docker/nginx/ssl/*.pem
+```
+
+> **ADVERTENCIA:** `docker/nginx/ssl/*.pem` y `*.key` están en `.gitignore` y NUNCA deben subirse al repositorio.
+
+---
+
+## 4. Primer Despliegue
 
 ```bash
 # 1. Clonar el repositorio
@@ -317,4 +361,42 @@ El pool de TypeORM está configurado en `max: 10, min: 2`. Si hay más de 10 con
 
 ---
 
-*Última actualización: 2026-08-04 — Bloque B11*
+---
+
+## 12. Checklist Pre-Producción
+
+Ejecutar antes de cada despliegue a producción:
+
+- [ ] `.env.production` creado y sin valores `CAMBIAR_`
+- [ ] `QR_SECRET_SALT` generado con 48+ bytes aleatorios y guardado en lugar seguro
+- [ ] `JWT_SECRET` y `JWT_REFRESH_SECRET` son distintos entre sí y tienen 64+ bytes
+- [ ] Certificados SSL en `docker/nginx/ssl/cert.pem` y `docker/nginx/ssl/key.pem`
+- [ ] El dominio resuelve a la IP del servidor (`dig permisos.municipio.gov.co`)
+- [ ] Firewall permite tráfico en 80 y 443 únicamente
+- [ ] Servidor tiene ≥ 2 GB RAM y ≥ 20 GB disco libre
+- [ ] Acceso SMTP verificado manualmente (`telnet smtp.municipio.gov.co 587`)
+- [ ] Migraciones revisadas y respaldadas antes de aplicar
+- [ ] Backup de PostgreSQL si es actualización (no primer despliegue)
+- [ ] Variables `SEED_CI_*` correctas para el municipio (solo se leen si la tabla está vacía)
+- [ ] `docker-compose.prod.yml` validado: `docker compose -f docker/docker-compose.prod.yml config`
+
+---
+
+## 13. Checklist Post-Despliegue
+
+Verificar después de cada despliegue:
+
+- [ ] `GET /api/v1/health` responde `{"status":"ok"}` con los 4 servicios `up`
+- [ ] Redireccionamiento HTTP → HTTPS funciona: `curl -I http://permisos.municipio.gov.co`
+- [ ] Login de funcionario funciona con usuario admin inicial
+- [ ] Creación de solicitud de prueba completa el flujo
+- [ ] Email de prueba llega correctamente (verificar bandeja del ciudadano)
+- [ ] Generación de PDF no falla (aprobar una solicitud de prueba)
+- [ ] QR del permiso verifica correctamente en `GET /api/v1/public/verificar/:codigo`
+- [ ] Logs del backend no muestran errores de conexión: `docker logs pyp-backend-prod --tail 50`
+- [ ] MinIO consola accesible internamente (no debe estar expuesta al exterior)
+- [ ] HSTS header presente en respuesta HTTPS (activar en `nginx.conf` después de confirmar SSL)
+
+---
+
+*Última actualización: 2026-08-04 — Bloque B11.1*

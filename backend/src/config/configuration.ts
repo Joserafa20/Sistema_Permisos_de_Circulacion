@@ -51,4 +51,17 @@ export default (): Record<string, unknown> => ({
   security: {
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS ?? '12', 10),
   },
+  seed: {
+    ci: {
+      nombreAlcaldia: process.env.SEED_CI_NOMBRE_ALCALDIA,
+      municipio: process.env.SEED_CI_MUNICIPIO,
+      departamento: process.env.SEED_CI_DEPARTAMENTO,
+      direccion: process.env.SEED_CI_DIRECCION,
+      telefono: process.env.SEED_CI_TELEFONO,
+      correo: process.env.SEED_CI_CORREO,
+      sitioWeb: process.env.SEED_CI_SITIO_WEB,
+      nit: process.env.SEED_CI_NIT,
+      codigoDane: process.env.SEED_CI_CODIGO_DANE,
+    },
+  },
 });
