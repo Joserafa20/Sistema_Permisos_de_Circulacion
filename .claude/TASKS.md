@@ -245,17 +245,24 @@
 - [x] Hooks: useMotivos, useConfiguracionPublica ✅ 2026-08-04 (B12)
 - [x] Variables de entorno tipadas (src/lib/env.ts) ✅ 2026-08-04 (B12)
 
+### B13 — Formulario Ciudadano (✅ 2026-08-04)
+- [x] Schemas Zod completos: ciudadanoSchema, motocicletaSchema, motivoBaseSchema, confirmacionSchema, solicitudFormSchema ✅ 2026-08-04 (B13)
+- [x] Stepper funcional 5 pasos con Framer Motion AnimatePresence (dirección animada) ✅ 2026-08-04 (B13)
+- [x] Paso 1: Datos del ciudadano con validaciones colombianas (celular 3XXXXXXXXX, documento, correo) ✅ 2026-08-04 (B13)
+- [x] Paso 2: Motocicleta con validación placa colombiana ABC12D ✅ 2026-08-04 (B13)
+- [x] Paso 3: Motivos dinámicos GET /public/motivos, fechas con validación cruzada ✅ 2026-08-04 (B13)
+- [x] Paso 4: FileUploader (RN-53) drag & drop, PDF/JPG/PNG, máx 10 MB, 5 archivos ✅ 2026-08-04 (B13)
+- [x] Paso 5: Pantalla de resumen completo + checkbox declaración jurada ✅ 2026-08-04 (B13)
+- [x] LocalStorage auto-save debounced 500 ms + restauración de borrador con banner de aviso ✅ 2026-08-04 (B13)
+- [x] reCAPTCHA v3 con hook useRecaptchaV3, env var NEXT_PUBLIC_RECAPTCHA_SITE_KEY, warning en dev ✅ 2026-08-04 (B13)
+- [x] Envío con crearSolicitud() + adjuntarDocumentos(), LoadingOverlay, sin doble submit ✅ 2026-08-04 (B13)
+- [x] Pantalla de éxito: radicado prominente, botones copiar/imprimir/consultar/nueva ✅ 2026-08-04 (B13)
+- [x] Error handling 400/409/422/500/timeout/offline con mensajes distintos, sin alert() ✅ 2026-08-04 (B13)
+- [x] WCAG: aria-label, aria-invalid, aria-live, focus management entre pasos ✅ 2026-08-04 (B13)
+- [x] Mobile-first responsive, Navbar/Footer sin romper ✅ 2026-08-04 (B13)
+- [x] Página de inicio del portal con información del trámite ✅ 2026-08-04 (B12)
+
 ### Pendiente — siguiente bloque
-- [ ] Página de inicio del portal con información del trámite
-- [ ] Formulario de solicitud en pasos (stepper):
-  - [ ] Paso 1: Datos personales del ciudadano
-  - [ ] Paso 2: Datos de la motocicleta
-  - [ ] Paso 3: Motivo y fechas
-  - [ ] Paso 4: Carga de documentos adjuntos
-  - [ ] Paso 5: Declaración y confirmación
-- [ ] Guardado automático en localStorage (prevenir pérdida de datos)
-- [ ] Validación en tiempo real (placa, documento, correo, fechas)
-- [ ] reCAPTCHA v3 integrado
 - [ ] Pantalla de confirmación con número de radicado prominente
 - [ ] Página de consulta de estado (radicado + documento)
 - [ ] Página de descarga del permiso aprobado

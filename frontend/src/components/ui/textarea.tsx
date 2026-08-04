@@ -1,21 +1,29 @@
 import { forwardRef, type TextareaHTMLAttributes } from 'react';
+import { Label } from './label';
 import { cn } from '@/lib/utils';
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
   error?: string;
   hint?: string;
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, error, hint, id, ...props }, ref) => {
+  ({ className, label, required, error, hint, id, ...props }, ref) => {
     const descriptionId = id ? `${id}-desc` : undefined;
     const errorId = id && error ? `${id}-error` : undefined;
 
     return (
       <div className="flex flex-col gap-1 w-full">
+        {label && (
+          <Label htmlFor={id} required={required}>
+            {label}
+          </Label>
+        )}
         <textarea
           ref={ref}
           id={id}
+          required={required}
           aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined}
           aria-invalid={error ? 'true' : undefined}
           rows={4}

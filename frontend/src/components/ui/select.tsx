@@ -98,8 +98,11 @@ SelectItem.displayName = 'SelectItem';
 /* ─── High-level Select ────────────────────────────── */
 interface SelectProps<T extends string = string> {
   id?: string;
+  label?: string;
+  required?: boolean;
   value?: T;
-  onValueChange: (value: T) => void;
+  onValueChange?: (value: T) => void;
+  onChange?: (value: T) => void;
   options: SelectOption<T>[];
   placeholder?: string;
   disabled?: boolean;
@@ -109,22 +112,37 @@ interface SelectProps<T extends string = string> {
 
 function Select<T extends string = string>({
   id,
+  label,
+  required,
   value,
   onValueChange,
+  onChange,
   options,
   placeholder = 'Seleccione…',
   disabled,
   error,
   hint,
 }: SelectProps<T>) {
+  const handleChange = onValueChange ?? onChange ?? ((_v: T) => {});
+
   const errorId = id && error ? `${id}-error` : undefined;
   const hintId = id && hint ? `${id}-hint` : undefined;
 
   return (
     <div className="flex flex-col gap-1 w-full">
+      {label && (
+        <label htmlFor={id} className="text-sm font-medium text-neutral-700 leading-none">
+          {label}
+          {required && (
+            <span aria-hidden="true" className="ml-1 text-danger-600">
+              *
+            </span>
+          )}
+        </label>
+      )}
       <SelectRoot
         value={value}
-        onValueChange={onValueChange as (v: string) => void}
+        onValueChange={handleChange as (v: string) => void}
         disabled={disabled}
       >
         <SelectTrigger

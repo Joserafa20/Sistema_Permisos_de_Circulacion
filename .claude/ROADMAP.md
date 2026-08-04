@@ -166,24 +166,15 @@
 **Dependencia:** Fases 3 y 4 completadas.
 
 - [x] Infraestructura base: Next.js 15, React 19, Axios, TanStack Query, RHF+Zod, shadcn/ui primitivos, layout, 6 rutas shell, services, hooks ✅ 2026-08-04 (B12)
-- [ ] Página de inicio del portal con información del trámite
-- [ ] Formulario de solicitud en pasos (stepper):
-  - [ ] Paso 1: Datos personales del ciudadano
-  - [ ] Paso 2: Datos de la motocicleta
-  - [ ] Paso 3: Motivo y fechas
-  - [ ] Paso 4: Carga de documentos adjuntos
-  - [ ] Paso 5: Declaración y confirmación
-- [ ] Guardado automático en localStorage (prevenir pérdida de datos)
-- [ ] Validación en tiempo real (placa, documento, correo, fechas)
-- [ ] reCAPTCHA v3 integrado
-- [ ] Pantalla de confirmación con número de radicado prominente
-- [ ] Página de consulta de estado (radicado + documento)
+- [x] Formulario de solicitud 5 pasos con Framer Motion, Zod, RHF, localStorage, reCAPTCHA v3, éxito y errores ✅ 2026-08-04 (B13)
+- [x] Página de inicio del portal con información del trámite ✅ 2026-08-04 (B12)
+- [x] Aviso de privacidad y autorización Ley 1581 (integrado en formulario) ✅ 2026-08-04 (B13)
+- [x] Accesibilidad WCAG 2.1 nivel AA (aria-label, aria-invalid, focus, aria-live) ✅ 2026-08-04 (B13)
+- [x] Responsive: móvil, tablet y escritorio ✅ 2026-08-04 (B13)
+- [ ] Página de consulta de estado (radicado + documento) — funcional
 - [ ] Página de descarga del permiso aprobado
 - [ ] Página pública de validación QR (optimizada para móvil)
   - [ ] Estado visual claro: verde (Vigente), rojo (Vencido/Revocado), gris (No encontrado)
-- [ ] Aviso de privacidad y autorización Ley 1581
-- [ ] Accesibilidad WCAG 2.1 nivel AA
-- [ ] Responsive: móvil, tablet y escritorio
 
 ---
 
@@ -281,7 +272,7 @@
 | Fase 2 | Auth y Seguridad | 17 | 17 | ✅ Completada (B8) |
 | Fase 3 | Solicitudes Backend | 16 | 16 | ✅ Completada (B9) |
 | Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
-| Fase 5 | Frontend Ciudadano | 14 | 28 | 🔄 En progreso (B12) |
+| Fase 5 | Frontend Ciudadano | 29 | 33 | 🔄 En progreso (B13) |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
