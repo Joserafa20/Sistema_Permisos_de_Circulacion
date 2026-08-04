@@ -20,4 +20,6 @@ export enum AccionAuditoria {
   USUARIO_RESTAURADO = 'usuario_restaurado',
   CIUDADANO_CONSULTADO = 'ciudadano_consultado',
   LISTADO_CIUDADANOS = 'listado_ciudadanos',
+  MOTOCICLETA_CONSULTADA = 'motocicleta_consultada',
+  LISTADO_MOTOS = 'listado_motos',
 }

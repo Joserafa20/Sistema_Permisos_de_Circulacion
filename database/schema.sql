@@ -74,7 +74,9 @@ CREATE TYPE accion_auditoria AS ENUM (
   'usuario_eliminado',
   'usuario_restaurado',
   'ciudadano_consultado',
-  'listado_ciudadanos'
+  'listado_ciudadanos',
+  'motocicleta_consultada',
+  'listado_motos'
 );
 
 

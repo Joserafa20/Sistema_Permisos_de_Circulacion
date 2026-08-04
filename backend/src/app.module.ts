@@ -12,6 +12,7 @@ import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guar
 import { RolesGuard } from './modules/auth/infrastructure/guards/roles.guard';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { CiudadanosModule } from './modules/ciudadanos/ciudadanos.module';
+import { MotocicletasModule } from './modules/motocicletas/motocicletas.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { CiudadanosModule } from './modules/ciudadanos/ciudadanos.module';
     AuthModule,
     UsuariosModule,
     CiudadanosModule,
+    MotocicletasModule,
   ],
   providers: [
     // ── Guards globales ────────────────────────────────────────────
