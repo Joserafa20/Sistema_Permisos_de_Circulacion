@@ -1,5 +1,8 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
+
 export default function GlobalError({
   error,
   reset,
@@ -8,15 +11,16 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <h1 className="text-2xl font-bold text-red-600">Ha ocurrido un error</h1>
-      <p className="mt-2 text-gray-600">{error.message}</p>
-      <button
-        onClick={reset}
-        className="mt-6 rounded bg-primary-600 px-4 py-2 text-white hover:bg-primary-700"
-      >
-        Intentar nuevamente
-      </button>
+    <main id="main-content" className="flex min-h-screen flex-col items-center justify-center p-8">
+      <div className="w-full max-w-md">
+        <Alert variant="danger" title="Ha ocurrido un error">
+          {error.message || 'Ocurrió un error inesperado. Por favor intente nuevamente.'}
+          {error.digest && <p className="mt-1 text-xs opacity-70">Código: {error.digest}</p>}
+        </Alert>
+        <div className="mt-4 flex justify-end">
+          <Button onClick={reset}>Intentar nuevamente</Button>
+        </div>
+      </div>
     </main>
   );
 }

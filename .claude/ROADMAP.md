@@ -165,6 +165,7 @@
 **Duración estimada:** Semanas 5–6  
 **Dependencia:** Fases 3 y 4 completadas.
 
+- [x] Infraestructura base: Next.js 15, React 19, Axios, TanStack Query, RHF+Zod, shadcn/ui primitivos, layout, 6 rutas shell, services, hooks ✅ 2026-08-04 (B12)
 - [ ] Página de inicio del portal con información del trámite
 - [ ] Formulario de solicitud en pasos (stepper):
   - [ ] Paso 1: Datos personales del ciudadano
@@ -280,7 +281,7 @@
 | Fase 2 | Auth y Seguridad | 17 | 17 | ✅ Completada (B8) |
 | Fase 3 | Solicitudes Backend | 16 | 16 | ✅ Completada (B9) |
 | Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
-| Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
+| Fase 5 | Frontend Ciudadano | 14 | 28 | 🔄 En progreso (B12) |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |

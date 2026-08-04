@@ -39,7 +39,7 @@
 - [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
 - [x] Docker Compose: PostgreSQL + Redis + MinIO ✅ 2026-08-02
 - [x] Backend NestJS: scaffolding base con ConfigModule tipado
-- [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
+- [x] Frontend Next.js: scaffolding base con App Router y TailwindCSS ✅ 2026-08-04 (B12)
 - [x] Archivo `.env.example` completo con todas las variables
 - [x] ESLint + Prettier configurados
 - [x] Husky (pre-commit hooks) ✅ 2026-08-02
@@ -227,8 +227,25 @@
 **Objetivo:** Interfaz pública accesible para el trámite del ciudadano.
 **Semanas:** 5–6
 **Dependencia:** Fases 3 y 4 completadas.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B12 completado (infraestructura base)
 
+### B12 — Infraestructura Base (✅ 2026-08-04)
+- [x] Next.js 15 + React 19 + TypeScript configurados ✅ 2026-08-04 (B12)
+- [x] TailwindCSS con tema institucional extendido (colores, animaciones, tipografía) ✅ 2026-08-04 (B12)
+- [x] shadcn/ui primitivos: Button, Input, Label, Select, Textarea, DatePicker, FileUploader, Loading, Skeleton, Card, Badge, Alert, Modal, Stepper, Table ✅ 2026-08-04 (B12)
+- [x] Layout: Navbar responsive, Footer, PageHeader, PortalLayout wrapper ✅ 2026-08-04 (B12)
+- [x] API client Axios con interceptores JWT, refresh automático y normalización de errores ✅ 2026-08-04 (B12)
+- [x] TanStack Query (QueryProvider, QueryClient con retry inteligente) ✅ 2026-08-04 (B12)
+- [x] React Hook Form + Zod (instalados — se usan en siguiente bloque) ✅ 2026-08-04 (B12)
+- [x] ToastProvider global con accesibilidad ARIA live region ✅ 2026-08-04 (B12)
+- [x] ErrorBoundary con UI de recuperación ✅ 2026-08-04 (B12)
+- [x] Skip-to-content y enfoque visible WCAG 2.1 AA ✅ 2026-08-04 (B12)
+- [x] Rutas shell: /, /solicitud, /estado, /verificar, /contacto, /ayuda ✅ 2026-08-04 (B12)
+- [x] Services: public.service.ts (6 endpoints del portal ciudadano) ✅ 2026-08-04 (B12)
+- [x] Hooks: useMotivos, useConfiguracionPublica ✅ 2026-08-04 (B12)
+- [x] Variables de entorno tipadas (src/lib/env.ts) ✅ 2026-08-04 (B12)
+
+### Pendiente — siguiente bloque
 - [ ] Página de inicio del portal con información del trámite
 - [ ] Formulario de solicitud en pasos (stepper):
   - [ ] Paso 1: Datos personales del ciudadano
@@ -245,7 +262,7 @@
 - [ ] Página pública de validación QR (optimizada para móvil)
   - [ ] Estado visual claro: verde (Vigente), rojo (Vencido/Revocado), gris (No encontrado)
 - [ ] Aviso de privacidad y autorización Ley 1581
-- [ ] Accesibilidad WCAG 2.1 nivel AA
+- [ ] Accesibilidad WCAG 2.1 nivel AA (validación con axe)
 - [ ] Responsive: móvil, tablet y escritorio
 
 ---
