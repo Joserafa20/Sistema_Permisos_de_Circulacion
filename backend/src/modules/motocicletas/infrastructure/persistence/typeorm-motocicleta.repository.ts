@@ -4,6 +4,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import {
   IMotocicletaRepository,
   ListarMotocicletasQuery,
+  UpdateMotocicletaData,
 } from '../../domain/ports/motocicleta-repository.interface';
 import { MotocicletaDomainEntity } from '../../domain/entities/motocicleta.domain-entity';
 import { MotocicletaEntity } from './motocicleta.entity';
@@ -65,6 +66,20 @@ export class TypeOrmMotocicletaRepository implements IMotocicletaRepository {
 
   async findByPlaca(placa: string): Promise<MotocicletaDomainEntity | null> {
     return this.loadDetail({ placa });
+  }
+
+  async update(id: string, data: UpdateMotocicletaData): Promise<MotocicletaDomainEntity> {
+    const patch: Partial<MotocicletaEntity> = {};
+    if (data.marca !== undefined) patch.marca = data.marca;
+    if (data.linea !== undefined) patch.linea = data.linea;
+    if (data.modelo !== undefined) patch.modelo = data.modelo;
+    if (data.cilindraje !== undefined) patch.cilindraje = data.cilindraje;
+    if (data.color !== undefined) patch.color = data.color;
+    if (data.numeroMotor !== undefined) patch.numeroMotor = data.numeroMotor;
+    if (data.numeroChasis !== undefined) patch.numeroChasis = data.numeroChasis;
+
+    await this.repo.update(id, patch);
+    return (await this.loadDetail({ id }))!;
   }
 
   // ─── Helper privado ────────────────────────────────────────────────────────

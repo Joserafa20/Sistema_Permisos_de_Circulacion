@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   IMotocicletaRepository,
   MOTOCICLETA_REPOSITORY_TOKEN,
+  UpdateMotocicletaData,
 } from '../../domain/ports/motocicleta-repository.interface';
 import { MotocicletaDomainEntity } from '../../domain/entities/motocicleta.domain-entity';
 
@@ -29,5 +30,10 @@ export class MotocicletaBusquedaService {
   /** Normaliza la placa a UPPER+TRIM antes de buscar (RN-18) */
   async buscarPorPlaca(placa: string): Promise<MotocicletaDomainEntity | null> {
     return this.motoRepo.findByPlaca(placa.trim().toUpperCase());
+  }
+
+  /** Actualiza campos técnicos de la moto (sin placa ni ciudadano). Usado por SolicitudesModule */
+  async actualizarDatos(id: string, data: UpdateMotocicletaData): Promise<MotocicletaDomainEntity> {
+    return this.motoRepo.update(id, data);
   }
 }

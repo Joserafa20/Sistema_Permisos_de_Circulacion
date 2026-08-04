@@ -8,6 +8,7 @@ import { MotocicletaBusquedaService } from './application/services/motocicleta-b
 import { ListarMotocicletasUseCase } from './application/use-cases/listar-motocicletas/listar-motocicletas.use-case';
 import { ObtenerMotocicletaPorIdUseCase } from './application/use-cases/obtener-motocicleta-por-id/obtener-motocicleta-por-id.use-case';
 import { ObtenerMotocicletaPorPlacaUseCase } from './application/use-cases/obtener-motocicleta-por-placa/obtener-motocicleta-por-placa.use-case';
+import { ActualizarMotocicletaUseCase } from './application/use-cases/actualizar-motocicleta/actualizar-motocicleta.use-case';
 import { MotocicletasController } from './infrastructure/controllers/motocicletas.controller';
 
 @Module({
@@ -17,6 +18,7 @@ import { MotocicletasController } from './infrastructure/controllers/motocicleta
     ListarMotocicletasUseCase,
     ObtenerMotocicletaPorIdUseCase,
     ObtenerMotocicletaPorPlacaUseCase,
+    ActualizarMotocicletaUseCase,
     MotocicletaBusquedaService,
     {
       provide: MOTOCICLETA_REPOSITORY_TOKEN,
