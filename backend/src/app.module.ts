@@ -13,6 +13,8 @@ import { RolesGuard } from './modules/auth/infrastructure/guards/roles.guard';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { CiudadanosModule } from './modules/ciudadanos/ciudadanos.module';
 import { MotocicletasModule } from './modules/motocicletas/motocicletas.module';
+import { MotivosModule } from './modules/motivos/motivos.module';
+import { SolicitudesModule } from './modules/solicitudes/solicitudes.module';
 
 @Module({
   imports: [
@@ -80,6 +82,8 @@ import { MotocicletasModule } from './modules/motocicletas/motocicletas.module';
     UsuariosModule,
     CiudadanosModule,
     MotocicletasModule,
+    MotivosModule,
+    SolicitudesModule,
   ],
   providers: [
     // ── Guards globales ────────────────────────────────────────────

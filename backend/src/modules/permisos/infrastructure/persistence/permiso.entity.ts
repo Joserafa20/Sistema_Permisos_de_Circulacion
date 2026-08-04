@@ -84,7 +84,7 @@ export class PermisoEntity {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
   updatedAt: Date | null;
 
-  @OneToOne(() => SolicitudEntity, { nullable: false })
+  @OneToOne(() => SolicitudEntity, (s) => s.permiso, { nullable: false })
   @JoinColumn({ name: 'solicitud_id' })
   solicitud: Relation<SolicitudEntity>;
 

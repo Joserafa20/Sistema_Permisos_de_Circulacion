@@ -49,7 +49,7 @@ export class HistorialEstadoEntity {
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @ManyToOne(() => SolicitudEntity, { nullable: false })
+  @ManyToOne(() => SolicitudEntity, (s) => s.historial, { nullable: false })
   @JoinColumn({ name: 'solicitud_id' })
   solicitud: Relation<SolicitudEntity>;
 

@@ -6,6 +6,8 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Relation,
   UpdateDateColumn,
@@ -14,6 +16,9 @@ import { CiudadanoEntity } from '../../../ciudadanos/infrastructure/persistence/
 import { MotocicletaEntity } from '../../../motocicletas/infrastructure/persistence/motocicleta.entity';
 import { MotivoEntity } from '../../../motivos/infrastructure/persistence/motivo.entity';
 import { EstadoSolicitud } from '../../../../common/enums';
+import { HistorialEstadoEntity } from './historial-estado.entity';
+import { DocumentoEntity } from './documento.entity';
+import { PermisoEntity } from '../../../permisos/infrastructure/persistence/permiso.entity';
 
 @Entity({ name: 'solicitudes' })
 @Index('idx_solicitudes_estado', ['estado'])
@@ -76,4 +81,14 @@ export class SolicitudEntity {
   @ManyToOne(() => MotivoEntity, { nullable: false })
   @JoinColumn({ name: 'motivo_id' })
   motivo: Relation<MotivoEntity>;
+
+  @OneToMany(() => HistorialEstadoEntity, (h) => h.solicitud, { cascade: false })
+  historial: Relation<HistorialEstadoEntity[]>;
+
+  @OneToMany(() => DocumentoEntity, (d) => d.solicitud, { cascade: false })
+  documentos: Relation<DocumentoEntity[]>;
+
+  /** Null mientras la solicitud no ha sido aprobada. */
+  @OneToOne(() => PermisoEntity, (p) => p.solicitud, { nullable: true })
+  permiso: Relation<PermisoEntity> | null;
 }
