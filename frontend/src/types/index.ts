@@ -64,6 +64,13 @@ export interface Motivo {
 export type EstadoSolicitud =
   'recibida' | 'en_revision' | 'aprobada' | 'rechazada' | 'pendiente_correccion' | 'vencida';
 
+export interface HistorialEstadoItem {
+  estado: EstadoSolicitud;
+  descripcion: string;
+  fecha: string;
+  usuario?: string;
+}
+
 export interface SolicitudResumenCiudadano {
   radicado: string;
   estado: EstadoSolicitud;
@@ -72,6 +79,9 @@ export interface SolicitudResumenCiudadano {
   fechaActualizacion: string;
   nombreCiudadano?: string;
   placaMoto?: string;
+  motivoNombre?: string;
+  funcionarioNombre?: string;
+  historial?: HistorialEstadoItem[];
   permiso?: {
     codigoPermiso: string;
     estadoPermiso: EstadoPermiso;

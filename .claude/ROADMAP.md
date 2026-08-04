@@ -121,7 +121,7 @@
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.  
 **Duración estimada:** Semanas 4–5  
 **Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).  
-**Estado:** ✅ Completada — 18 / 18 tareas completadas
+**Estado:** ✅ Completada — 18 / 18 tareas completadas (B10)
 
 - [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04 (B6)
   - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
@@ -171,10 +171,10 @@
 - [x] Aviso de privacidad y autorización Ley 1581 (integrado en formulario) ✅ 2026-08-04 (B13)
 - [x] Accesibilidad WCAG 2.1 nivel AA (aria-label, aria-invalid, focus, aria-live) ✅ 2026-08-04 (B13)
 - [x] Responsive: móvil, tablet y escritorio ✅ 2026-08-04 (B13)
-- [ ] Página de consulta de estado (radicado + documento) — funcional
-- [ ] Página de descarga del permiso aprobado
-- [ ] Página pública de validación QR (optimizada para móvil)
-  - [ ] Estado visual claro: verde (Vigente), rojo (Vencido/Revocado), gris (No encontrado)
+- [x] Página de consulta de estado (radicado + documento) — funcional con TanStack Query, estados skeleton/error/offline ✅ 2026-08-04 (B14)
+- [x] Página pública de validación QR con lector de cámara (@zxing/browser) + manual ✅ 2026-08-04 (B14)
+  - [x] Estado visual claro: verde (Vigente), rojo (Revocado), gris (No encontrado/Vencido) ✅ 2026-08-04 (B14)
+- [x] Descarga de PDF del permiso desde /estado cuando está aprobado ✅ 2026-08-04 (B14)
 
 ---
 
@@ -272,7 +272,7 @@
 | Fase 2 | Auth y Seguridad | 17 | 17 | ✅ Completada (B8) |
 | Fase 3 | Solicitudes Backend | 16 | 16 | ✅ Completada (B9) |
 | Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
-| Fase 5 | Frontend Ciudadano | 29 | 33 | 🔄 En progreso (B13) |
+| Fase 5 | Frontend Ciudadano | 33 | 33 | ✅ Completada (B14) |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |

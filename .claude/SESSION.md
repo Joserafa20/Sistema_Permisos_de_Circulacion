@@ -394,8 +394,54 @@ B11 — Frontend Portal Ciudadano (Fase 5) o Fase 8 (Calidad y Producción). Req
 - `nodemailer`
 - `@types/nodemailer` (dev)
 
+---
+
+## Bloque B11–B14 — Frontend Portal Ciudadano (2026-08-04)
+
+### B12 — Infraestructura base portal ciudadano
+Scaffolding Next.js 15 + React 19, TanStack Query, RHF, Zod, shadcn/ui primitivos, layout, 6 rutas shell (/solicitud /estado /verificar /ayuda /contacto), services, hooks base. Build 9/9 páginas ✅.
+
+### B13 — Formulario ciudadano 5 pasos
+- React Hook Form + Zod, FormProvider, zodResolver, PASO_FIELDS para validación parcial
+- Stepper con Framer Motion AnimatePresence dirección
+- Paso 1: datos ciudadano (colombiano) / Paso 2: motocicleta (placa ABC12D) / Paso 3: motivos dinámicos / Paso 4: FileUploader documentos / Paso 5: resumen + declaración jurada
+- localStorage auto-save 500ms, restauración de borrador
+- reCAPTCHA v3 dinámico, advertencia en dev si no configurado
+- SuccessScreen: radicado prominente, copy/print/consultar/nueva
+- Error handling: 400/409/422/500/timeout/offline sin alert()
+- WCAG: aria-label, aria-invalid, aria-live, focus management
+- Quality gates: tsc + lint + build ✅
+
+### B14 — Consultas ciudadano y validación QR
+Archivos creados:
+- `frontend/src/schemas/estado.schemas.ts` — estadoConsultaSchema (radicado + documento)
+- `frontend/src/schemas/verificar.schemas.ts` — verificarCodigoSchema
+- `frontend/src/hooks/use-estado-solicitud.ts` — TanStack Query, fetch-on-demand
+- `frontend/src/hooks/use-verificar-permiso.ts` — TanStack Query, enabled por código activo
+- `frontend/src/modules/estado/estado-consulta.tsx` — orquestador fetch-on-demand
+- `frontend/src/modules/estado/components/solicitud-resultado.tsx` — badge estado, historial timeline, permiso card, PDF download
+- `frontend/src/modules/verificar/verificar-form.tsx` — modos idle/manual/camera, dynamic import ssr:false
+- `frontend/src/modules/verificar/components/qr-scanner.tsx` — @zxing/browser, cleanup IScannerControls.stop()
+- `frontend/src/modules/verificar/components/permiso-resultado.tsx` — semáforo visual verde/rojo/gris
+
+Archivos modificados:
+- `frontend/src/types/index.ts` — extendido SolicitudResumenCiudadano (historial[], motivoNombre, funcionarioNombre, permiso.urlDescarga)
+- `frontend/src/app/estado/page.tsx` — server component con metadata
+- `frontend/src/app/verificar/page.tsx` — server component con metadata
+
+Dependencia añadida: `@zxing/browser` (ADR-018)
+
+Quality gates B14:
+- `tsc --noEmit`: ✅ exit 0
+- `eslint`: ✅ 0 errores
+- `next build`: ✅ 9/9 páginas, /estado 4.88 kB, /verificar 4.83 kB (QrScanner excluido del bundle inicial)
+
+Commit: `feat(frontend): portal ciudadano consultas y validacion QR — B14`
+
+---
+
 ## Última actualización
 
-2026-08-04 — B10 completado. Fase 4 cerrada (18/18). Sistema de notificaciones real con BullMQ + SMTP +
-RedisModule reutilizable + EmailModule con abstracción IEmailProvider + 7 templates HTML institucionales.
-Próximo: B11 — Frontend Portal Ciudadano (Fase 5) o Fase 8 (Calidad y Producción). Requiere autorización.
+2026-08-04 — B14 completado. Fase 5 cerrada (33/33). Portal ciudadano 100% funcional:
+/, /solicitud, /estado, /verificar, /contacto, /ayuda.
+Siguiente: Fase 6 (Panel Funcionario) o Fase 8 (Calidad). Requiere autorización.

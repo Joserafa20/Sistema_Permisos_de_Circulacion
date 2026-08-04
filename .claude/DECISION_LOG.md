@@ -18,6 +18,34 @@ Su objetivo es mantener la coherencia del desarrollo y evitar que se reevalúen 
 
 ---
 
+## ADR-018 — Librería QR scanner: @zxing/browser
+
+**Fecha:** 2026-08-04  
+**Bloque:** B14  
+**Estado:** Aprobado
+
+### Contexto
+
+La página /verificar requiere leer códigos QR con la cámara del dispositivo (móvil/escritorio). Se evaluaron tres alternativas:
+
+1. **html5-qrcode** — popular, pero usa una API interna de ZXing y tiene dependencias de mantenimiento cuestionables en 2026.
+2. **@zxing/browser** — wrapper oficial TypeScript de la biblioteca ZXing, mantenido por la comunidad ZXing-JS. API tipada, IScannerControls para cleanup determinista.
+3. **react-qr-reader** — wrapper de React sobre html5-qrcode; añade una capa de abstracción sin beneficios claros para nuestro caso.
+
+### Decisión
+
+Se adoptó **@zxing/browser** por:
+- API TypeScript tipada (`BrowserQRCodeReader`, `IScannerControls`)
+- Control determinista del ciclo de vida de la cámara (`controls.stop()` en cleanup)
+- Compatible con `next/dynamic` y `ssr: false` (no depende de APIs de servidor)
+- Sin peer dependencies conflictivas con React 19
+
+### Consecuencias
+
+- `QrScanner` debe importarse con `dynamic(..., { ssr: false })` para evitar errores en SSR de Next.js
+- `@zxing/browser` solo debe importarse dentro de `useEffect` para garantizar que corra exclusivamente en el cliente
+- El bundle de /verificar excluye el scanner del First Load JS (~4.83 kB); carga solo cuando el usuario activa la cámara
+
 # Formato
 
 ## ADR-NNN — AAAA-MM-DD

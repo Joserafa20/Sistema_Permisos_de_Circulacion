@@ -262,12 +262,23 @@
 - [x] Mobile-first responsive, Navbar/Footer sin romper ✅ 2026-08-04 (B13)
 - [x] Página de inicio del portal con información del trámite ✅ 2026-08-04 (B12)
 
-### Pendiente — siguiente bloque
-- [ ] Pantalla de confirmación con número de radicado prominente
-- [ ] Página de consulta de estado (radicado + documento)
-- [ ] Página de descarga del permiso aprobado
-- [ ] Página pública de validación QR (optimizada para móvil)
-  - [ ] Estado visual claro: verde (Vigente), rojo (Vencido/Revocado), gris (No encontrado)
+### B14 — Consultas y Validación QR (✅ 2026-08-04)
+- [x] /estado: formulario RHF+Zod (radicado + documento), TanStack Query, idle/loading/success/error/offline ✅ 2026-08-04 (B14)
+- [x] /estado: SolicitudResultado con badge de estado, info completa, historial, permiso si aplica ✅ 2026-08-04 (B14)
+- [x] /estado: botón Descargar PDF si permiso.urlDescarga disponible ✅ 2026-08-04 (B14)
+- [x] /verificar: VerificarForm con modos cámara/manual ✅ 2026-08-04 (B14)
+- [x] /verificar: QrScanner con @zxing/browser, dynamic import SSR-safe, cleanup de cámara ✅ 2026-08-04 (B14)
+- [x] /verificar: PermisoResultado con semáforo verde/rojo/gris, detalles del permiso ✅ 2026-08-04 (B14)
+- [x] Skeletons, empty states, error states, retry, offline detection ✅ 2026-08-04 (B14)
+- [x] Animaciones Framer Motion en resultados ✅ 2026-08-04 (B14)
+- [x] Tipo SolicitudResumenCiudadano extendido: motivoNombre, funcionarioNombre, historial[] ✅ 2026-08-04 (B14)
+- [x] Hooks: useEstadoSolicitud, useVerificarPermiso ✅ 2026-08-04 (B14)
+- [x] Schemas Zod: estadoConsultaSchema, verificarCodigoSchema ✅ 2026-08-04 (B14)
+- [x] WCAG: aria-live, aria-label, role="status", role="region", focus management ✅ 2026-08-04 (B14)
+- [x] Dynamic import de QrScanner (SSR-safe, no afecta bundle de otras páginas) ✅ 2026-08-04 (B14)
+
+### Fase 5 — COMPLETADA ✅
+Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado, /verificar, /contacto, /ayuda
 - [ ] Aviso de privacidad y autorización Ley 1581
 - [ ] Accesibilidad WCAG 2.1 nivel AA (validación con axe)
 - [ ] Responsive: móvil, tablet y escritorio
