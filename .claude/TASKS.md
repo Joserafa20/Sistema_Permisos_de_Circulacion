@@ -337,6 +337,20 @@ Fase 3 — Módulo de Solicitudes (Backend)
 
 ### Última tarea terminada
 
+B6 — PermisosModule: generación de permiso con PDF escarapela + QR + MinIO (2026-08-04):
+- `PermisosModule` completo con arquitectura hexagonal
+- `GenerarPermisoUseCase` — QR opaco + PDF institucional + MinIO + DB
+- `QrCodeService` — SHA256(permisoId + SALT) + imagen buffer PNG (RN-05)
+- `CodigoPermisoService` — nextval(seq_codigo_permiso) (RN-07)
+- `PdfGeneratorService` — escarapela A4 con escudo, QR, snapshots, condiciones
+- `MinioStorageAdapter` — upload/download/signedUrl
+- `GET /api/v1/permisos` — listado paginado con filtros
+- `GET /api/v1/permisos/{id}` — detalle completo
+- `GET /api/v1/permisos/{id}/pdf` — URL firmada 5 min
+- Migración `condicionesRestricciones` en tabla `permisos`
+- `AprobarSolicitudUseCase` actualizado para llamar `GenerarPermisoUseCase`
+- Paquetes instalados: pdfkit, qrcode, minio, uuid
+
 B5C4 — Aprobación, rechazo y corrección de solicitudes (2026-08-04):
 - `POST /api/v1/solicitudes/{id}/aprobar` — RN-15, RN-17, RN-01 (HTTP 202)
 - `POST /api/v1/solicitudes/{id}/rechazar` — RN-04, RN-10, RN-15 (HTTP 200)
@@ -348,7 +362,7 @@ B5C4 — Aprobación, rechazo y corrección de solicitudes (2026-08-04):
 
 ### Próxima tarea
 
-B6 — Generación del permiso: `PermisosModule` con PDF + QR — aguardando autorización.
+B7 — Bloque pendiente de definición (revocación, notificaciones, recuperación de contraseña) — aguardando autorización.
 
 ---
 

@@ -15,6 +15,7 @@ import { CiudadanosModule } from './modules/ciudadanos/ciudadanos.module';
 import { MotocicletasModule } from './modules/motocicletas/motocicletas.module';
 import { MotivosModule } from './modules/motivos/motivos.module';
 import { SolicitudesModule } from './modules/solicitudes/solicitudes.module';
+import { PermisosModule } from './modules/permisos/permisos.module';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { SolicitudesModule } from './modules/solicitudes/solicitudes.module';
     MotocicletasModule,
     MotivosModule,
     SolicitudesModule,
+    PermisosModule,
   ],
   providers: [
     // ── Guards globales ────────────────────────────────────────────

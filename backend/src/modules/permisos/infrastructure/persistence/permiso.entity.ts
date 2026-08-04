@@ -74,6 +74,14 @@ export class PermisoEntity {
   @Column({ name: 'snapshot_motivo', type: 'jsonb' })
   snapshotMotivo: Record<string, unknown>;
 
+  /**
+   * Condiciones y restricciones específicas impuestas por el funcionario (RN-38, RN-39).
+   * Texto libre, máx. 500 caracteres. Solo editable por funcionario o administrador.
+   * Se incluye en el PDF si no es NULL/vacío. El QR siempre muestra el valor actual.
+   */
+  @Column({ name: 'condiciones_restricciones', type: 'text', nullable: true })
+  condicionesRestricciones: string | null;
+
   /** Hash SHA-256 del PDF para verificación de integridad documental. */
   @Column({ name: 'hash_pdf', type: 'varchar', length: 64, nullable: true })
   hashPdf: string | null;

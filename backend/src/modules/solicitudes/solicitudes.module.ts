@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditoriaModule } from '../auditoria/auditoria.module';
 import { CiudadanosModule } from '../ciudadanos/ciudadanos.module';
 import { MotocicletasModule } from '../motocicletas/motocicletas.module';
 import { MotivosModule } from '../motivos/motivos.module';
+import { PermisosModule } from '../permisos/permisos.module';
 import { SolicitudEntity } from './infrastructure/persistence/solicitud.entity';
 import { HistorialEstadoEntity } from './infrastructure/persistence/historial-estado.entity';
 import { DocumentoEntity } from './infrastructure/persistence/documento.entity';
@@ -50,6 +51,7 @@ import { SolicitarCorreccionUseCase } from './application/use-cases/solicitar-co
     CiudadanosModule,
     MotocicletasModule,
     MotivosModule,
+    forwardRef(() => PermisosModule),
   ],
   controllers: [SolicitudesController, SolicitudesFuncionarioController],
   providers: [
@@ -67,6 +69,7 @@ import { SolicitarCorreccionUseCase } from './application/use-cases/solicitar-co
     AprobarSolicitudUseCase,
     RechazarSolicitudUseCase,
     SolicitarCorreccionUseCase,
+    // GenerarPermisoUseCase: provisto por PermisosModule (exportado), no declarar aquí
   ],
   // SolicitudBusquedaService exportado para PermisosModule y futuros módulos
   // que necesiten consultar el estado de una solicitud sin acceder al repo directamente.

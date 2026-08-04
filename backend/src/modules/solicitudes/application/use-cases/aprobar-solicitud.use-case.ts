@@ -5,6 +5,7 @@ import {
 } from '../../domain/ports/solicitud-repository.interface';
 import { SolicitudBusquedaService } from '../services/solicitud-busqueda.service';
 import { AuditoriaService } from '../../../auditoria/application/auditoria.service';
+import { GenerarPermisoUseCase } from '../../../permisos/application/use-cases/generar-permiso.use-case';
 import { SolicitudStateMachine } from '../../domain/services/solicitud-state-machine';
 import { AccionSolicitudResponseDto } from '../dtos/accion-solicitud-response.dto';
 import { AccionAuditoria, EstadoSolicitud } from '../../../../common/enums';
@@ -29,6 +30,7 @@ export class AprobarSolicitudUseCase {
     @Inject(SOLICITUD_REPOSITORY_TOKEN)
     private readonly solicitudRepo: ISolicitudRepository,
     private readonly auditoriaService: AuditoriaService,
+    private readonly generarPermisoUseCase: GenerarPermisoUseCase,
   ) {}
 
   async ejecutar(
@@ -102,6 +104,11 @@ export class AprobarSolicitudUseCase {
       ipAddress,
       usuarioId,
     });
+
+    // Generar permiso (PDF + QR + MinIO + DB) de forma sincrónica
+    // El permiso debe existir antes de retornar 202 para que el funcionario
+    // pueda descargar el PDF inmediatamente (no usa BullMQ en esta fase).
+    await this.generarPermisoUseCase.ejecutar(solicitudId, usuarioId, ipAddress);
 
     return {
       solicitudId,

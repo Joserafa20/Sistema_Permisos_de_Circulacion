@@ -202,7 +202,44 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   - Notificaciones BullMQ: enqueue en aprobar/rechazar/correccion
   - AccionAuditoria.EDITAR usado para auto-transición recibida→en_revision (sin enum propio)
 
+✓ **B6 — PermisosModule: generación de permiso con PDF + QR** ✅ 2026-08-04
+  Rama: `feature/fase-2-auth`
+  Archivos nuevos (módulo completo):
+  - `domain/entities/permiso.domain-entity.ts` — SnapshotCiudadano/Motocicleta/Motivo
+  - `domain/ports/permiso-repository.interface.ts` — IPermisoRepository + CrearPermisoParams
+  - `infrastructure/services/qr-code.service.ts` — SHA256 opaco + imagen PNG
+  - `infrastructure/services/codigo-permiso.service.ts` — nextval PostgreSQL
+  - `infrastructure/services/pdf-generator.service.ts` — escarapela A4 con pdfkit
+  - `infrastructure/services/minio-storage.adapter.ts` — upload/download/presignedUrl
+  - `infrastructure/persistence/permiso.mapper.ts` — entity ↔ domain
+  - `infrastructure/persistence/typeorm-permiso.repository.ts` — CRUD + listado paginado
+  - `infrastructure/controllers/permisos.controller.ts` — GET /permisos, /:id, /:id/pdf
+  - `application/dtos/listar-permisos-query.dto.ts`
+  - `application/dtos/permiso-list-item.dto.ts` — PermisoListItemDto + PermisoDetalleDto + PermisoPdfUrlDto + PermisoGeneradoDto
+  - `application/use-cases/generar-permiso.use-case.ts` — flujo completo RN-05/06/07/33
+  - `application/use-cases/obtener-permiso-por-id.use-case.ts`
+  - `application/use-cases/listar-permisos.use-case.ts`
+  - `application/use-cases/obtener-pdf-permiso.use-case.ts` — URL firmada 5 min
+  - `permisos.module.ts` — exports GenerarPermisoUseCase
+  - `database/migrations/1785984000000-AddCondicionesRestriccionesPermiso.ts`
+  Archivos modificados:
+  - `permisos/infrastructure/persistence/permiso.entity.ts` — + condicionesRestricciones
+  - `solicitudes/application/use-cases/aprobar-solicitud.use-case.ts` — llama GenerarPermisoUseCase
+  - `solicitudes/solicitudes.module.ts` — importa PermisosModule via forwardRef
+  - `app.module.ts` — importa PermisosModule
+  - `backend/package.json` — + pdfkit, qrcode, minio, uuid
+  Quality gates: tsc --noEmit ✅, npm run lint ✅ (0 errores), nest build ✅
+
+  Deuda técnica → B7:
+  - BullMQ: hacer GenerarPermiso verdaderamente asíncrono (actualmente síncrono en aprobar)
+  - Notificaciones: correo al ciudadano al aprobar/rechazar
+  - condicionesRestricciones: PATCH /permisos/{id}/condiciones
+  - Revocación: POST /permisos/{id}/revocar (solo admin)
+  - Job automático: vencer permisos (fecha_vencimiento < hoy)
+  - Consulta pública QR: GET /public/verificar/{codigoQr}
+  - Verificación de integridad escudo al iniciar (seed debe incluir escudo placeholder)
+
 ## Última actualización
 
-2026-08-04 — B5C4 completado. Flujo de aprobación/rechazo/corrección implementado.
-Próximo: B6 — PermisosModule (PDF + QR) — aguardando autorización.
+2026-08-04 — B6 completado. PermisosModule con PDF escarapela + QR + MinIO integrado.
+Próximo: B7 — definir alcance (revocación, notificaciones, recuperar contraseña) — aguardando autorización.

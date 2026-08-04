@@ -120,21 +120,25 @@
 ## Fase 4 — Generación de Permiso (PDF + QR)
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.  
 **Duración estimada:** Semanas 4–5  
-**Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).
+**Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).  
+**Estado:** 🔄 En progreso — 9 / 14 tareas completadas ← (B6 completado 2026-08-04)
 
-- [ ] PDFModule: generación de PDF institucional con template
-  - [ ] Encabezado con logo/escudo desde configuración
-  - [ ] Número consecutivo formato `2026-PYP-00145`
-  - [ ] Snapshot de datos del ciudadano y moto
-  - [ ] Imagen del QR embebida en el PDF
-  - [ ] Firma y sello institucional configurables
-  - [ ] Pie de página institucional
-- [ ] QRModule: generación de código QR con identificador UUID+hash opaco
-- [ ] Almacenamiento seguro del PDF en MinIO (bucket privado)
-- [ ] `GET /api/v1/permisos/{id}/pdf` — URL firmada para descarga
+- [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04
+  - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
+  - [x] Número consecutivo formato `2026-PYP-00145` (RN-07) ✅ 2026-08-04
+  - [x] Snapshot inmutable de ciudadano y moto (RN-06) ✅ 2026-08-04
+  - [x] Imagen del QR embebida en el PDF ✅ 2026-08-04
+  - [x] Firma del funcionario configurable ✅ 2026-08-04
+  - [x] Pie de página institucional ✅ 2026-08-04
+- [x] QRModule: código SHA256 opaco (RN-05), nunca datos personales ✅ 2026-08-04
+- [x] Almacenamiento seguro del PDF en MinIO (bucket privado) ✅ 2026-08-04
+- [x] `GET /api/v1/permisos` — listado paginado con filtros ✅ 2026-08-04
+- [x] `GET /api/v1/permisos/{id}` — detalle sin exponer storageKey ni codigoQr ✅ 2026-08-04
+- [x] `GET /api/v1/permisos/{id}/pdf` — URL firmada TTL 5 min ✅ 2026-08-04
 - [ ] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública del QR
 - [ ] Registro de cada escaneo en `qr_validaciones`
 - [ ] `POST /api/v1/permisos/{id}/revocar` — Revocación con motivo (Admin)
+- [ ] `PATCH /api/v1/permisos/{id}/condiciones` — condicionesRestricciones (RN-38)
 - [ ] Job automático: marcar permisos en `VENCIDO` al superar `fecha_vencimiento`
 - [ ] NotificacionesModule: cola de correos con BullMQ
   - [ ] Correo: solicitud recibida (con número de radicado)
@@ -260,8 +264,8 @@
 | Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
 | Fase 1 | Base de Datos | 7 | 7 | ✅ Completada |
 | Fase 2 | Auth y Seguridad | 9 | 15 | 🔄 En progreso |
-| Fase 3 | Solicitudes Backend | 12 | 16 | 🔄 En progreso ← |
-| Fase 4 | Permisos PDF/QR | 0 | 14 | ⬜ No iniciada |
+| Fase 3 | Solicitudes Backend | 12 | 16 | 🔄 En progreso |
+| Fase 4 | Permisos PDF/QR | 9 | 18 | 🔄 En progreso ← |
 | Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
 | Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
