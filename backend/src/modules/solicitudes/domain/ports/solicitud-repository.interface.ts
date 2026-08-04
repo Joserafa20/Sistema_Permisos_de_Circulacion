@@ -72,6 +72,15 @@ export interface ISolicitudRepository {
   cambiarEstado(params: CambiarEstadoParams): Promise<boolean>;
 
   /**
+   * Job de vencimiento automático (RN-08):
+   * - Marca RECIBIDA → VENCIDA si superó plazo_revision_horas desde created_at.
+   * - Marca PENDIENTE_CORRECCION → VENCIDA si superó plazo_correccion_dias desde updatedAt.
+   * Registra en historial_estados con usuarioId = null.
+   * Retorna los IDs de solicitudes marcadas como vencidas.
+   */
+  marcarVencidas(params: MarcarVencidasParams): Promise<string[]>;
+
+  /**
    * RN-17: verifica si la motocicleta tiene un permiso vigente cuyas fechas se solapan
    * con el rango [fechaInicio, fechaFin] de la solicitud a aprobar.
    */
@@ -80,6 +89,13 @@ export interface ISolicitudRepository {
     fechaInicio: string,
     fechaFin: string,
   ): Promise<{ solapamiento: boolean; codigoPermiso?: string }>;
+}
+
+export interface MarcarVencidasParams {
+  /** Fecha de corte para recibidas: solicitudes RECIBIDAS con created_at < ahoraUTC - plazo_revision_horas */
+  plazoRevisionHoras: number;
+  /** Fecha de corte para pendiente_correccion: solicitudes con updated_at < ahoraUTC - plazo_correccion_dias días */
+  plazoCorreccionDias: number;
 }
 
 export interface CambiarEstadoParams {

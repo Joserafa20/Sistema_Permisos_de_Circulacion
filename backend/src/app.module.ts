@@ -17,6 +17,7 @@ import { MotivosModule } from './modules/motivos/motivos.module';
 import { SolicitudesModule } from './modules/solicitudes/solicitudes.module';
 import { PermisosModule } from './modules/permisos/permisos.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { NotificacionesModule } from './modules/notificaciones/notificaciones.mo
     }),
 
     // ── Módulos funcionales ────────────────────────────────────────
+    StorageModule,
     HealthModule,
     ConfiguracionInstitucionalModule,
     AuthModule,

@@ -13,7 +13,6 @@ import { PERMISO_REPOSITORY_TOKEN } from './domain/ports/permiso-repository.inte
 import { QrCodeService } from './infrastructure/services/qr-code.service';
 import { CodigoPermisoService } from './infrastructure/services/codigo-permiso.service';
 import { PdfGeneratorService } from './infrastructure/services/pdf-generator.service';
-import { MinioStorageAdapter } from './infrastructure/services/minio-storage.adapter';
 import { GenerarPermisoUseCase } from './application/use-cases/generar-permiso.use-case';
 import { ObtenerPermisoPorIdUseCase } from './application/use-cases/obtener-permiso-por-id.use-case';
 import { ListarPermisosUseCase } from './application/use-cases/listar-permisos.use-case';
@@ -48,7 +47,6 @@ import { VencerPermisosJob } from './infrastructure/jobs/vencer-permisos.job';
     QrCodeService,
     CodigoPermisoService,
     PdfGeneratorService,
-    MinioStorageAdapter,
     QrValidacionRepository,
     GenerarPermisoUseCase,
     ObtenerPermisoPorIdUseCase,

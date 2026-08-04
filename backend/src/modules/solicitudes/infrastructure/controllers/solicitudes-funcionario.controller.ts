@@ -26,6 +26,8 @@ import type { PaginatedSolicitudesDto } from '../../application/use-cases/listar
 import { ObtenerSolicitudPorIdUseCase } from '../../application/use-cases/obtener-solicitud-por-id.use-case';
 import { ObtenerHistorialUseCase } from '../../application/use-cases/obtener-historial.use-case';
 import { ListarDocumentosUseCase } from '../../application/use-cases/listar-documentos.use-case';
+import { ObtenerUrlDocumentoUseCase } from '../../application/use-cases/obtener-url-documento.use-case';
+import { DocumentoUrlDto } from '../../application/dtos/documento-url.dto';
 import { AprobarSolicitudUseCase } from '../../application/use-cases/aprobar-solicitud.use-case';
 import { RechazarSolicitudUseCase } from '../../application/use-cases/rechazar-solicitud.use-case';
 import { SolicitarCorreccionUseCase } from '../../application/use-cases/solicitar-correccion.use-case';
@@ -49,6 +51,7 @@ export class SolicitudesFuncionarioController {
     private readonly aprobarSolicitudUseCase: AprobarSolicitudUseCase,
     private readonly rechazarSolicitudUseCase: RechazarSolicitudUseCase,
     private readonly solicitarCorreccionUseCase: SolicitarCorreccionUseCase,
+    private readonly obtenerUrlDocumentoUseCase: ObtenerUrlDocumentoUseCase,
   ) {}
 
   @Get()
@@ -115,6 +118,29 @@ export class SolicitudesFuncionarioController {
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
   listarDocumentos(@Param('id', ParseUUIDPipe) id: string): Promise<DocumentoItemDto[]> {
     return this.listarDocumentosUseCase.ejecutar(id);
+  }
+
+  @Get(':id/documentos/:docId')
+  @ApiOperation({
+    summary: 'Obtener URL firmada para descargar un documento (RN-53)',
+    description:
+      'Genera y retorna una URL firmada con TTL 5 minutos para descargar el documento adjunto. ' +
+      'Requiere rol funcionario o administrador. ' +
+      'storage_key nunca se expone en la respuesta (RN-53). ' +
+      'Registra la descarga en auditoría.',
+  })
+  @ApiResponse({ status: 200, description: 'URL firmada generada', type: DocumentoUrlDto })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Sin permisos suficientes' })
+  @ApiResponse({ status: 404, description: 'Documento no encontrado' })
+  obtenerUrlDocumento(
+    @Param('id', ParseUUIDPipe) solicitudId: string,
+    @Param('docId', ParseUUIDPipe) docId: string,
+    @CurrentUser() user: JwtUser,
+    @Req() req: Request,
+  ): Promise<DocumentoUrlDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    return this.obtenerUrlDocumentoUseCase.ejecutar(solicitudId, docId, user.sub, ipAddress);
   }
 
   @Post(':id/aprobar')

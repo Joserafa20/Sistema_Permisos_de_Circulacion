@@ -8,13 +8,13 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 4 — Generación de Permiso (PDF + QR)
+Fase: Fase 3 ✅ COMPLETADA + Fase 4 🔄 en progreso
 
-Bloque actual: B7 ✅ COMPLETADO — Ciclo de vida del permiso (revocación, condiciones, verificación QR, job de vencimiento, NotificacionesModule)
+Bloque actual: B9 ✅ COMPLETADO — StorageModule (@Global), POST documentos (multipart), GET URL firmada documentos, VencerSolicitudesJob
 
 Rama: `feature/fase-2-auth`
 
-Estado: 🔄 En progreso — 13/18 tareas de Fase 4 completadas. Pendiente: envío real de correos (BullMQ+SMTP).
+Estado: Fase 3: 16/16 completadas. Fase 4: 13/18 completadas. Pendiente B10: envío real de correos (BullMQ+SMTP).
 
 ---
 
@@ -77,7 +77,7 @@ Estado: ✅ COMPLETADA (parcial) — Login/Logout/Refresh implementados. Pendien
 
 ## Próxima tarea sugerida
 
-Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
+B10 — Envío real de correos: BullMQ + SMTP (Fase 4 — deuda técnica). Requiere autorización.
 
 ---
 
@@ -303,8 +303,42 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   y sincronizó los archivos de estado con la realidad del código.
   **Fase 2 completamente cerrada.**
 
+---
+
+## Bloque B9 — StorageModule + Documentos + VencerSolicitudesJob (2026-08-04)
+
+### Archivos creados
+- `backend/src/modules/storage/storage.module.ts` — @Global() module, exporta MinioStorageAdapter
+- `backend/src/modules/storage/infrastructure/services/minio-storage.adapter.ts` — adapter extraído con bucketPdfs + bucketDocs
+- `backend/src/modules/solicitudes/application/use-cases/adjuntar-documento.use-case.ts` — POST documentos (multipart)
+- `backend/src/modules/solicitudes/application/use-cases/obtener-url-documento.use-case.ts` — GET URL firmada (TTL 5 min, RN-53)
+- `backend/src/modules/solicitudes/infrastructure/jobs/vencer-solicitudes.job.ts` — Cron 05:01 UTC, RN-08
+- `backend/src/modules/solicitudes/application/dtos/adjuntar-documento-query.dto.ts`
+- `backend/src/modules/solicitudes/application/dtos/documento-url.dto.ts`
+
+### Archivos modificados
+- `backend/src/modules/permisos/infrastructure/services/minio-storage.adapter.ts` — convertido a barrel re-export (backward compat)
+- `backend/src/modules/permisos/permisos.module.ts` — eliminado MinioStorageAdapter local (ahora global)
+- `backend/src/modules/solicitudes/solicitudes.module.ts` — añadidos use cases, job, ScheduleModule
+- `backend/src/modules/solicitudes/infrastructure/controllers/solicitudes.controller.ts` — POST :id/documentos (público)
+- `backend/src/modules/solicitudes/infrastructure/controllers/solicitudes-funcionario.controller.ts` — GET :id/documentos/:docId
+- `backend/src/modules/solicitudes/infrastructure/services/configuracion-sistema.service.ts` — añadidos obtenerPlazoRevisionHoras / obtenerPlazoCorreccionDias
+- `backend/src/modules/solicitudes/infrastructure/persistence/typeorm-solicitud.repository.ts` — implementado marcarVencidas
+- `backend/src/modules/solicitudes/domain/ports/solicitud-repository.interface.ts` — añadido marcarVencidas + MarcarVencidasParams
+- `backend/src/common/enums/accion-auditoria.enum.ts` — añadidos DESCARGAR_DOCUMENTO + ADJUNTAR_DOCUMENTO
+- `backend/src/app.module.ts` — añadido StorageModule
+
+### Mejoras arquitectónicas
+- Eliminación de código duplicado: MinioStorageAdapter vivía en PermisosModule; ahora es singleton global en StorageModule
+- PermisosModule: backward compat via barrel re-export sin cambiar paths de importación en use-cases
+
+### Quality Gates — B9
+- `tsc --noEmit`: ✅ exit 0
+- `eslint`: ✅ 0 errors (3 warnings pre-existentes)
+- `nest build`: ✅ exit 0
+
 ## Última actualización
 
-2026-08-04 — B8 completado. Fase 2 cerrada (17/17). Gaps de API cubiertos: PATCH activar usuario,
-rate limit recuperar-contrasena, confirmarContrasena en DTOs, política RN-51 centralizada.
-Próximo: B9 — StorageModule + job vencimiento solicitudes.
+2026-08-04 — B9 completado. Fase 3 cerrada (16/16). StorageModule @Global extraído, POST documentos
+multipart con SHA-256 + MinIO, GET URL firmada TTL 5 min (RN-53), VencerSolicitudesJob (RN-08).
+Próximo: B10 — Envío real de correos (BullMQ + SMTP).

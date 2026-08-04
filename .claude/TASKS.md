@@ -140,24 +140,24 @@
 **Objetivo:** Núcleo del negocio implementado y probado.
 **Semanas:** 3–4
 **Dependencia:** Fase 2 completada.
-**Estado:** 🔄 En progreso — 12 / 16 tareas completadas
+**Estado:** ✅ Completada — 16 / 16 tareas completadas
 
 - [x] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos ✅ 2026-08-03
 - [x] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento ✅ 2026-08-04
-- [ ] `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas)
+- [x] `POST /api/v1/public/solicitudes/{id}/documentos` — Adjuntar documentos (multipart) ✅ 2026-08-04 (B9)
 - [x] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario) ✅ 2026-08-04
 - [x] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario) ✅ 2026-08-04
-- [ ] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga
+- [x] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga (TTL 5 min, RN-53) ✅ 2026-08-04 (B9)
 - [x] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola ✅ 2026-08-04
 - [x] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio ✅ 2026-08-04
 - [x] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos ✅ 2026-08-04
 - [x] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados ✅ 2026-08-04
 - [x] Validación: no duplicar solicitudes activas para la misma moto ✅ 2026-08-03
 - [x] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX` ✅ 2026-08-03
-- [ ] Job automático: marcar solicitudes en `VENCIDA` al superar plazo
+- [x] Job automático: marcar solicitudes en `VENCIDA` al superar plazo (VencerSolicitudesJob, RN-08) ✅ 2026-08-04 (B9)
 - [x] Registro en `historial_estados` en cada cambio ✅ 2026-08-04
 - [x] Registro en `auditoria` en cada cambio ✅ 2026-08-04
-- [ ] StorageModule con MinIO: subida y URLs firmadas
+- [x] StorageModule con MinIO (@Global): subida multipart y URLs firmadas ✅ 2026-08-04 (B9)
 
 ### Pendientes de Diseño — Fase 3
 

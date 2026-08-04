@@ -17,4 +17,20 @@ export class ConfiguracionSistemaService {
     const val = parseInt(config.valor, 10);
     return isNaN(val) || val <= 0 ? 30 : val;
   }
+
+  /** Horas máximas antes de que una solicitud RECIBIDA pase a VENCIDA (RN-08). Default: 48h. */
+  async obtenerPlazoRevisionHoras(): Promise<number> {
+    const config = await this.repo.findOne({ where: { clave: 'plazo_revision_horas' } });
+    if (!config?.valor) return 48;
+    const val = parseInt(config.valor, 10);
+    return isNaN(val) || val <= 0 ? 48 : val;
+  }
+
+  /** Días máximos antes de que una solicitud PENDIENTE_CORRECCION pase a VENCIDA (RN-08). Default: 5. */
+  async obtenerPlazoCorreccionDias(): Promise<number> {
+    const config = await this.repo.findOne({ where: { clave: 'plazo_correccion_dias' } });
+    if (!config?.valor) return 5;
+    const val = parseInt(config.valor, 10);
+    return isNaN(val) || val <= 0 ? 5 : val;
+  }
 }

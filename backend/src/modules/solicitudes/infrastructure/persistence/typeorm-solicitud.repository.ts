@@ -5,6 +5,7 @@ import {
   CambiarEstadoParams,
   ISolicitudRepository,
   ListarSolicitudesQuery,
+  MarcarVencidasParams,
 } from '../../domain/ports/solicitud-repository.interface';
 import { SolicitudDomainEntity } from '../../domain/entities/solicitud.domain-entity';
 import { SolicitudEntity } from './solicitud.entity';
@@ -248,6 +249,80 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
 
     if (!row) return { solapamiento: false };
     return { solapamiento: true, codigoPermiso: row.codigoPermiso };
+  }
+
+  async marcarVencidas(params: MarcarVencidasParams): Promise<string[]> {
+    const { plazoRevisionHoras, plazoCorreccionDias } = params;
+
+    // Solicitudes RECIBIDAS que superaron el plazo de revisión
+    const limiteRevision = new Date(Date.now() - plazoRevisionHoras * 60 * 60 * 1000);
+    const recibidas = await this.repo
+      .createQueryBuilder('s')
+      .select('s.id', 'id')
+      .where('s.estado = :estado', { estado: EstadoSolicitud.RECIBIDA })
+      .andWhere('s.deletedAt IS NULL')
+      .andWhere('s.createdAt < :limite', { limite: limiteRevision.toISOString() })
+      .getRawMany<{ id: string }>();
+
+    // Solicitudes PENDIENTE_CORRECCION que superaron el plazo de corrección
+    const limiteCorreccion = new Date(Date.now() - plazoCorreccionDias * 24 * 60 * 60 * 1000);
+    const pendientes = await this.repo
+      .createQueryBuilder('s')
+      .select('s.id', 'id')
+      .where('s.estado = :estado', { estado: EstadoSolicitud.PENDIENTE_CORRECCION })
+      .andWhere('s.deletedAt IS NULL')
+      .andWhere('s.updatedAt < :limite', { limite: limiteCorreccion.toISOString() })
+      .getRawMany<{ id: string }>();
+
+    const idsRecibidas = recibidas.map((r) => r.id);
+    const idsPendientes = pendientes.map((r) => r.id);
+    const todos = [...idsRecibidas, ...idsPendientes];
+
+    if (todos.length === 0) return [];
+
+    await this.dataSource.transaction(async (em) => {
+      // Actualizar estados a VENCIDA
+      await em
+        .createQueryBuilder()
+        .update(SolicitudEntity)
+        .set({ estado: EstadoSolicitud.VENCIDA })
+        .whereInIds(todos)
+        .execute();
+
+      // Insertar historial para recibidas
+      for (const id of idsRecibidas) {
+        await em.save(
+          HistorialEstadoEntity,
+          em.create(HistorialEstadoEntity, {
+            estadoAnterior: EstadoSolicitud.RECIBIDA,
+            estadoNuevo: EstadoSolicitud.VENCIDA,
+            motivo: 'Vencimiento automático por superación de plazo de revisión',
+            camposCorreccion: null,
+            ipAddress: null,
+            solicitud: { id } as SolicitudEntity,
+            usuario: null,
+          }),
+        );
+      }
+
+      // Insertar historial para pendientes de corrección
+      for (const id of idsPendientes) {
+        await em.save(
+          HistorialEstadoEntity,
+          em.create(HistorialEstadoEntity, {
+            estadoAnterior: EstadoSolicitud.PENDIENTE_CORRECCION,
+            estadoNuevo: EstadoSolicitud.VENCIDA,
+            motivo: 'Vencimiento automático por superación de plazo de corrección',
+            camposCorreccion: null,
+            ipAddress: null,
+            solicitud: { id } as SolicitudEntity,
+            usuario: null,
+          }),
+        );
+      }
+    });
+
+    return todos;
   }
 
   // ─── Helper privado ────────────────────────────────────────────────────────
