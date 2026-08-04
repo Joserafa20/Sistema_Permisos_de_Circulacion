@@ -51,4 +51,15 @@ export interface ISolicitudRepository {
    * Retorna el numero_radicado de la solicitud activa si existe.
    */
   hasActivaSolicitud(motocicletaId: string): Promise<{ activa: boolean; numeroRadicado?: string }>;
+
+  /**
+   * Transición automática recibida → en_revision al abrir el detalle (PRD §13).
+   * Solo ocurre si el estado actual es RECIBIDA. Es atómica: actualiza estado e inserta historial.
+   * Retorna true si la transición ocurrió, false si el estado ya era diferente.
+   */
+  marcarEnRevision(
+    id: string,
+    usuarioId: string | null,
+    ipAddress: string | null,
+  ): Promise<boolean>;
 }

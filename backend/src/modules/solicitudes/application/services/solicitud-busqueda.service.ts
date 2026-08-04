@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ISolicitudRepository,
+  ListarSolicitudesQuery,
   SOLICITUD_REPOSITORY_TOKEN,
 } from '../../domain/ports/solicitud-repository.interface';
 import { SolicitudDomainEntity } from '../../domain/entities/solicitud.domain-entity';
@@ -38,5 +39,11 @@ export class SolicitudBusquedaService {
     motocicletaId: string,
   ): Promise<{ activa: boolean; numeroRadicado?: string }> {
     return this.solicitudRepo.hasActivaSolicitud(motocicletaId);
+  }
+
+  async listar(
+    query: ListarSolicitudesQuery,
+  ): Promise<{ items: SolicitudDomainEntity[]; total: number }> {
+    return this.solicitudRepo.findMany(query);
   }
 }

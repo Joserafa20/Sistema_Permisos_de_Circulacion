@@ -16,6 +16,12 @@ import { RecaptchaService } from './infrastructure/services/recaptcha.service';
 import { ConfiguracionSistemaService } from './infrastructure/services/configuracion-sistema.service';
 import { SolicitudTransaccionService } from './infrastructure/services/solicitud-transaccion.service';
 import { SolicitudesController } from './infrastructure/controllers/solicitudes.controller';
+import { SolicitudesFuncionarioController } from './infrastructure/controllers/solicitudes-funcionario.controller';
+import { ListarSolicitudesUseCase } from './application/use-cases/listar-solicitudes.use-case';
+import { ObtenerSolicitudPorIdUseCase } from './application/use-cases/obtener-solicitud-por-id.use-case';
+import { ObtenerHistorialUseCase } from './application/use-cases/obtener-historial.use-case';
+import { ListarDocumentosUseCase } from './application/use-cases/listar-documentos.use-case';
+import { ConsultarEstadoPublicoUseCase } from './application/use-cases/consultar-estado-publico.use-case';
 
 /**
  * Módulo central del trámite ciudadano.
@@ -42,7 +48,7 @@ import { SolicitudesController } from './infrastructure/controllers/solicitudes.
     MotocicletasModule,
     MotivosModule,
   ],
-  controllers: [SolicitudesController],
+  controllers: [SolicitudesController, SolicitudesFuncionarioController],
   providers: [
     SolicitudBusquedaService,
     { provide: SOLICITUD_REPOSITORY_TOKEN, useClass: TypeOrmSolicitudRepository },
@@ -50,6 +56,11 @@ import { SolicitudesController } from './infrastructure/controllers/solicitudes.
     RecaptchaService,
     ConfiguracionSistemaService,
     SolicitudTransaccionService,
+    ListarSolicitudesUseCase,
+    ObtenerSolicitudPorIdUseCase,
+    ObtenerHistorialUseCase,
+    ListarDocumentosUseCase,
+    ConsultarEstadoPublicoUseCase,
   ],
   // SolicitudBusquedaService exportado para PermisosModule y futuros módulos
   // que necesiten consultar el estado de una solicitud sin acceder al repo directamente.

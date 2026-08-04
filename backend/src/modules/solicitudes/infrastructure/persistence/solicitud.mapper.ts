@@ -34,6 +34,8 @@ function historialToDomain(entity: HistorialEstadoEntity): HistorialEstadoDomain
   domain.usuarioId = entity.usuario?.id ?? null;
   domain.usuarioNombre = entity.usuario?.nombre ?? null;
   domain.usuarioApellido = entity.usuario?.apellido ?? null;
+  domain.usuarioRol =
+    (entity.usuario as unknown as { rol?: { nombre?: string } })?.rol?.nombre ?? null;
   return domain;
 }
 

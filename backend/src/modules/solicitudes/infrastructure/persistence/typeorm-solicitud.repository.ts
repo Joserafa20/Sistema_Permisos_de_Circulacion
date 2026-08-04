@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import {
   ISolicitudRepository,
   ListarSolicitudesQuery,
 } from '../../domain/ports/solicitud-repository.interface';
 import { SolicitudDomainEntity } from '../../domain/entities/solicitud.domain-entity';
 import { SolicitudEntity } from './solicitud.entity';
+import { HistorialEstadoEntity } from './historial-estado.entity';
 import { SolicitudMapper } from './solicitud.mapper';
 import { EstadoSolicitud } from '../../../../common/enums';
+import { UsuarioEntity } from '../../../usuarios/infrastructure/persistence/usuario.entity';
 
 /** Estados que bloquean la creación de una nueva solicitud para la misma moto (RN-03). */
 const ESTADOS_ACTIVOS: EstadoSolicitud[] = [
@@ -29,6 +31,7 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
   constructor(
     @InjectRepository(SolicitudEntity)
     private readonly repo: Repository<SolicitudEntity>,
+    private readonly dataSource: DataSource,
   ) {}
 
   // ─── Lecturas ──────────────────────────────────────────────────────────────
@@ -141,6 +144,38 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
     return { activa: true, numeroRadicado: found.numeroRadicado };
   }
 
+  async marcarEnRevision(
+    id: string,
+    usuarioId: string | null,
+    ipAddress: string | null,
+  ): Promise<boolean> {
+    return this.dataSource.transaction(async (em) => {
+      const result = await em
+        .createQueryBuilder()
+        .update(SolicitudEntity)
+        .set({ estado: EstadoSolicitud.EN_REVISION })
+        .where('id = :id AND estado = :estado', { id, estado: EstadoSolicitud.RECIBIDA })
+        .execute();
+
+      if (!result.affected || result.affected === 0) return false;
+
+      await em.save(
+        HistorialEstadoEntity,
+        em.create(HistorialEstadoEntity, {
+          estadoAnterior: EstadoSolicitud.RECIBIDA,
+          estadoNuevo: EstadoSolicitud.EN_REVISION,
+          motivo: null,
+          camposCorreccion: null,
+          ipAddress,
+          solicitud: { id } as SolicitudEntity,
+          usuario: usuarioId ? ({ id: usuarioId } as UsuarioEntity) : null,
+        }),
+      );
+
+      return true;
+    });
+  }
+
   // ─── Helper privado ────────────────────────────────────────────────────────
 
   private async loadDetail(where: Record<string, unknown>): Promise<SolicitudDomainEntity | null> {
@@ -152,6 +187,7 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
       .leftJoinAndSelect('ciudadano.municipio', 'municipio')
       .leftJoinAndSelect('s.historial', 'historial')
       .leftJoinAndSelect('historial.usuario', 'historialUsuario')
+      .leftJoinAndSelect('historialUsuario.rol', 'historialUsuarioRol')
       .leftJoinAndSelect('s.documentos', 'documentos')
       .where('s.deletedAt IS NULL')
       .andWhere(

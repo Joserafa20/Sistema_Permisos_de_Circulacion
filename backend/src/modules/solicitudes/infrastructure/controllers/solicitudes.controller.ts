@@ -1,15 +1,20 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { CrearSolicitudDto } from '../../application/dtos/crear-solicitud.dto';
 import { SolicitudCreadaDto } from '../../application/dtos/solicitud-creada.dto';
+import { EstadoPublicoSolicitudDto } from '../../application/dtos/estado-publico-solicitud.dto';
 import { CrearSolicitudUseCase } from '../../application/use-cases/crear-solicitud.use-case';
+import { ConsultarEstadoPublicoUseCase } from '../../application/use-cases/consultar-estado-publico.use-case';
 
 @ApiTags('solicitudes-publicas')
 @Controller('public/solicitudes')
 export class SolicitudesController {
-  constructor(private readonly crearSolicitudUseCase: CrearSolicitudUseCase) {}
+  constructor(
+    private readonly crearSolicitudUseCase: CrearSolicitudUseCase,
+    private readonly consultarEstadoPublicoUseCase: ConsultarEstadoPublicoUseCase,
+  ) {}
 
   @Post()
   @Public()
@@ -37,5 +42,41 @@ export class SolicitudesController {
   async crear(@Body() dto: CrearSolicitudDto, @Req() req: Request): Promise<SolicitudCreadaDto> {
     const ipSolicitante = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
     return this.crearSolicitudUseCase.ejecutar(dto, ipSolicitante);
+  }
+
+  @Get('estado')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Consultar estado público de una solicitud (RN-20)',
+    description:
+      'Permite al ciudadano consultar el estado de su solicitud usando número de radicado ' +
+      'y número de documento. La respuesta es idéntica si no existe o si el documento no coincide ' +
+      '— nunca revela si un radicado existe sin el documento correcto.',
+  })
+  @ApiQuery({
+    name: 'radicado',
+    required: true,
+    description: 'Número de radicado (ej: 20260804-PYP-000001)',
+  })
+  @ApiQuery({
+    name: 'documento',
+    required: true,
+    description: 'Número de documento del solicitante',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado público de la solicitud',
+    type: EstadoPublicoSolicitudDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontró la solicitud con ese radicado y documento',
+  })
+  consultarEstado(
+    @Query('radicado') radicado: string,
+    @Query('documento') documento: string,
+  ): Promise<EstadoPublicoSolicitudDto> {
+    return this.consultarEstadoPublicoUseCase.ejecutar(radicado, documento);
   }
 }

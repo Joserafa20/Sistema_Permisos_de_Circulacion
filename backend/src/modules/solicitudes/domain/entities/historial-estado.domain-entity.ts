@@ -12,4 +12,5 @@ export class HistorialEstadoDomainEntity {
   usuarioId: string | null;
   usuarioNombre: string | null;
   usuarioApellido: string | null;
+  usuarioRol: string | null;
 }
