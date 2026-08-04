@@ -274,7 +274,37 @@ Fase 1 — segunda tarea: Script SQL completo y migraciones TypeORM.
   - CRUD Usuarios Admin
   - StorageModule: adjuntar documentos a solicitudes
 
+✓ **B8 — Auth completo + CRUD Usuarios + sincronización de estado** ✅ 2026-08-04
+  Rama: `feature/fase-2-auth`
+  Archivos nuevos:
+  - `common/decorators/is-strong-password.decorator.ts` — política RN-51 reutilizable
+  - `common/decorators/matches-field.decorator.ts` — validación confirmarContrasena
+  - `usuarios/application/dtos/activar-usuario.dto.ts`
+  - `usuarios/application/use-cases/activar-usuario/activar-usuario.use-case.ts` — revoca tokens al desactivar
+  Archivos modificados:
+  - `common/enums/accion-auditoria.enum.ts` — +USUARIO_ACTIVADO, +USUARIO_DESACTIVADO
+  - `auth/application/dtos/restablecer-contrasena.dto.ts` — refactor a @IsStrongPassword() + confirmarContrasena
+  - `auth/application/dtos/cambiar-contrasena.dto.ts` — refactor a @IsStrongPassword() + confirmarContrasena
+  - `auth/infrastructure/controllers/auth.controller.ts` — +@Throttle 3/hora en recuperar-contrasena
+  - `usuarios/infrastructure/controllers/usuarios.controller.ts` — +PATCH :id/activar
+  - `usuarios/usuarios.module.ts` — +TokenEntity en forFeature, +ActivarUsuarioUseCase
+  - `.claude/TASKS.md` — Fase 2 19/19 ✅, Estado Actual actualizado
+  - `.claude/ROADMAP.md` — Fase 2 17/17 ✅, Fase 4 body corregido, tabla actualizada
+  Quality gates: tsc --noEmit ✅, eslint 0 errores ✅, nest build ✅
+
+  Deuda técnica → B9:
+  - StorageModule MinIO: `POST /solicitudes/{id}/documentos` + `GET /solicitudes/{id}/documentos/{docId}`
+  - Job vencimiento solicitudes (RN-08 análogo para solicitudes)
+  - Envío real de correos (BullMQ/SMTP)
+
+  **Hallazgo de B8:** Auth extendido (recuperar/restablecer/cambiar contraseña, GET /me) y CRUD Usuarios
+  ya estaban implementados en el código pero no estaban marcados en TASKS.md ni ROADMAP.md.
+  B8 cerró los gaps reales (PATCH activar, rate limit recuperar-contrasena, confirmarContrasena)
+  y sincronizó los archivos de estado con la realidad del código.
+  **Fase 2 completamente cerrada.**
+
 ## Última actualización
 
-2026-08-04 — B7 completado. Ciclo de vida del permiso cerrado: revocar, condiciones, QR público, job vencimiento, notificaciones desacopladas.
-Próximo: aguardando autorización para B8.
+2026-08-04 — B8 completado. Fase 2 cerrada (17/17). Gaps de API cubiertos: PATCH activar usuario,
+rate limit recuperar-contrasena, confirmarContrasena en DTOs, política RN-51 centralizada.
+Próximo: B9 — StorageModule + job vencimiento solicitudes.

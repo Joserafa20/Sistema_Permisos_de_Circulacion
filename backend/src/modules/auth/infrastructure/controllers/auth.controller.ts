@@ -125,6 +125,8 @@ export class AuthController {
   @Post('recuperar-contrasena')
   @Public()
   @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 3600000 } })
   @ApiOperation({
     summary: 'Solicitar recuperación de contraseña',
     description:

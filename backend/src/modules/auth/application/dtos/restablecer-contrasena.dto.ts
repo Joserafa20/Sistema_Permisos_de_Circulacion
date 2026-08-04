@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, Matches, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { IsStrongPassword } from '../../../../common/decorators/is-strong-password.decorator';
+import { MatchesField } from '../../../../common/decorators/matches-field.decorator';
 
 export class RestablecerContrasenaDto {
   @ApiProperty({ description: 'Token recibido por correo (64 caracteres hex)' })
@@ -12,13 +14,14 @@ export class RestablecerContrasenaDto {
       'Nueva contraseña: mínimo 10 caracteres, una mayúscula, una minúscula, un número y un carácter especial (!@#$%^&*)',
     example: 'NuevaContrasena1!',
   })
-  @IsString()
-  @MinLength(10, { message: 'La contraseña debe tener mínimo 10 caracteres' })
-  @Matches(/[A-Z]/, { message: 'La contraseña debe contener al menos una mayúscula' })
-  @Matches(/[a-z]/, { message: 'La contraseña debe contener al menos una minúscula' })
-  @Matches(/[0-9]/, { message: 'La contraseña debe contener al menos un número' })
-  @Matches(/[!@#$%^&*]/, {
-    message: 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)',
-  })
+  @IsStrongPassword()
   nuevaContrasena: string;
+
+  @ApiProperty({
+    description: 'Confirmación de la nueva contraseña — debe coincidir exactamente',
+    example: 'NuevaContrasena1!',
+  })
+  @IsString()
+  @MatchesField('nuevaContrasena', { message: 'Las contraseñas no coinciden' })
+  confirmarContrasena: string;
 }

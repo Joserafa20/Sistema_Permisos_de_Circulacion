@@ -18,6 +18,8 @@ export enum AccionAuditoria {
   USUARIO_DESBLOQUEADO = 'usuario_desbloqueado',
   USUARIO_ELIMINADO = 'usuario_eliminado',
   USUARIO_RESTAURADO = 'usuario_restaurado',
+  USUARIO_ACTIVADO = 'usuario_activado',
+  USUARIO_DESACTIVADO = 'usuario_desactivado',
   CIUDADANO_CONSULTADO = 'ciudadano_consultado',
   LISTADO_CIUDADANOS = 'listado_ciudadanos',
   MOTOCICLETA_CONSULTADA = 'motocicleta_consultada',

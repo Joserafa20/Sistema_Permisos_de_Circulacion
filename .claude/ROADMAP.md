@@ -56,25 +56,25 @@
 **Objetivo:** Sistema de identidad blindado antes de cualquier módulo funcional.  
 **Duración estimada:** Semanas 2–3  
 **Dependencia:** Fase 1 completada.  
-**Estado:** 🔄 En progreso — 9 / 15 tareas completadas
+**Estado:** ✅ Completada — 17 / 17 tareas completadas
 
 - [x] Migración TypeORM y seed para `configuracion_institucional` ✅ 2026-08-03
 - [x] Módulo backend `configuracion-institucional/` con endpoints CRUD e imagen ✅ 2026-08-03
 - [x] `POST /api/v1/auth/login` con JWT Access + Refresh Token ✅ 2026-08-03
 - [x] `POST /api/v1/auth/logout` (revocación de refresh token) ✅ 2026-08-03
 - [x] `POST /api/v1/auth/refresh` (rotación de refresh token) ✅ 2026-08-03
-- [ ] `POST /api/v1/auth/recuperar-contrasena`
-- [ ] `POST /api/v1/auth/restablecer-contrasena`
-- [ ] `POST /api/v1/auth/cambiar-contrasena`
-- [ ] `GET  /api/v1/auth/me`
+- [x] `POST /api/v1/auth/recuperar-contrasena` — rate limit 3/hora, respuesta genérica (RN-54) ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/restablecer-contrasena` — token uso único, historial 5 pass ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/cambiar-contrasena` — valida actual, revoca refresh tokens ✅ 2026-08-04 (B8)
+- [x] `GET  /api/v1/auth/me` — perfil sin campos sensibles ✅ 2026-08-04 (B8)
 - [x] JwtAuthGuard y RolesGuard globales ✅ 2026-08-03
 - [x] Rate limiting en `/auth/login` (5 intentos / 15 min por IP) ✅ 2026-08-03
 - [x] Bloqueo temporal de cuenta por intentos fallidos ✅ 2026-08-03
-- [ ] Política de contraseñas aplicada en DTOs
+- [x] Política de contraseñas en DTOs (RN-51) — `@IsStrongPassword()` + `@MatchesField()` ✅ 2026-08-04 (B8)
 - [x] Registro de auditoría: login, logout, login fallido ✅ 2026-08-03
-- [ ] Global Exception Filter (sin exposición de internos)
-- [ ] Helmet + CORS configurados
-- [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
+- [x] Global Exception Filter (sin exposición de internos) ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] Helmet + CORS configurados ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] CRUD Usuarios (Admin): listar, detalle, crear, actualizar, `PATCH /activar`, soft delete, restaurar ✅ 2026-08-04 (B8)
 
 ### Pendientes de Diseño — Fase 2
 
@@ -121,26 +121,27 @@
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.  
 **Duración estimada:** Semanas 4–5  
 **Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).  
-**Estado:** 🔄 En progreso — 9 / 14 tareas completadas ← (B6 completado 2026-08-04)
+**Estado:** 🔄 En progreso — 13 / 18 tareas completadas
 
-- [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04
+- [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04 (B6)
   - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
   - [x] Número consecutivo formato `2026-PYP-00145` (RN-07) ✅ 2026-08-04
   - [x] Snapshot inmutable de ciudadano y moto (RN-06) ✅ 2026-08-04
   - [x] Imagen del QR embebida en el PDF ✅ 2026-08-04
   - [x] Firma del funcionario configurable ✅ 2026-08-04
   - [x] Pie de página institucional ✅ 2026-08-04
-- [x] QRModule: código SHA256 opaco (RN-05), nunca datos personales ✅ 2026-08-04
-- [x] Almacenamiento seguro del PDF en MinIO (bucket privado) ✅ 2026-08-04
-- [x] `GET /api/v1/permisos` — listado paginado con filtros ✅ 2026-08-04
-- [x] `GET /api/v1/permisos/{id}` — detalle sin exponer storageKey ni codigoQr ✅ 2026-08-04
-- [x] `GET /api/v1/permisos/{id}/pdf` — URL firmada TTL 5 min ✅ 2026-08-04
-- [ ] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública del QR
-- [ ] Registro de cada escaneo en `qr_validaciones`
-- [ ] `POST /api/v1/permisos/{id}/revocar` — Revocación con motivo (Admin)
-- [ ] `PATCH /api/v1/permisos/{id}/condiciones` — condicionesRestricciones (RN-38)
-- [ ] Job automático: marcar permisos en `VENCIDO` al superar `fecha_vencimiento`
-- [ ] NotificacionesModule: cola de correos con BullMQ
+- [x] QRModule: código SHA256 opaco (RN-05), nunca datos personales ✅ 2026-08-04 (B6)
+- [x] Almacenamiento seguro del PDF en MinIO (bucket privado) ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos` — listado paginado con filtros ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}` — detalle sin exponer storageKey ni codigoQr ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}/pdf` — URL firmada TTL 5 min ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública (RN-34), HTTP 200 siempre ✅ 2026-08-04 (B7)
+- [x] Registro de cada escaneo en `qr_validaciones` incluyendo NO_ENCONTRADO (RN-35) ✅ 2026-08-04 (B7)
+- [x] `POST /api/v1/permisos/{id}/revocar` — Admin only, motivo 20-1000 chars (RN-37) ✅ 2026-08-04 (B7)
+- [x] `PATCH /api/v1/permisos/{id}/condiciones` — Funcionario/Admin, máx 500 chars (RN-38) ✅ 2026-08-04 (B7)
+- [x] Job automático: marcar permisos `VENCIDO` diario 00:01 COT (RN-08, RN-31) ✅ 2026-08-04 (B7)
+- [x] NotificacionesModule: persistencia desacoplada en BD (estado PENDIENTE) ✅ 2026-08-04 (B7)
+  - [ ] Envío real de correos (SMTP + BullMQ) — deuda técnica B9+
   - [ ] Correo: solicitud recibida (con número de radicado)
   - [ ] Correo: solicitud aprobada (con enlace de descarga)
   - [ ] Correo: solicitud rechazada (con motivo)
@@ -263,7 +264,7 @@
 |------|-------------|:-----------:|:-----:|--------|
 | Fase 0 | Fundamentos | 12 | 12 | ✅ Completada |
 | Fase 1 | Base de Datos | 7 | 7 | ✅ Completada |
-| Fase 2 | Auth y Seguridad | 9 | 15 | 🔄 En progreso |
+| Fase 2 | Auth y Seguridad | 17 | 17 | ✅ Completada (B8) |
 | Fase 3 | Solicitudes Backend | 12 | 16 | 🔄 En progreso |
 | Fase 4 | Permisos PDF/QR | 13 | 18 | 🔄 En progreso ← |
 | Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |

@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -18,12 +19,14 @@ import { SWAGGER_BEARER_TOKEN } from '../../../../common/constants/swagger.const
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
 import { AuthUser } from '../../../auth/infrastructure/strategies/jwt.strategy';
+import { ActivarUsuarioDto } from '../../application/dtos/activar-usuario.dto';
 import { ActualizarUsuarioDto } from '../../application/dtos/actualizar-usuario.dto';
 import { CrearUsuarioDto } from '../../application/dtos/crear-usuario.dto';
 import { ListarUsuariosQueryDto } from '../../application/dtos/listar-usuarios-query.dto';
 import { UsuarioCreadoDto } from '../../application/dtos/usuario-creado.dto';
 import { UsuarioDetalleDto } from '../../application/dtos/usuario-detalle.dto';
 import { UsuarioListItemDto } from '../../application/dtos/usuario-list-item.dto';
+import { ActivarUsuarioUseCase } from '../../application/use-cases/activar-usuario/activar-usuario.use-case';
 import { ActualizarUsuarioUseCase } from '../../application/use-cases/actualizar-usuario/actualizar-usuario.use-case';
 import { CrearUsuarioUseCase } from '../../application/use-cases/crear-usuario/crear-usuario.use-case';
 import { EliminarUsuarioUseCase } from '../../application/use-cases/eliminar-usuario/eliminar-usuario.use-case';
@@ -41,6 +44,7 @@ export class UsuariosController {
     private readonly obtenerUsuarioPorIdUseCase: ObtenerUsuarioPorIdUseCase,
     private readonly crearUsuarioUseCase: CrearUsuarioUseCase,
     private readonly actualizarUsuarioUseCase: ActualizarUsuarioUseCase,
+    private readonly activarUsuarioUseCase: ActivarUsuarioUseCase,
     private readonly eliminarUsuarioUseCase: EliminarUsuarioUseCase,
     private readonly restaurarUsuarioUseCase: RestaurarUsuarioUseCase,
   ) {}
@@ -156,6 +160,43 @@ export class UsuariosController {
     return this.actualizarUsuarioUseCase.execute({
       id,
       dto,
+      actorId: actor.id,
+      ipAddress,
+      userAgent,
+    });
+  }
+
+  @Patch(':id/activar')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Activar o desactivar usuario',
+    description:
+      'Cambia el estado activo del usuario. Al desactivar se revocan todos sus refresh tokens activos, forzando un nuevo inicio de sesión. El administrador no puede desactivarse a sí mismo. Solo el Administrador puede acceder.',
+  })
+  @ApiParam({ name: 'id', description: 'UUID del usuario', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado del usuario actualizado correctamente',
+    type: UsuarioDetalleDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'Rol insuficiente — se requiere Administrador' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
+  @ApiResponse({
+    status: 422,
+    description: 'Regla de negocio violada (SELF_DEACTIVATION_FORBIDDEN)',
+  })
+  async activar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ActivarUsuarioDto,
+    @CurrentUser() actor: AuthUser,
+    @Req() req: Request,
+  ): Promise<UsuarioDetalleDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    const userAgent = (req.headers['user-agent'] ?? null) as string | null;
+    return this.activarUsuarioUseCase.execute({
+      id,
+      activo: dto.activo,
       actorId: actor.id,
       ipAddress,
       userAgent,

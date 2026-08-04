@@ -101,7 +101,7 @@
 **Objetivo:** Sistema de identidad blindado antes de cualquier módulo funcional.
 **Semanas:** 2–3
 **Dependencia:** Fase 1 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** ✅ Completada — 19 / 19 tareas completadas
 
 - [x] Migración TypeORM para tabla `configuracion_institucional` ✅ 2026-08-03
 - [x] Seed inicial de `configuracion_institucional` (configurable vía `.env`) ✅ 2026-08-03
@@ -110,18 +110,18 @@
 - [x] `POST /api/v1/auth/login` con JWT Access + Refresh Token ✅ 2026-08-03
 - [x] `POST /api/v1/auth/logout` (revocación de refresh token) ✅ 2026-08-03
 - [x] `POST /api/v1/auth/refresh` (rotación de refresh token) ✅ 2026-08-03
-- [ ] `POST /api/v1/auth/recuperar-contrasena`
-- [ ] `POST /api/v1/auth/restablecer-contrasena`
-- [ ] `POST /api/v1/auth/cambiar-contrasena`
-- [ ] `GET  /api/v1/auth/me`
+- [x] `POST /api/v1/auth/recuperar-contrasena` — rate limit 3/hora, token SHA256, respuesta genérica ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/restablecer-contrasena` — token uso único, historial 5 contraseñas ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/cambiar-contrasena` — valida actual, revoca refresh tokens ✅ 2026-08-04 (B8)
+- [x] `GET  /api/v1/auth/me` — perfil completo sin campos sensibles ✅ 2026-08-04 (B8)
 - [x] JwtAuthGuard y RolesGuard implementados y aplicados ✅ 2026-08-03
 - [x] Rate limiting en `/auth/login` (5 intentos / 15 min por IP) ✅ 2026-08-03
 - [x] Bloqueo temporal de cuenta por intentos fallidos (en LocalStrategy) ✅ 2026-08-03
-- [ ] Política de contraseñas aplicada en DTOs
+- [x] Política de contraseñas aplicada en DTOs (RN-51) — `@IsStrongPassword()` compartido ✅ 2026-08-04 (B8)
 - [x] Registro de auditoría: login, logout, login fallido ✅ 2026-08-03
-- [ ] Global Exception Filter (sin exposición de internos)
-- [ ] Helmet + CORS configurados
-- [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
+- [x] Global Exception Filter (sin exposición de internos) ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] Helmet + CORS configurados ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] CRUD Usuarios (Admin): listar, detalle, crear, actualizar, activar/desactivar, soft delete, restaurar ✅ 2026-08-04 (B8)
 
 > **Nota:** El módulo `configuracion-institucional` comparte Fase 2 con Auth porque la tabla debe existir antes de la Fase 4 (generación de PDF). Las pantallas de UI del administrador se implementan en Fase 7.
 
@@ -330,43 +330,36 @@
 
 ### Fase Activa
 
-Fase 3 — Módulo de Solicitudes (Backend)
+Fase 3 — Módulo de Solicitudes (Backend) ← StorageModule + Job vencimiento solicitudes pendientes
+Fase 4 — Generación de Permiso (PDF + QR) ← Envío real de correos pendiente
 
-### Tareas pendientes en la fase activa
+### Tareas pendientes en las fases activas
 
-- `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas) — deferred StorageModule
-- `GET /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga — deferred StorageModule
-- Job automático: marcar solicitudes en `VENCIDA` al superar plazo — pendiente BullMQ
-- StorageModule con MinIO: subida y URLs firmadas — Fase 4 (PermisosModule)
+**Fase 3:**
+- `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas) — requiere StorageModule
+- `GET /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga — requiere StorageModule
+- Job automático: marcar solicitudes en `VENCIDA` al superar plazo
+- StorageModule con MinIO: subida y URLs firmadas
+
+**Fase 4:**
+- Envío real de correos (SMTP + BullMQ) — tabla `notificaciones` ya lista con estado PENDIENTE
 
 ### Última tarea terminada
 
-B6 — PermisosModule: generación de permiso con PDF escarapela + QR + MinIO (2026-08-04):
-- `PermisosModule` completo con arquitectura hexagonal
-- `GenerarPermisoUseCase` — QR opaco + PDF institucional + MinIO + DB
-- `QrCodeService` — SHA256(permisoId + SALT) + imagen buffer PNG (RN-05)
-- `CodigoPermisoService` — nextval(seq_codigo_permiso) (RN-07)
-- `PdfGeneratorService` — escarapela A4 con escudo, QR, snapshots, condiciones
-- `MinioStorageAdapter` — upload/download/signedUrl
-- `GET /api/v1/permisos` — listado paginado con filtros
-- `GET /api/v1/permisos/{id}` — detalle completo
-- `GET /api/v1/permisos/{id}/pdf` — URL firmada 5 min
-- Migración `condicionesRestricciones` en tabla `permisos`
-- `AprobarSolicitudUseCase` actualizado para llamar `GenerarPermisoUseCase`
-- Paquetes instalados: pdfkit, qrcode, minio, uuid
-
-B5C4 — Aprobación, rechazo y corrección de solicitudes (2026-08-04):
-- `POST /api/v1/solicitudes/{id}/aprobar` — RN-15, RN-17, RN-01 (HTTP 202)
-- `POST /api/v1/solicitudes/{id}/rechazar` — RN-04, RN-10, RN-15 (HTTP 200)
-- `POST /api/v1/solicitudes/{id}/correccion` — RN-04, RN-15, RN-16 (HTTP 200)
-- `SolicitudStateMachine` — máquina de estados centralizada
-- `cambiarEstado()` — transición atómica con pessimistic_write lock
-- `tienePermisoVigenteConSolapamiento()` — RN-17 raw SQL JOIN
-- Historial de estados + auditoría en cada transición
+B8 — Auth completo + CRUD Usuarios + gaps API (2026-08-04):
+- `PATCH /api/v1/usuarios/{id}/activar` — endpoint dedicado, revoca refresh tokens al desactivar
+- `@IsStrongPassword()` — decorador compartido RN-51, elimina duplicación en DTOs
+- `@MatchesField()` — validador de confirmación de contraseña para DTOs
+- `confirmarContrasena` agregado a `RestablecerContrasenaDto` y `CambiarContrasenaDto`
+- Rate limiting `POST /auth/recuperar-contrasena` — 3 req/hora (RN-54)
+- `AccionAuditoria.USUARIO_ACTIVADO` / `USUARIO_DESACTIVADO` — enums explícitos
+- TASKS.md + ROADMAP.md + SESSION.md sincronizados con estado real del código
+- **Fase 2 cerrada: 17/17 tareas completadas ✅**
 
 ### Próxima tarea
 
-B7 — Bloque pendiente de definición (revocación, notificaciones, recuperación de contraseña) — aguardando autorización.
+B9 — StorageModule (MinIO): subida de documentos adjuntos y URLs firmadas para descarga.
+Esto desbloquea `POST /solicitudes/{id}/documentos` y `GET /solicitudes/{id}/documentos/{docId}`.
 
 ---
 
