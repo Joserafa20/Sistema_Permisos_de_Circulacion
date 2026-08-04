@@ -5,10 +5,11 @@ import {
 } from '../../domain/ports/solicitud-repository.interface';
 import { SolicitudBusquedaService } from '../services/solicitud-busqueda.service';
 import { AuditoriaService } from '../../../auditoria/application/auditoria.service';
+import { NotificacionesService } from '../../../notificaciones/notificaciones.service';
 import { SolicitudStateMachine } from '../../domain/services/solicitud-state-machine';
 import { SolicitarCorreccionDto } from '../dtos/solicitar-correccion.dto';
 import { AccionSolicitudResponseDto } from '../dtos/accion-solicitud-response.dto';
-import { AccionAuditoria, EstadoSolicitud } from '../../../../common/enums';
+import { AccionAuditoria, EstadoSolicitud, TipoNotificacion } from '../../../../common/enums';
 import { NotFoundException } from '../../../../common/exceptions/not-found.exception';
 import { BusinessRuleException } from '../../../../common/exceptions/business-rule.exception';
 
@@ -19,6 +20,7 @@ export class SolicitarCorreccionUseCase {
     @Inject(SOLICITUD_REPOSITORY_TOKEN)
     private readonly solicitudRepo: ISolicitudRepository,
     private readonly auditoriaService: AuditoriaService,
+    private readonly notificacionesService: NotificacionesService,
   ) {}
 
   async ejecutar(
@@ -74,6 +76,22 @@ export class SolicitarCorreccionUseCase {
       ipAddress,
       usuarioId,
     });
+
+    // Notificar al ciudadano (fire-and-forget — RN-76)
+    if (solicitud.ciudadanoEmail) {
+      void this.notificacionesService.encolar({
+        tipo: TipoNotificacion.CORRECCION,
+        destinatario: solicitud.ciudadanoEmail,
+        asunto: `Se requieren correcciones — Radicado ${solicitud.numeroRadicado}`,
+        solicitudId,
+        contexto: {
+          nombreCiudadano: `${solicitud.ciudadanoNombre} ${solicitud.ciudadanoApellido}`,
+          numeroRadicado: solicitud.numeroRadicado,
+          motivoCorreccion: dto.motivo,
+          camposCorreccion: dto.camposCorreccion.join(', '),
+        },
+      });
+    }
 
     return {
       solicitudId,

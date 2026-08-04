@@ -8,13 +8,13 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 3 ✅ COMPLETADA + Fase 4 🔄 en progreso
+Fase: Fase 4 ✅ COMPLETADA — 18/18 tareas
 
-Bloque actual: B9 ✅ COMPLETADO — StorageModule (@Global), POST documentos (multipart), GET URL firmada documentos, VencerSolicitudesJob
+Bloque actual: B10 ✅ COMPLETADO — BullMQ worker + SMTP Nodemailer + RedisModule + EmailModule + 7 templates HTML + integración con use-cases
 
 Rama: `feature/fase-2-auth`
 
-Estado: Fase 3: 16/16 completadas. Fase 4: 13/18 completadas. Pendiente B10: envío real de correos (BullMQ+SMTP).
+Estado: Fase 3: 16/16 ✅. Fase 4: 18/18 ✅. Backend completo. Siguiente: Fase 5 (Frontend Ciudadano) o Fase 8 (Calidad).
 
 ---
 
@@ -77,7 +77,7 @@ Estado: ✅ COMPLETADA (parcial) — Login/Logout/Refresh implementados. Pendien
 
 ## Próxima tarea sugerida
 
-B10 — Envío real de correos: BullMQ + SMTP (Fase 4 — deuda técnica). Requiere autorización.
+B11 — Frontend Portal Ciudadano (Fase 5) o Fase 8 (Calidad y Producción). Requiere autorización.
 
 ---
 
@@ -337,8 +337,65 @@ B10 — Envío real de correos: BullMQ + SMTP (Fase 4 — deuda técnica). Requi
 - `eslint`: ✅ 0 errors (3 warnings pre-existentes)
 - `nest build`: ✅ exit 0
 
+---
+
+## Bloque B10 — Sistema de Notificaciones Reales (2026-08-04)
+
+### Nuevos módulos creados
+- `backend/src/modules/redis/redis.module.ts` — RedisModule @Global, exporta REDIS_CLIENT (IORedis)
+- `backend/src/modules/redis/redis.constants.ts` — tokens REDIS_CLIENT, EMAIL_NOTIFICATIONS_QUEUE, DLQ
+- `backend/src/modules/email/email.module.ts` — EmailModule con IEmailProvider + PlantillaEmailService
+- `backend/src/modules/email/domain/ports/email-provider.interface.ts` — IEmailProvider port
+- `backend/src/modules/email/infrastructure/providers/smtp-email.provider.ts` — SmtpEmailProvider (Nodemailer)
+- `backend/src/modules/email/infrastructure/services/plantilla-email.service.ts` — HTML rendering + branding + XSS escape
+
+### Templates HTML creados
+- `backend/src/templates/email/solicitud-recibida.html`
+- `backend/src/templates/email/solicitud-aprobada.html`
+- `backend/src/templates/email/solicitud-rechazada.html`
+- `backend/src/templates/email/correccion-requerida.html`
+- `backend/src/templates/email/solicitud-vencida.html`
+- `backend/src/templates/email/permiso-revocado.html`
+- `backend/src/templates/email/correccion-enviada.html`
+
+### Processor y migración creados
+- `backend/src/modules/notificaciones/infrastructure/processors/email.processor.ts` — BullMQ WorkerHost, concurrencia 5, backoff 1m/5m/15m, DLQ
+- `backend/database/migrations/1786060800000-AddContextoToNotificaciones.ts` — columna contexto JSONB
+
+### Archivos modificados
+- `backend/src/common/enums/tipo-notificacion.enum.ts` — +SOLICITUD_VENCIDA, +CORRECCION_ENVIADA
+- `backend/src/modules/notificaciones/infrastructure/persistence/notificacion.entity.ts` — +contexto JSONB
+- `backend/src/modules/notificaciones/notificaciones.service.ts` — encola en BullMQ después de persistir en DB
+- `backend/src/modules/notificaciones/notificaciones.module.ts` — +BullModule, +EmailModule, +EmailProcessor
+- `backend/src/app.module.ts` — +RedisModule, +BullModule.forRootAsync
+- `backend/src/modules/solicitudes/solicitudes.module.ts` — +NotificacionesModule
+- `backend/nest-cli.json` — assets para copiar templates/*.html a dist/
+- `backend/src/modules/solicitudes/application/use-cases/crear-solicitud.use-case.ts` — notifica SOLICITUD_RECIBIDA
+- `backend/src/modules/solicitudes/application/use-cases/aprobar-solicitud.use-case.ts` — notifica APROBADA
+- `backend/src/modules/solicitudes/application/use-cases/rechazar-solicitud.use-case.ts` — notifica RECHAZADA
+- `backend/src/modules/solicitudes/application/use-cases/solicitar-correccion.use-case.ts` — notifica CORRECCION
+- `backend/src/modules/solicitudes/infrastructure/jobs/vencer-solicitudes.job.ts` — notifica SOLICITUD_VENCIDA
+
+### Reglas de negocio implementadas
+- RN-76: BullMQ asíncrono, 3 reintentos, backoff 1m/5m/15m, DLQ
+- RN-77: 7 tipos de notificación al ciudadano y funcionario
+- RN-78: emails contienen enlaces al portal web, nunca URLs directas de MinIO
+- RN-79: templates HTML con branding institucional desde configuracion_institucional
+
+### Quality Gates — B10
+- `tsc --noEmit`: ✅ exit 0
+- `eslint`: ✅ 0 errors (3 warnings pre-existentes)
+- `nest build`: ✅ exit 0
+
+### Nuevas dependencias
+- `@nestjs/bullmq@11.0.4`
+- `bullmq`
+- `ioredis`
+- `nodemailer`
+- `@types/nodemailer` (dev)
+
 ## Última actualización
 
-2026-08-04 — B9 completado. Fase 3 cerrada (16/16). StorageModule @Global extraído, POST documentos
-multipart con SHA-256 + MinIO, GET URL firmada TTL 5 min (RN-53), VencerSolicitudesJob (RN-08).
-Próximo: B10 — Envío real de correos (BullMQ + SMTP).
+2026-08-04 — B10 completado. Fase 4 cerrada (18/18). Sistema de notificaciones real con BullMQ + SMTP +
+RedisModule reutilizable + EmailModule con abstracción IEmailProvider + 7 templates HTML institucionales.
+Próximo: B11 — Frontend Portal Ciudadano (Fase 5) o Fase 8 (Calidad y Producción). Requiere autorización.

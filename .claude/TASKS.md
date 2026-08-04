@@ -200,11 +200,14 @@
 - [x] `PATCH /api/v1/permisos/{id}/condiciones` — Funcionario/Admin (RN-38) ✅ 2026-08-04 (B7)
 - [x] Job automático: marcar permisos `VENCIDO` diario 00:01 COT (RN-08) ✅ 2026-08-04 (B7)
 - [x] NotificacionesModule: persistencia desacoplada en BD ✅ 2026-08-04 (B7)
-  - [ ] Envío real de correos (SMTP + BullMQ) — deuda técnica B8+
-  - [ ] Correo: solicitud recibida
-  - [ ] Correo: solicitud aprobada con enlace descarga
-  - [ ] Correo: solicitud rechazada con motivo
-  - [ ] Correo: solicitud requiere corrección
+- [x] Envío real de correos: BullMQ + SMTP + templates HTML (RN-76, RN-77, RN-78, RN-79) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud recibida ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud aprobada con enlace al portal ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud rechazada con motivo ✅ 2026-08-04 (B10)
+  - [x] Correo: corrección requerida con campos específicos ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud vencida ✅ 2026-08-04 (B10)
+  - [x] Correo: permiso revocado ✅ 2026-08-04 (B10)
+  - [x] Correo: corrección enviada (interno — funcionario) ✅ 2026-08-04 (B10)
 
 ### Pendientes de Diseño — Fase 4
 
@@ -330,36 +333,33 @@
 
 ### Fase Activa
 
-Fase 3 — Módulo de Solicitudes (Backend) ← StorageModule + Job vencimiento solicitudes pendientes
-Fase 4 — Generación de Permiso (PDF + QR) ← Envío real de correos pendiente
+Fase 4 — Generación de Permiso (PDF + QR) ← ✅ COMPLETADA — 18/18 tareas
+Fase 5 — Frontend Portal Ciudadano ← Siguiente fase (no iniciada)
 
-### Tareas pendientes en las fases activas
+### Tareas pendientes
 
-**Fase 3:**
-- `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas) — requiere StorageModule
-- `GET /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga — requiere StorageModule
-- Job automático: marcar solicitudes en `VENCIDA` al superar plazo
-- StorageModule con MinIO: subida y URLs firmadas
-
-**Fase 4:**
-- Envío real de correos (SMTP + BullMQ) — tabla `notificaciones` ya lista con estado PENDIENTE
+Todas las tareas de Backend (Fases 0–4) están completadas.
+El próximo desarrollo es Frontend (Fases 5, 6, 7) o Fase 8 (calidad y producción).
 
 ### Última tarea terminada
 
-B8 — Auth completo + CRUD Usuarios + gaps API (2026-08-04):
-- `PATCH /api/v1/usuarios/{id}/activar` — endpoint dedicado, revoca refresh tokens al desactivar
-- `@IsStrongPassword()` — decorador compartido RN-51, elimina duplicación en DTOs
-- `@MatchesField()` — validador de confirmación de contraseña para DTOs
-- `confirmarContrasena` agregado a `RestablecerContrasenaDto` y `CambiarContrasenaDto`
-- Rate limiting `POST /auth/recuperar-contrasena` — 3 req/hora (RN-54)
-- `AccionAuditoria.USUARIO_ACTIVADO` / `USUARIO_DESACTIVADO` — enums explícitos
-- TASKS.md + ROADMAP.md + SESSION.md sincronizados con estado real del código
-- **Fase 2 cerrada: 17/17 tareas completadas ✅**
+B10 — Sistema de Notificaciones Reales (BullMQ + SMTP) (2026-08-04):
+- RedisModule (@Global) reutilizable — IORedis singleton
+- BullModule.forRootAsync en AppModule — configuración única centralizada
+- EmailModule con abstracción IEmailProvider (EMAIL_PROVIDER token)
+- SmtpEmailProvider (Nodemailer) — transporte SMTP con pool de conexiones
+- PlantillaEmailService — templates HTML + branding institucional desde DB + caché 60s
+- 7 templates HTML institucionales (solicitud-recibida, solicitud-aprobada, solicitud-rechazada, correccion-requerida, solicitud-vencida, permiso-revocado, correccion-enviada)
+- EmailProcessor (BullMQ WorkerHost) — concurrencia 5, backoff 1m/5m/15m, DLQ
+- NotificacionesService actualizado — encola en BullMQ después de persistir en DB
+- Integración en 5 use-cases: CrearSolicitud, AprobarSolicitud, RechazarSolicitud, SolicitarCorreccion + VencerSolicitudesJob
+- Migración `AddContextoToNotificaciones` — columna JSONB para snapshot de contexto
+- TipoNotificacion: +SOLICITUD_VENCIDA, +CORRECCION_ENVIADA
+- **Fase 4 cerrada: 18/18 tareas completadas ✅**
 
 ### Próxima tarea
 
-B9 — StorageModule (MinIO): subida de documentos adjuntos y URLs firmadas para descarga.
-Esto desbloquea `POST /solicitudes/{id}/documentos` y `GET /solicitudes/{id}/documentos/{docId}`.
+B11 — Frontend Portal Ciudadano (Fase 5) o B11 — Calidad y Producción (Fase 8). Requiere autorización.
 
 ---
 

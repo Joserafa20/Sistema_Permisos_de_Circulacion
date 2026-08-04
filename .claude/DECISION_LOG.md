@@ -646,6 +646,86 @@ Antes del inicio de Fase 2 — Autenticación y Seguridad.
 
 ---
 
+---
+
+## ADR-B10-001 — RedisModule @Global reutilizable (no exclusivo para BullMQ)
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** BullMQ requiere una conexión Redis. El sistema también necesitará Redis para caché (RN-86), rate limiting distribuido y locks en fases posteriores.
+
+**Decisión:** `RedisModule` con `@Global()` exporta un cliente `ioredis` bajo `REDIS_CLIENT`. `BullModule.forRootAsync()` en `AppModule` usa la misma configuración. Única fuente de verdad: `ConfigService`.
+
+**Consecuencias:** Una sola conexión documentada. Reutilizable sin nueva infraestructura en B11+. La separación `RedisModule` (cliente) vs `BullModule` (cola) es explícita e intencional.
+
+---
+
+## ADR-B10-002 — IEmailProvider como abstracción del transporte de email
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** El proveedor de email puede cambiar (SMTP institucional → SES → SendGrid) en sistemas gubernamentales, sin que ningún caso de uso ni processor deba cambiar.
+
+**Decisión:** `IEmailProvider` (símbolo `EMAIL_PROVIDER`) en `EmailModule`. Implementación actual: `SmtpEmailProvider` (Nodemailer con pool). Para cambiar: solo crear un nuevo provider y cambiar el binding en `EmailModule`.
+
+**Consecuencias:** En desarrollo, apuntar `MAIL_HOST=localhost MAIL_PORT=1025` activa Mailhog sin cambiar código. Desacoplamiento total del transporte.
+
+---
+
+## ADR-B10-003 — Templates HTML en archivos independientes con sustitución segura
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** Los correos institucionales requieren branding. Embeber HTML en TypeScript mezcla presentación con lógica.
+
+**Decisión:** Templates en `src/templates/email/*.html` con placeholders `{{variable}}`. `PlantillaEmailService` carga, cachea (60 s en memoria) y reemplaza con escape XSS básico (`&`, `<`, `>`, `"`). `nest-cli.json` copia los templates a `dist/` en el build.
+
+**Consecuencias:** Templates editables por personal no técnico. Cache evita lecturas de disco en cada envío. El escape XSS previene inyección desde datos de DB o ciudadano.
+
+---
+
+## ADR-B10-004 — Contexto snapshot en columna JSONB de notificaciones
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** El `EmailProcessor` necesita datos (nombre ciudadano, radicado, etc.) para renderizar templates. Opciones: (a) re-fetch en el processor, (b) payload en job BullMQ, (c) columna JSONB en DB.
+
+**Decisión:** Opción (c) — columna `contexto JSONB nullable` en `notificaciones`. Snapshot capturado en `encolar()`. Migración: `AddContextoToNotificaciones`.
+
+**Consecuencias:** El contexto es inmutable. Si la solicitud es eliminada, el email puede enviarse igualmente. Los reintentos BullMQ usan el mismo contexto sin re-fetch.
+
+---
+
+## ADR-B10-005 — Dead Letter Queue como cola BullMQ separada
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** BullMQ no tiene DLQ nativa. Los jobs fallidos quedan en el set `failed` de la cola principal.
+
+**Decisión:** Cola `email-notifications-dlq` separada. Evento `failed` con `attemptsMade >= maxAttempts` → actualiza `estadoEnvio = ERROR` en DB + mueve al DLQ para intervención manual futura.
+
+**Consecuencias:** Los emails fallidos son identificables y procesables. La cola principal se mantiene limpia (`removeOnFail: { count: 200 }`).
+
+---
+
+## ADR-B10-006 — TipoNotificacion: añadir sin renombrar valores existentes
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** El PRD usa `solicitud_aprobada` pero el enum existente tiene `APROBADA = 'aprobada'`. La DB usa VARCHAR (no ENUM nativo PostgreSQL), el renombre sería posible con migración.
+
+**Decisión:** NO renombrar valores existentes. Solo añadir los 2 faltantes: `SOLICITUD_VENCIDA` y `CORRECCION_ENVIADA`. El comportamiento funcional es idéntico al PRD; la diferencia es cosmética.
+
+**Consecuencias:** Deuda menor. Si en el futuro se decide alinear, se crea una migración UPDATE + rename con impacto controlado.
+
+---
+
 # Instrucciones para Claude Code
 
 Antes de modificar una decisión existente:

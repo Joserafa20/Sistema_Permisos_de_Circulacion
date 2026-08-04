@@ -46,6 +46,10 @@ export class NotificacionEntity {
   @Column({ name: 'error_detalle', type: 'text', nullable: true })
   errorDetalle: string | null;
 
+  /** Variables de contexto para renderizar el template HTML al momento del envío. */
+  @Column({ name: 'contexto', type: 'jsonb', nullable: true })
+  contexto: Record<string, string> | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

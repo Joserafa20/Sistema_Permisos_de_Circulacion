@@ -5,10 +5,11 @@ import {
 } from '../../domain/ports/solicitud-repository.interface';
 import { SolicitudBusquedaService } from '../services/solicitud-busqueda.service';
 import { AuditoriaService } from '../../../auditoria/application/auditoria.service';
+import { NotificacionesService } from '../../../notificaciones/notificaciones.service';
 import { GenerarPermisoUseCase } from '../../../permisos/application/use-cases/generar-permiso.use-case';
 import { SolicitudStateMachine } from '../../domain/services/solicitud-state-machine';
 import { AccionSolicitudResponseDto } from '../dtos/accion-solicitud-response.dto';
-import { AccionAuditoria, EstadoSolicitud } from '../../../../common/enums';
+import { AccionAuditoria, EstadoSolicitud, TipoNotificacion } from '../../../../common/enums';
 import { NotFoundException } from '../../../../common/exceptions/not-found.exception';
 import { BusinessRuleException } from '../../../../common/exceptions/business-rule.exception';
 import { ConflictException } from '../../../../common/exceptions/conflict.exception';
@@ -31,6 +32,7 @@ export class AprobarSolicitudUseCase {
     private readonly solicitudRepo: ISolicitudRepository,
     private readonly auditoriaService: AuditoriaService,
     private readonly generarPermisoUseCase: GenerarPermisoUseCase,
+    private readonly notificacionesService: NotificacionesService,
   ) {}
 
   async ejecutar(
@@ -106,9 +108,24 @@ export class AprobarSolicitudUseCase {
     });
 
     // Generar permiso (PDF + QR + MinIO + DB) de forma sincrónica
-    // El permiso debe existir antes de retornar 202 para que el funcionario
-    // pueda descargar el PDF inmediatamente (no usa BullMQ en esta fase).
-    await this.generarPermisoUseCase.ejecutar(solicitudId, usuarioId, ipAddress);
+    const permiso = await this.generarPermisoUseCase.ejecutar(solicitudId, usuarioId, ipAddress);
+
+    // Notificar al ciudadano (fire-and-forget — RN-76)
+    if (solicitud.ciudadanoEmail) {
+      void this.notificacionesService.encolar({
+        tipo: TipoNotificacion.APROBADA,
+        destinatario: solicitud.ciudadanoEmail,
+        asunto: `Permiso aprobado — ${permiso.codigoPermiso}`,
+        solicitudId,
+        permisoId: permiso.id,
+        contexto: {
+          nombreCiudadano: `${solicitud.ciudadanoNombre} ${solicitud.ciudadanoApellido}`,
+          numeroRadicado: solicitud.numeroRadicado,
+          codigoPermiso: permiso.codigoPermiso,
+          fechaVencimiento: permiso.fechaVencimiento,
+        },
+      });
+    }
 
     return {
       solicitudId,

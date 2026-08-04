@@ -2,6 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuditoriaModule } from '../auditoria/auditoria.module';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 import { CiudadanosModule } from '../ciudadanos/ciudadanos.module';
 import { MotocicletasModule } from '../motocicletas/motocicletas.module';
 import { MotivosModule } from '../motivos/motivos.module';
@@ -54,6 +55,7 @@ import { VencerSolicitudesJob } from './infrastructure/jobs/vencer-solicitudes.j
     ]),
     ScheduleModule.forRoot(),
     AuditoriaModule,
+    NotificacionesModule,
     CiudadanosModule,
     MotocicletasModule,
     MotivosModule,

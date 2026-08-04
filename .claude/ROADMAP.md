@@ -121,7 +121,7 @@
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.  
 **Duración estimada:** Semanas 4–5  
 **Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).  
-**Estado:** 🔄 En progreso — 13 / 18 tareas completadas
+**Estado:** ✅ Completada — 18 / 18 tareas completadas
 
 - [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04 (B6)
   - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
@@ -141,11 +141,14 @@
 - [x] `PATCH /api/v1/permisos/{id}/condiciones` — Funcionario/Admin, máx 500 chars (RN-38) ✅ 2026-08-04 (B7)
 - [x] Job automático: marcar permisos `VENCIDO` diario 00:01 COT (RN-08, RN-31) ✅ 2026-08-04 (B7)
 - [x] NotificacionesModule: persistencia desacoplada en BD (estado PENDIENTE) ✅ 2026-08-04 (B7)
-  - [ ] Envío real de correos (SMTP + BullMQ) — deuda técnica B9+
-  - [ ] Correo: solicitud recibida (con número de radicado)
-  - [ ] Correo: solicitud aprobada (con enlace de descarga)
-  - [ ] Correo: solicitud rechazada (con motivo)
-  - [ ] Correo: solicitud requiere corrección (con campos específicos)
+- [x] Envío real de correos: BullMQ worker + SMTP Nodemailer + templates HTML (RN-76, RN-77, RN-78, RN-79) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud recibida (con número de radicado) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud aprobada (con código permiso y enlace al portal) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud rechazada (con motivo) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud requiere corrección (con campos específicos) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud vencida (RN-77) ✅ 2026-08-04 (B10)
+  - [x] Correo: permiso revocado (RN-77) ✅ 2026-08-04 (B10)
+  - [x] Correo: corrección enviada (interno — funcionario) ✅ 2026-08-04 (B10)
 
 ### Pendientes de Diseño — Fase 4
 

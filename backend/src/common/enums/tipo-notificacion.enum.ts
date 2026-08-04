@@ -4,5 +4,7 @@ export enum TipoNotificacion {
   APROBADA = 'aprobada',
   RECHAZADA = 'rechazada',
   CORRECCION = 'correccion',
+  SOLICITUD_VENCIDA = 'solicitud_vencida',
   PERMISO_REVOCADO = 'permiso_revocado',
+  CORRECCION_ENVIADA = 'correccion_enviada',
 }

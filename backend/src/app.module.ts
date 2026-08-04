@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import configuration from './config/configuration';
@@ -18,6 +19,7 @@ import { SolicitudesModule } from './modules/solicitudes/solicitudes.module';
 import { PermisosModule } from './modules/permisos/permisos.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -74,6 +76,19 @@ import { StorageModule } from './modules/storage/storage.module';
           min: 2,
           idleTimeoutMillis: 30000,
           connectionTimeoutMillis: 5000,
+        },
+      }),
+    }),
+
+    // ── Redis global + BullMQ root ─────────────────────────────────
+    RedisModule,
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('redis.host') ?? 'localhost',
+          port: config.get<number>('redis.port') ?? 6379,
+          password: config.get<string>('redis.password') || undefined,
         },
       }),
     }),
