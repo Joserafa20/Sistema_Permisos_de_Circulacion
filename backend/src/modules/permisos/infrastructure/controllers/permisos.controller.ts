@@ -29,12 +29,7 @@ import { ObtenerPermisoPorIdUseCase } from '../../application/use-cases/obtener-
 import { ObtenerPdfPermisoUseCase } from '../../application/use-cases/obtener-pdf-permiso.use-case';
 import { RevocarPermisoUseCase } from '../../application/use-cases/revocar-permiso.use-case';
 import { ActualizarCondicionesPermisoUseCase } from '../../application/use-cases/actualizar-condiciones-permiso.use-case';
-
-interface JwtUser {
-  sub: string;
-  email: string;
-  rol: string;
-}
+import { AuthUser } from '../../../../modules/auth/infrastructure/strategies/jwt.strategy';
 
 @ApiTags('permisos')
 @ApiBearerAuth()
@@ -96,11 +91,11 @@ export class PermisosController {
   @ApiResponse({ status: 404, description: 'Permiso no encontrado' })
   obtenerPdf(
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<PermisoPdfUrlDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.obtenerPdfPermisoUseCase.ejecutar(id, user.sub, ipAddress);
+    return this.obtenerPdfPermisoUseCase.ejecutar(id, user.id, ipAddress);
   }
 
   @Post(':id/revocar')
@@ -119,11 +114,11 @@ export class PermisosController {
   revocar(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RevocarPermisoDto,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<RevocarPermisoResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.revocarPermisoUseCase.ejecutar(id, dto, user.sub, ipAddress);
+    return this.revocarPermisoUseCase.ejecutar(id, dto, user.id, ipAddress);
   }
 
   @Patch(':id/condiciones')
@@ -144,10 +139,10 @@ export class PermisosController {
   actualizarCondiciones(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ActualizarCondicionesDto,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<ActualizarCondicionesResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.actualizarCondicionesPermisoUseCase.ejecutar(id, dto, user.sub, ipAddress);
+    return this.actualizarCondicionesPermisoUseCase.ejecutar(id, dto, user.id, ipAddress);
   }
 }

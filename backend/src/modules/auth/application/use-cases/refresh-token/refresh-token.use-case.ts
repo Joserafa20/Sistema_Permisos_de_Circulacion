@@ -26,8 +26,6 @@ export class RefreshTokenUseCase {
     private readonly configService: ConfigService,
     @InjectRepository(TokenEntity)
     private readonly tokenRepo: Repository<TokenEntity>,
-    @InjectRepository(UsuarioEntity)
-    private readonly usuarioRepo: Repository<UsuarioEntity>,
   ) {}
 
   async execute(command: RefreshTokenCommand): Promise<RefreshResponseDto> {
@@ -37,6 +35,7 @@ export class RefreshTokenUseCase {
 
     const token = await this.tokenRepo.findOne({
       where: { tokenHash, tipo: TipoToken.REFRESH },
+      relations: ['usuario', 'usuario.rol'],
     });
 
     if (!token) {
@@ -69,11 +68,7 @@ export class RefreshTokenUseCase {
     // Revocar el token actual (rotación)
     await this.tokenRepo.update(token.id, { revocado: true, revocadoAt: new Date() });
 
-    const usuario = await this.usuarioRepo.findOne({
-      where: { id: userId },
-      relations: ['rol'],
-    });
-
+    const usuario = token.usuario;
     if (!usuario || !usuario.activo) {
       throw new UnauthorizedException('Usuario no disponible');
     }

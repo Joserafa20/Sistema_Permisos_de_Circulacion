@@ -4,15 +4,27 @@ import { TipoToken } from '../../../../../common/enums/tipo-token.enum';
 const GENERIC_MESSAGE =
   'Si el correo electrónico está registrado recibirá las instrucciones de recuperación';
 
+const mockNotificacionesService = { encolar: jest.fn().mockResolvedValue(undefined) };
+const mockConfigService = { get: jest.fn().mockReturnValue('http://localhost:3000') };
+
 function makeRepos(
   usuarioPartial?: Partial<{
     id: string;
+    nombre: string;
+    apellido: string;
     email: string;
     activo: boolean;
   }>,
 ) {
   const usuario = usuarioPartial
-    ? { id: 'u-1', email: 'admin@test.co', activo: true, ...usuarioPartial }
+    ? {
+        id: 'u-1',
+        nombre: 'Admin',
+        apellido: 'Test',
+        email: 'admin@test.co',
+        activo: true,
+        ...usuarioPartial,
+      }
     : null;
 
   const usuarioRepo = {
@@ -29,10 +41,19 @@ function makeRepos(
   return { usuarioRepo, tokenRepo };
 }
 
+function buildUseCase(usuarioRepo: object, tokenRepo: object) {
+  return new RecuperarContrasenaUseCase(
+    usuarioRepo as never,
+    tokenRepo as never,
+    mockNotificacionesService as never,
+    mockConfigService as never,
+  );
+}
+
 describe('RecuperarContrasenaUseCase', () => {
   it('devuelve respuesta genérica cuando el usuario no existe (evita enumeración)', async () => {
     const { usuarioRepo, tokenRepo } = makeRepos(undefined);
-    const useCase = new RecuperarContrasenaUseCase(usuarioRepo as never, tokenRepo as never);
+    const useCase = buildUseCase(usuarioRepo, tokenRepo);
 
     const result = await useCase.execute({
       email: 'noexiste@test.co',
@@ -46,7 +67,7 @@ describe('RecuperarContrasenaUseCase', () => {
 
   it('devuelve respuesta genérica cuando el usuario está inactivo', async () => {
     const { usuarioRepo, tokenRepo } = makeRepos({ activo: false });
-    const useCase = new RecuperarContrasenaUseCase(usuarioRepo as never, tokenRepo as never);
+    const useCase = buildUseCase(usuarioRepo, tokenRepo);
 
     const result = await useCase.execute({
       email: 'admin@test.co',
@@ -60,7 +81,7 @@ describe('RecuperarContrasenaUseCase', () => {
 
   it('genera y persiste un token hash (no el token raw) para usuario activo', async () => {
     const { usuarioRepo, tokenRepo } = makeRepos({ activo: true });
-    const useCase = new RecuperarContrasenaUseCase(usuarioRepo as never, tokenRepo as never);
+    const useCase = buildUseCase(usuarioRepo, tokenRepo);
 
     const result = await useCase.execute({
       email: 'admin@test.co',
@@ -84,7 +105,7 @@ describe('RecuperarContrasenaUseCase', () => {
 
   it('el tokenHash almacenado es diferente al rawToken (nunca almacena texto plano)', async () => {
     const { usuarioRepo, tokenRepo } = makeRepos({ activo: true });
-    const useCase = new RecuperarContrasenaUseCase(usuarioRepo as never, tokenRepo as never);
+    const useCase = buildUseCase(usuarioRepo, tokenRepo);
 
     await useCase.execute({
       email: 'admin@test.co',
@@ -111,7 +132,7 @@ describe('RecuperarContrasenaUseCase', () => {
       save: jest.fn().mockResolvedValue(undefined),
     };
 
-    const useCase = new RecuperarContrasenaUseCase(usuarioRepo as never, tokenRepo as never);
+    const useCase = buildUseCase(usuarioRepo, tokenRepo);
 
     await useCase.execute({
       email: 'admin@test.co',
@@ -127,7 +148,7 @@ describe('RecuperarContrasenaUseCase', () => {
 
   it('expira el token en 1 hora desde la creación', async () => {
     const { usuarioRepo, tokenRepo } = makeRepos({ activo: true });
-    const useCase = new RecuperarContrasenaUseCase(usuarioRepo as never, tokenRepo as never);
+    const useCase = buildUseCase(usuarioRepo, tokenRepo);
     const antes = Date.now();
 
     await useCase.execute({

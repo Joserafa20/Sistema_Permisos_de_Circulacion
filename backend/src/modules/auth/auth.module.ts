@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsuarioEntity } from '../usuarios/infrastructure/persistence/usuario.entity';
 import { TokenEntity } from './infrastructure/persistence/token.entity';
 import { AuditoriaModule } from '../auditoria/auditoria.module';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 
 import { LocalStrategy } from './infrastructure/strategies/local.strategy';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
@@ -36,6 +37,7 @@ import { AuthController } from './infrastructure/controllers/auth.controller';
   imports: [
     ConfigModule,
     AuditoriaModule,
+    NotificacionesModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

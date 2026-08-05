@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, ILike, Repository } from 'typeorm';
 import { AuditoriaRegistroEntity } from '../infrastructure/persistence/auditoria-registro.entity';
@@ -19,6 +19,8 @@ export interface RegistrarAuditoriaParams {
 
 @Injectable()
 export class AuditoriaService {
+  private readonly logger = new Logger(AuditoriaService.name);
+
   constructor(
     @InjectRepository(AuditoriaRegistroEntity)
     private readonly auditoriaRepo: Repository<AuditoriaRegistroEntity>,
@@ -64,6 +66,8 @@ export class AuditoriaService {
       userAgent: params.userAgent ?? null,
       usuario: params.usuarioId ? ({ id: params.usuarioId } as UsuarioEntity) : null,
     });
-    await this.auditoriaRepo.save(registro).catch(() => undefined);
+    await this.auditoriaRepo.save(registro).catch((err: unknown) => {
+      this.logger.error('Error guardando registro de auditoría', err);
+    });
   }
 }

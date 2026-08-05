@@ -65,7 +65,10 @@ export class NotificacionesService {
       );
     } catch (err) {
       // La notificación nunca debe bloquear la operación principal
-      this.logger.error({ err, params }, 'Error al encolar notificación');
+      this.logger.error(
+        { err, tipo: params.tipo, solicitudId: params.solicitudId, permisoId: params.permisoId },
+        'Error al encolar notificación',
+      );
     }
   }
 }

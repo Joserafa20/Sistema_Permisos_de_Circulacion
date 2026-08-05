@@ -10,6 +10,8 @@ import { AuditoriaService } from '../../../../auditoria/application/auditoria.se
 import { AccionAuditoria } from '../../../../../common/enums/accion-auditoria.enum';
 import { TipoToken } from '../../../../../common/enums/tipo-token.enum';
 import { AuthResponseDto } from '../../dtos/auth-response.dto';
+import { UnauthorizedException } from '../../../../../common/exceptions';
+import { UserRole } from '../../../../../common/decorators/roles.decorator';
 
 export interface LoginCommand {
   userId: string;
@@ -40,7 +42,7 @@ export class LoginUseCase {
     });
 
     if (!usuario) {
-      throw new Error('Usuario no encontrado tras validación');
+      throw new UnauthorizedException('Sesión no válida');
     }
 
     await this.usuarioRepo.update(userId, {
@@ -50,7 +52,7 @@ export class LoginUseCase {
     });
 
     // Si el usuario es ADMINISTRADOR y tiene MFA activo, devolver token pendiente
-    if (usuario.rol.nombre === 'ADMINISTRADOR' && usuario.mfaActivo) {
+    if (usuario.rol.nombre === UserRole.ADMINISTRADOR && usuario.mfaActivo) {
       const familia = crypto.randomUUID();
       const mfaPendingToken = this.jwtService.sign(
         { sub: userId, mfaPending: true, familia },

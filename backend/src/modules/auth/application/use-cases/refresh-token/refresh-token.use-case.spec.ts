@@ -5,6 +5,7 @@ function makeToken(
     revocado: boolean;
     expiraAt: Date;
     familia: string | null;
+    usuario: { id: string; activo: boolean; rol: { nombre: string } } | null;
   }> = {},
 ) {
   return {
@@ -12,15 +13,12 @@ function makeToken(
     revocado: false,
     expiraAt: new Date(Date.now() + 86_400_000),
     familia: 'fam-uuid-1',
+    usuario: { id: 'u-1', activo: true, rol: { nombre: 'FUNCIONARIO' } },
     ...overrides,
   };
 }
 
-function makeUsuario() {
-  return { id: 'u-1', activo: true, rol: { nombre: 'FUNCIONARIO' } };
-}
-
-function buildDeps(token: ReturnType<typeof makeToken> | null, usuario = makeUsuario()) {
+function buildDeps(token: ReturnType<typeof makeToken> | null) {
   const qb = {
     update: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),
@@ -35,10 +33,9 @@ function buildDeps(token: ReturnType<typeof makeToken> | null, usuario = makeUsu
     save: jest.fn().mockResolvedValue(undefined),
     createQueryBuilder: jest.fn().mockReturnValue(qb),
   };
-  const usuarioRepo = { findOne: jest.fn().mockResolvedValue(usuario) };
   const jwtService = { sign: jest.fn().mockReturnValue('new-jwt') };
   const configService = { get: jest.fn().mockReturnValue('refresh-secret') };
-  return { tokenRepo, usuarioRepo, jwtService, configService, qb };
+  return { tokenRepo, jwtService, configService, qb };
 }
 
 describe('RefreshTokenUseCase', () => {
@@ -47,7 +44,6 @@ describe('RefreshTokenUseCase', () => {
       deps.jwtService as never,
       deps.configService as never,
       deps.tokenRepo as never,
-      deps.usuarioRepo as never,
     );
   }
 

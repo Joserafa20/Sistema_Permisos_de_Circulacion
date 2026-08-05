@@ -38,21 +38,19 @@ export class ReportesController {
       qb.andWhere('s.createdAt <= :hasta', { hasta: new Date(`${fechaHasta}T23:59:59Z`) });
     }
 
-    const total = await qb.getCount();
+    const total = await qb.clone().getCount();
 
-    const byEstado: Record<string, number> = {};
-    for (const estado of Object.values(EstadoSolicitud)) {
-      const count = await this.solicitudRepo
-        .createQueryBuilder('s')
-        .where('s.estado = :estado', { estado })
-        .andWhere(fechaDesde ? 's.createdAt >= :desde' : '1=1', {
-          desde: fechaDesde ? new Date(`${fechaDesde}T00:00:00Z`) : undefined,
-        })
-        .andWhere(fechaHasta ? 's.createdAt <= :hasta' : '1=1', {
-          hasta: fechaHasta ? new Date(`${fechaHasta}T23:59:59Z`) : undefined,
-        })
-        .getCount();
-      byEstado[estado] = count;
+    const rows = await qb
+      .select('s.estado', 'estado')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('s.estado')
+      .getRawMany<{ estado: string; count: string }>();
+
+    const byEstado: Record<string, number> = Object.fromEntries(
+      Object.values(EstadoSolicitud).map((e) => [e, 0]),
+    );
+    for (const row of rows) {
+      byEstado[row.estado] = parseInt(row.count, 10);
     }
 
     return { total, byEstado, fechaDesde, fechaHasta };
@@ -76,21 +74,19 @@ export class ReportesController {
       qb.andWhere('p.createdAt <= :hasta', { hasta: new Date(`${fechaHasta}T23:59:59Z`) });
     }
 
-    const total = await qb.getCount();
+    const total = await qb.clone().getCount();
 
-    const byEstado: Record<string, number> = {};
-    for (const estado of Object.values(EstadoPermiso)) {
-      const count = await this.permisoRepo
-        .createQueryBuilder('p')
-        .where('p.estado = :estado', { estado })
-        .andWhere(fechaDesde ? 'p.createdAt >= :desde' : '1=1', {
-          desde: fechaDesde ? new Date(`${fechaDesde}T00:00:00Z`) : undefined,
-        })
-        .andWhere(fechaHasta ? 'p.createdAt <= :hasta' : '1=1', {
-          hasta: fechaHasta ? new Date(`${fechaHasta}T23:59:59Z`) : undefined,
-        })
-        .getCount();
-      byEstado[estado] = count;
+    const rows = await qb
+      .select('p.estado', 'estado')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('p.estado')
+      .getRawMany<{ estado: string; count: string }>();
+
+    const byEstado: Record<string, number> = Object.fromEntries(
+      Object.values(EstadoPermiso).map((e) => [e, 0]),
+    );
+    for (const row of rows) {
+      byEstado[row.estado] = parseInt(row.count, 10);
     }
 
     return { total, byEstado, fechaDesde, fechaHasta };

@@ -15,6 +15,7 @@ const TEMPLATE_MAP: Record<TipoNotificacion, string> = {
   [TipoNotificacion.SOLICITUD_VENCIDA]: 'solicitud-vencida.html',
   [TipoNotificacion.PERMISO_REVOCADO]: 'permiso-revocado.html',
   [TipoNotificacion.CORRECCION_ENVIADA]: 'correccion-enviada.html',
+  [TipoNotificacion.RECUPERACION_CONTRASENA]: 'recuperacion-contrasena.html',
 };
 
 /**

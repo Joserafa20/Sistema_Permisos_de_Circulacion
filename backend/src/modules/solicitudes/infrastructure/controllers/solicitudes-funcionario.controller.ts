@@ -31,12 +31,7 @@ import { DocumentoUrlDto } from '../../application/dtos/documento-url.dto';
 import { AprobarSolicitudUseCase } from '../../application/use-cases/aprobar-solicitud.use-case';
 import { RechazarSolicitudUseCase } from '../../application/use-cases/rechazar-solicitud.use-case';
 import { SolicitarCorreccionUseCase } from '../../application/use-cases/solicitar-correccion.use-case';
-
-interface JwtUser {
-  sub: string;
-  email: string;
-  rol: string;
-}
+import { AuthUser } from '../../../../modules/auth/infrastructure/strategies/jwt.strategy';
 
 @ApiTags('solicitudes')
 @ApiBearerAuth()
@@ -80,11 +75,11 @@ export class SolicitudesFuncionarioController {
   @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
   obtenerPorId(
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<SolicitudDetalleDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.obtenerSolicitudPorIdUseCase.ejecutar(id, user.sub, ipAddress);
+    return this.obtenerSolicitudPorIdUseCase.ejecutar(id, user.id, ipAddress);
   }
 
   @Get(':id/historial')
@@ -136,11 +131,11 @@ export class SolicitudesFuncionarioController {
   obtenerUrlDocumento(
     @Param('id', ParseUUIDPipe) solicitudId: string,
     @Param('docId', ParseUUIDPipe) docId: string,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<DocumentoUrlDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.obtenerUrlDocumentoUseCase.ejecutar(solicitudId, docId, user.sub, ipAddress);
+    return this.obtenerUrlDocumentoUseCase.ejecutar(solicitudId, docId, user.id, ipAddress);
   }
 
   @Post(':id/aprobar')
@@ -168,11 +163,11 @@ export class SolicitudesFuncionarioController {
   })
   aprobar(
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<AccionSolicitudResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.aprobarSolicitudUseCase.ejecutar(id, user.sub, ipAddress);
+    return this.aprobarSolicitudUseCase.ejecutar(id, user.id, ipAddress);
   }
 
   @Post(':id/rechazar')
@@ -201,11 +196,11 @@ export class SolicitudesFuncionarioController {
   rechazar(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RechazarSolicitudDto,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<AccionSolicitudResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.rechazarSolicitudUseCase.ejecutar(id, dto, user.sub, ipAddress);
+    return this.rechazarSolicitudUseCase.ejecutar(id, dto, user.id, ipAddress);
   }
 
   @Post(':id/correccion')
@@ -234,10 +229,10 @@ export class SolicitudesFuncionarioController {
   solicitarCorreccion(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SolicitarCorreccionDto,
-    @CurrentUser() user: JwtUser,
+    @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<AccionSolicitudResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.solicitarCorreccionUseCase.ejecutar(id, dto, user.sub, ipAddress);
+    return this.solicitarCorreccionUseCase.ejecutar(id, dto, user.id, ipAddress);
   }
 }

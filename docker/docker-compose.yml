@@ -68,7 +68,7 @@ services:
 
   # ── MinIO (Object Storage S3-compatible) ───────────────────────────────────
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
     container_name: pyp-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -96,7 +96,7 @@ services:
 
   # ── MinIO Init — crea buckets en el primer arranque ───────────────────────
   createbuckets:
-    image: minio/mc:latest
+    image: minio/mc:RELEASE.2024-11-21T17-21-54Z
     container_name: pyp-minio-init
     networks:
       - picoyplaca-network
@@ -116,7 +116,7 @@ services:
 
   # ── Mailpit — Captura de correos en desarrollo ────────────────────────────
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.21
     container_name: pyp-mailpit
     restart: unless-stopped
     ports:
@@ -180,7 +180,7 @@ services:
       MAIL_PASS: ${MAIL_PASS:-}
       MAIL_FROM: ${MAIL_FROM:-"Alcaldía PYP <noreply@alcaldia.gov.co>"}
       # reCAPTCHA
-      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-disabled}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
       RECAPTCHA_MIN_SCORE:  ${RECAPTCHA_MIN_SCORE:-0.5}
       # QR y seguridad
       QR_SECRET_SALT: ${QR_SECRET_SALT}

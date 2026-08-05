@@ -64,13 +64,13 @@ describe('LoginUseCase', () => {
     );
   }
 
-  it('lanza Error cuando el usuario no existe en la base de datos', async () => {
+  it('lanza UnauthorizedException cuando el usuario no existe en la base de datos', async () => {
     const deps = buildDeps(null);
     const useCase = buildUseCase(deps);
 
     await expect(
       useCase.execute({ userId: 'u-inexistente', ipAddress: null, userAgent: null }),
-    ).rejects.toThrow('Usuario no encontrado tras validación');
+    ).rejects.toThrow('Sesión no válida');
   });
 
   it('retorna accessToken, refreshToken y datos del usuario en login exitoso', async () => {
@@ -177,7 +177,7 @@ describe('LoginUseCase', () => {
 
   it('retorna mfaRequired:true cuando el ADMINISTRADOR tiene MFA activo', async () => {
     const usuario = makeUsuario({
-      rol: { id: 'r-1', nombre: 'ADMINISTRADOR' },
+      rol: { id: 'r-1', nombre: 'administrador' },
       mfaActivo: true,
       mfaSecret: 'SECRET',
     });
@@ -191,7 +191,7 @@ describe('LoginUseCase', () => {
   });
 
   it('NO requiere MFA si el rol no es ADMINISTRADOR aunque mfaActivo=true', async () => {
-    const usuario = makeUsuario({ rol: { id: 'r-2', nombre: 'FUNCIONARIO' }, mfaActivo: true });
+    const usuario = makeUsuario({ rol: { id: 'r-2', nombre: 'funcionario' }, mfaActivo: true });
     const deps = buildDeps(usuario);
     const useCase = buildUseCase(deps);
 
