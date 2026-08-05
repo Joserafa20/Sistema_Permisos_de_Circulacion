@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solicitud Aprobada — {{nombreAlcaldia}}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+
+          <tr>
+            <td style="background:#1a7a3b;padding:24px 32px;">
+              <p style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">{{nombreAlcaldia}}</p>
+              <p style="margin:4px 0 0;color:#a8e8bc;font-size:13px;">{{municipio}}, {{departamento}} — Sistema Pico y Placa</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px;">
+              <h2 style="margin:0 0 16px;color:#1a7a3b;font-size:20px;">🎉 Permiso de Circulación Aprobado</h2>
+              <p style="margin:0 0 12px;color:#333;font-size:15px;">Estimado/a <strong>{{nombreCiudadano}}</strong>,</p>
+              <p style="margin:0 0 24px;color:#555;font-size:14px;line-height:1.6;">
+                Su solicitud de permiso de circulación por Pico y Placa ha sido <strong>aprobada</strong>.
+                Su permiso oficial ya fue generado y puede descargarlo desde el portal web.
+              </p>
+
+              <table role="presentation" width="100%" style="background:#f0fff4;border-radius:6px;border-left:4px solid #1a7a3b;margin-bottom:24px;">
+                <tr><td style="padding:20px;">
+                  <p style="margin:0 0 8px;font-size:13px;color:#666;">RADICADO</p>
+                  <p style="margin:0 0 16px;font-size:18px;font-weight:bold;color:#1a3a6b;">{{numeroRadicado}}</p>
+                  <p style="margin:0 0 4px;font-size:13px;color:#666;">Código de permiso</p>
+                  <p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:#1a7a3b;">{{codigoPermiso}}</p>
+                  <p style="margin:0 0 4px;font-size:13px;color:#666;">Vigente hasta</p>
+                  <p style="margin:0;font-size:14px;color:#333;">{{fechaVencimiento}}</p>
+                </td></tr>
+              </table>
+
+              <p style="margin:0 0 16px;color:#555;font-size:14px;line-height:1.6;">
+                Para descargar su permiso en PDF, ingrese al portal web con su número de radicado y documento.
+                El permiso incluye un código QR que permite su verificación rápida por parte de las autoridades.
+              </p>
+
+              <div style="text-align:center;margin:24px 0;">
+                <a href="{{portalUrl}}/mis-solicitudes?radicado={{numeroRadicado}}"
+                   style="background:#1a7a3b;color:#ffffff;padding:12px 28px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:bold;display:inline-block;">
+                  Descargar mi Permiso
+                </a>
+              </div>
+
+              <p style="margin:16px 0 0;color:#888;font-size:12px;line-height:1.5;">
+                ⚠️ El permiso es válido únicamente para el período y la motocicleta indicados.
+                Lleve siempre el permiso impreso o en su dispositivo móvil al circular.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#f0fff4;padding:20px 32px;border-top:1px solid #c8e6c9;">
+              <p style="margin:0 0 4px;font-size:12px;color:#666;">{{nombreAlcaldia}} · {{direccion}}</p>
+              <p style="margin:0 0 4px;font-size:12px;color:#666;">Tel: {{telefono}} · {{correoInstitucional}}</p>
+              <p style="margin:12px 0 0;font-size:11px;color:#999;font-style:italic;">
+                Este es un correo automático. Por favor no responda a este mensaje.
+              </p>
+              <p style="margin:4px 0 0;font-size:11px;color:#999;">© {{anio}} {{nombreAlcaldia}}. Todos los derechos reservados.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

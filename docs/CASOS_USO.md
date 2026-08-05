@@ -370,7 +370,7 @@ flowchart TD
 **Flujos Alternativos — según resultado:**
 
 - **FA-06A — Permiso VIGENTE:**  
-  Pantalla verde con ✅ y datos: nombre del titular, tipo y número de documento, placa, marca, modelo, color, motivo autorizado, fechas de expedición y vencimiento, funcionario que autorizó.
+  Pantalla verde con ✅ y datos: nombre del titular, tipo y número de documento, placa, marca, modelo, color, motivo autorizado, fechas de expedición y vencimiento, funcionario que autorizó. Si el permiso tiene condiciones y restricciones registradas, se muestran en una sección destacada "⚠️ Condiciones y Restricciones" con el valor actual de la base de datos (valor en tiempo real, no el valor congelado en el PDF — ver RN-39).
 
 - **FA-06B — Permiso VENCIDO:**  
   Pantalla roja con ❌ y mensaje: *"PERMISO VENCIDO — Este permiso venció el [fecha] y ya no es válido para circular."*
@@ -667,8 +667,9 @@ flowchart TD
 **Flujo Principal:**
 
 1. El funcionario hace clic en "Aprobar".
-2. El sistema presenta un modal de confirmación con resumen de los datos clave (nombre, placa, motivo, fechas).
-3. El funcionario confirma la aprobación.
+2. El sistema presenta un modal de confirmación con resumen de los datos clave (nombre, placa, motivo, fechas) y un campo de texto opcional: **"Condiciones y Restricciones"** (máximo 500 caracteres).
+3. El funcionario, si lo considera necesario, registra condiciones o restricciones específicas del permiso en el campo opcional (ej: "Válido únicamente entre 06:00 y 18:00. Portar cédula de ciudadanía").
+4. El funcionario confirma la aprobación.
 4. El sistema cambia el estado de la solicitud a `aprobada`.
 5. El sistema registra el cambio en `historial_estados` y `auditoria` con acción `aprobar`.
 6. El sistema encola el job de generación del permiso (CU-24, CU-25).
@@ -923,6 +924,7 @@ flowchart TD
 - Datos de la motocicleta: placa, marca, línea, modelo, color.
 - Motivo autorizado.
 - Periodo de vigencia.
+- **Sección condicional "Condiciones y Restricciones":** se incluye únicamente si el campo `condiciones_restricciones` tiene valor al momento de generación del PDF (RN-38). Si el funcionario agrega o edita este campo con posterioridad, el PDF ya generado NO se regenera (RN-33); la versión actualizada sólo es visible vía QR.
 - Imagen del código QR con URL de verificación.
 - Nombre y cargo del funcionario que autorizó.
 - Firma digital del funcionario (imagen de firma configurable).

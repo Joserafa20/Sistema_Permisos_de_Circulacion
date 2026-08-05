@@ -1,0 +1,286 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Sistema de Permisos de Circulación — Docker Compose (Producción)
+#
+# Uso:
+#   cp .env.production.example .env.production
+#   # Editar .env.production con credenciales reales y seguras
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+#
+# IMPORTANTE:
+#   - Nunca exponer los puertos de PostgreSQL, Redis ni MinIO directamente al exterior.
+#   - El tráfico externo SOLO entra por Nginx (puerto 80/443).
+#   - .env.production NUNCA se sube al repositorio.
+# ══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── PostgreSQL 15 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: pyp-postgres-prod
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          memory: 256M
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ── Redis 7 ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: pyp-redis-prod
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 384M
+        reservations:
+          memory: 128M
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── MinIO (Object Storage S3-compatible) ───────────────────────────────────
+  minio:
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
+    container_name: pyp-minio-prod
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          memory: 128M
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER:     ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER:       "off"
+    volumes:
+      - minio_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── MinIO Init — crea buckets en el primer arranque ───────────────────────
+  createbuckets:
+    image: minio/mc:RELEASE.2024-11-21T17-21-54Z
+    container_name: pyp-minio-init-prod
+    networks:
+      - internal
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
+        mc mb --ignore-existing local/${MINIO_BUCKET_DOCS}    &&
+        mc mb --ignore-existing local/${MINIO_BUCKET_PDFS}    &&
+        mc mb --ignore-existing local/${MINIO_BUCKET_REPORTS} &&
+        mc anonymous set none local/${MINIO_BUCKET_DOCS}    &&
+        mc anonymous set none local/${MINIO_BUCKET_PDFS}    &&
+        mc anonymous set none local/${MINIO_BUCKET_REPORTS} &&
+        echo 'Buckets verificados/creados (acceso privado)' &&
+        exit 0
+      "
+    restart: on-failure
+
+  # ── Backend NestJS (imagen de producción multi-stage) ─────────────────────
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      target: production
+    image: pyp-backend:${APP_VERSION:-latest}
+    container_name: pyp-backend-prod
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          memory: 512M
+    environment:
+      NODE_ENV:     production
+      PORT:         "3001"
+      FRONTEND_URL: ${FRONTEND_URL}
+      PUBLIC_URL:   ${PUBLIC_URL}
+      # Base de Datos
+      DB_HOST:     postgres
+      DB_PORT:     "5432"
+      DB_NAME:     ${POSTGRES_DB}
+      DB_USER:     ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA:   public
+      # Redis
+      REDIS_HOST:     redis
+      REDIS_PORT:     "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      # MinIO
+      STORAGE_ENDPOINT:       minio
+      STORAGE_PORT:           "9000"
+      STORAGE_ACCESS_KEY:     ${MINIO_ROOT_USER}
+      STORAGE_SECRET_KEY:     ${MINIO_ROOT_PASSWORD}
+      STORAGE_BUCKET_DOCS:    ${MINIO_BUCKET_DOCS}
+      STORAGE_BUCKET_PDFS:    ${MINIO_BUCKET_PDFS}
+      STORAGE_BUCKET_REPORTS: ${MINIO_BUCKET_REPORTS}
+      STORAGE_USE_SSL:        "false"
+      # JWT
+      JWT_SECRET:             ${JWT_SECRET}
+      JWT_EXPIRES_IN:         ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET:     ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      # Email SMTP real
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: ${MAIL_FROM}
+      # reCAPTCHA
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
+      RECAPTCHA_MIN_SCORE:  ${RECAPTCHA_MIN_SCORE:-0.5}
+      # QR y seguridad
+      QR_SECRET_SALT: ${QR_SECRET_SALT}
+      BCRYPT_ROUNDS:  ${BCRYPT_ROUNDS:-12}
+      # Configuración institucional inicial (seed)
+      SEED_CI_NOMBRE_ALCALDIA: ${SEED_CI_NOMBRE_ALCALDIA}
+      SEED_CI_MUNICIPIO:       ${SEED_CI_MUNICIPIO}
+      SEED_CI_DEPARTAMENTO:    ${SEED_CI_DEPARTAMENTO}
+      SEED_CI_DIRECCION:       ${SEED_CI_DIRECCION}
+      SEED_CI_TELEFONO:        ${SEED_CI_TELEFONO}
+      SEED_CI_CORREO:          ${SEED_CI_CORREO}
+      SEED_CI_SITIO_WEB:       ${SEED_CI_SITIO_WEB}
+      SEED_CI_NIT:             ${SEED_CI_NIT}
+      SEED_CI_CODIGO_DANE:     ${SEED_CI_CODIGO_DANE}
+    networks:
+      - internal
+      - web
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      createbuckets:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/v1/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "10"
+
+  # ── Nginx — Proxy inverso + terminación SSL ────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: pyp-nginx-prod
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          memory: 64M
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - web
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+# ── Volúmenes persistentes ────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+# ── Redes ─────────────────────────────────────────────────────────────────────
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  web:
+    driver: bridge

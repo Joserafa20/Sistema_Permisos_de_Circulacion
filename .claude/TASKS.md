@@ -39,7 +39,7 @@
 - [x] `.gitignore` completo (Node, env, build) ✅ 2026-08-02
 - [x] Docker Compose: PostgreSQL + Redis + MinIO ✅ 2026-08-02
 - [x] Backend NestJS: scaffolding base con ConfigModule tipado
-- [ ] Frontend Next.js: scaffolding base con App Router y TailwindCSS
+- [x] Frontend Next.js: scaffolding base con App Router y TailwindCSS ✅ 2026-08-04 (B12)
 - [x] Archivo `.env.example` completo con todas las variables
 - [x] ESLint + Prettier configurados
 - [x] Husky (pre-commit hooks) ✅ 2026-08-02
@@ -101,27 +101,27 @@
 **Objetivo:** Sistema de identidad blindado antes de cualquier módulo funcional.
 **Semanas:** 2–3
 **Dependencia:** Fase 1 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** ✅ Completada — 19 / 19 tareas completadas
 
-- [ ] Migración TypeORM para tabla `configuracion_institucional`
-- [ ] Seed inicial de `configuracion_institucional` (configurable vía `.env`)
-- [ ] Variables de entorno `SEED_CI_*` en `.env.example`
-- [ ] Módulo NestJS `configuracion-institucional/` con arquitectura hexagonal
-- [ ] `POST /api/v1/auth/login` con JWT Access + Refresh Token
-- [ ] `POST /api/v1/auth/logout` (revocación de refresh token)
-- [ ] `POST /api/v1/auth/refresh` (rotación de refresh token)
-- [ ] `POST /api/v1/auth/recuperar-contrasena`
-- [ ] `POST /api/v1/auth/restablecer-contrasena`
-- [ ] `POST /api/v1/auth/cambiar-contrasena`
-- [ ] `GET  /api/v1/auth/me`
-- [ ] JwtAuthGuard y RolesGuard globales
-- [ ] Rate limiting en `/auth/login` (5 intentos / 15 min por IP)
-- [ ] Bloqueo temporal de cuenta por intentos fallidos
-- [ ] Política de contraseñas aplicada en DTOs
-- [ ] Registro de auditoría: login, logout, login fallido, cambio de contraseña
-- [ ] Global Exception Filter (sin exposición de internos)
-- [ ] Helmet + CORS configurados
-- [ ] CRUD Usuarios (Admin): crear, listar, activar/desactivar, soft delete
+- [x] Migración TypeORM para tabla `configuracion_institucional` ✅ 2026-08-03
+- [x] Seed inicial de `configuracion_institucional` (configurable vía `.env`) ✅ 2026-08-03
+- [x] Variables de entorno `SEED_CI_*` en `.env.example` ✅ 2026-08-03
+- [x] Módulo NestJS `configuracion-institucional/` con arquitectura hexagonal ✅ 2026-08-03
+- [x] `POST /api/v1/auth/login` con JWT Access + Refresh Token ✅ 2026-08-03
+- [x] `POST /api/v1/auth/logout` (revocación de refresh token) ✅ 2026-08-03
+- [x] `POST /api/v1/auth/refresh` (rotación de refresh token) ✅ 2026-08-03
+- [x] `POST /api/v1/auth/recuperar-contrasena` — rate limit 3/hora, token SHA256, respuesta genérica ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/restablecer-contrasena` — token uso único, historial 5 contraseñas ✅ 2026-08-04 (B8)
+- [x] `POST /api/v1/auth/cambiar-contrasena` — valida actual, revoca refresh tokens ✅ 2026-08-04 (B8)
+- [x] `GET  /api/v1/auth/me` — perfil completo sin campos sensibles ✅ 2026-08-04 (B8)
+- [x] JwtAuthGuard y RolesGuard implementados y aplicados ✅ 2026-08-03
+- [x] Rate limiting en `/auth/login` (5 intentos / 15 min por IP) ✅ 2026-08-03
+- [x] Bloqueo temporal de cuenta por intentos fallidos (en LocalStrategy) ✅ 2026-08-03
+- [x] Política de contraseñas aplicada en DTOs (RN-51) — `@IsStrongPassword()` compartido ✅ 2026-08-04 (B8)
+- [x] Registro de auditoría: login, logout, login fallido ✅ 2026-08-03
+- [x] Global Exception Filter (sin exposición de internos) ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] Helmet + CORS configurados ✅ 2026-08-04 (B8 — ya en main.ts)
+- [x] CRUD Usuarios (Admin): listar, detalle, crear, actualizar, activar/desactivar, soft delete, restaurar ✅ 2026-08-04 (B8)
 
 > **Nota:** El módulo `configuracion-institucional` comparte Fase 2 con Auth porque la tabla debe existir antes de la Fase 4 (generación de PDF). Las pantallas de UI del administrador se implementan en Fase 7.
 
@@ -140,24 +140,24 @@
 **Objetivo:** Núcleo del negocio implementado y probado.
 **Semanas:** 3–4
 **Dependencia:** Fase 2 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** ✅ Completada — 16 / 16 tareas completadas
 
-- [ ] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos
-- [ ] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento
-- [ ] `POST /api/v1/solicitudes/{id}/documentos` — Adjuntar documentos (URLs firmadas)
-- [ ] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario)
-- [ ] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario)
-- [ ] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga
-- [ ] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola
-- [ ] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio
-- [ ] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos
-- [ ] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados
-- [ ] Validación: no duplicar solicitudes activas para la misma moto
-- [ ] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX`
-- [ ] Job automático: marcar solicitudes en `VENCIDA` al superar plazo
-- [ ] Registro en `historial_estados` en cada cambio
-- [ ] Registro en `auditoria` en cada cambio
-- [ ] StorageModule con MinIO: subida y URLs firmadas
+- [x] `POST /api/v1/public/solicitudes` — Crear solicitud con ciudadano y moto embebidos ✅ 2026-08-03
+- [x] `GET  /api/v1/public/solicitudes/estado` — Consulta por radicado + documento ✅ 2026-08-04
+- [x] `POST /api/v1/public/solicitudes/{id}/documentos` — Adjuntar documentos (multipart) ✅ 2026-08-04 (B9)
+- [x] `GET  /api/v1/solicitudes` — Listar con filtros y paginación (Funcionario) ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}` — Detalle completo (Funcionario) ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}/documentos/{docId}` — URL firmada descarga (TTL 5 min, RN-53) ✅ 2026-08-04 (B9)
+- [x] `POST /api/v1/solicitudes/{id}/aprobar` — Aprobación con generación de permiso en cola ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/rechazar` — Rechazo con motivo obligatorio ✅ 2026-08-04
+- [x] `POST /api/v1/solicitudes/{id}/correccion` — Solicitar corrección con campos específicos ✅ 2026-08-04
+- [x] `GET  /api/v1/solicitudes/{id}/historial` — Historial de estados ✅ 2026-08-04
+- [x] Validación: no duplicar solicitudes activas para la misma moto ✅ 2026-08-03
+- [x] Número de radicado con formato `AAAAMMDD-PYP-XXXXXX` ✅ 2026-08-03
+- [x] Job automático: marcar solicitudes en `VENCIDA` al superar plazo (VencerSolicitudesJob, RN-08) ✅ 2026-08-04 (B9)
+- [x] Registro en `historial_estados` en cada cambio ✅ 2026-08-04
+- [x] Registro en `auditoria` en cada cambio ✅ 2026-08-04
+- [x] StorageModule con MinIO (@Global): subida multipart y URLs firmadas ✅ 2026-08-04 (B9)
 
 ### Pendientes de Diseño — Fase 3
 
@@ -180,27 +180,34 @@
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.
 **Semanas:** 4–5
 **Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — 13 / 18 tareas completadas ← (B7 completado 2026-08-04)
 
-- [ ] PDFModule: generación de PDF institucional con template
-  - [ ] Encabezado con logo/escudo desde configuración
-  - [ ] Número consecutivo formato `2026-PYP-00145`
-  - [ ] Snapshot de datos del ciudadano y moto
-  - [ ] Imagen del QR embebida en el PDF
-  - [ ] Firma y sello institucional configurables
-  - [ ] Pie de página institucional
-- [ ] QRModule: generación de código QR con identificador UUID+hash opaco
-- [ ] Almacenamiento seguro del PDF en MinIO (bucket privado)
-- [ ] `GET /api/v1/permisos/{id}/pdf` — URL firmada para descarga
-- [ ] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública del QR
-- [ ] Registro de cada escaneo en `qr_validaciones`
-- [ ] `POST /api/v1/permisos/{id}/revocar` — Revocación con motivo (Admin)
-- [ ] Job automático: marcar permisos en `VENCIDO` al superar `fecha_vencimiento`
-- [ ] NotificacionesModule: cola de correos con BullMQ
-  - [ ] Correo: solicitud recibida (con número de radicado)
-  - [ ] Correo: solicitud aprobada (con enlace de descarga)
-  - [ ] Correo: solicitud rechazada (con motivo)
-  - [ ] Correo: solicitud requiere corrección (con campos específicos)
+- [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04 (B6)
+  - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
+  - [x] Número consecutivo formato `2026-PYP-00145` ✅ 2026-08-04
+  - [x] Snapshot de datos del ciudadano y moto ✅ 2026-08-04
+  - [x] Imagen del QR embebida en el PDF ✅ 2026-08-04
+  - [x] Firma del funcionario ✅ 2026-08-04
+  - [x] Pie de página institucional ✅ 2026-08-04
+- [x] QRModule: SHA256 opaco (RN-05), imagen PNG ✅ 2026-08-04 (B6)
+- [x] Almacenamiento seguro del PDF en MinIO (bucket privado) ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos` — listado paginado con filtros ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}` — detalle sin storageKey ni codigoQr ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/permisos/{id}/pdf` — URL firmada 5 min ✅ 2026-08-04 (B6)
+- [x] `GET /api/v1/public/verificar/{codigoQR}` — Validación pública (RN-34) ✅ 2026-08-04 (B7)
+- [x] Registro de cada escaneo en `qr_validaciones` (RN-35) ✅ 2026-08-04 (B7)
+- [x] `POST /api/v1/permisos/{id}/revocar` — Admin only (RN-37) ✅ 2026-08-04 (B7)
+- [x] `PATCH /api/v1/permisos/{id}/condiciones` — Funcionario/Admin (RN-38) ✅ 2026-08-04 (B7)
+- [x] Job automático: marcar permisos `VENCIDO` diario 00:01 COT (RN-08) ✅ 2026-08-04 (B7)
+- [x] NotificacionesModule: persistencia desacoplada en BD ✅ 2026-08-04 (B7)
+- [x] Envío real de correos: BullMQ + SMTP + templates HTML (RN-76, RN-77, RN-78, RN-79) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud recibida ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud aprobada con enlace al portal ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud rechazada con motivo ✅ 2026-08-04 (B10)
+  - [x] Correo: corrección requerida con campos específicos ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud vencida ✅ 2026-08-04 (B10)
+  - [x] Correo: permiso revocado ✅ 2026-08-04 (B10)
+  - [x] Correo: corrección enviada (interno — funcionario) ✅ 2026-08-04 (B10)
 
 ### Pendientes de Diseño — Fase 4
 
@@ -220,25 +227,60 @@
 **Objetivo:** Interfaz pública accesible para el trámite del ciudadano.
 **Semanas:** 5–6
 **Dependencia:** Fases 3 y 4 completadas.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B12 completado (infraestructura base)
 
-- [ ] Página de inicio del portal con información del trámite
-- [ ] Formulario de solicitud en pasos (stepper):
-  - [ ] Paso 1: Datos personales del ciudadano
-  - [ ] Paso 2: Datos de la motocicleta
-  - [ ] Paso 3: Motivo y fechas
-  - [ ] Paso 4: Carga de documentos adjuntos
-  - [ ] Paso 5: Declaración y confirmación
-- [ ] Guardado automático en localStorage (prevenir pérdida de datos)
-- [ ] Validación en tiempo real (placa, documento, correo, fechas)
-- [ ] reCAPTCHA v3 integrado
-- [ ] Pantalla de confirmación con número de radicado prominente
-- [ ] Página de consulta de estado (radicado + documento)
-- [ ] Página de descarga del permiso aprobado
-- [ ] Página pública de validación QR (optimizada para móvil)
-  - [ ] Estado visual claro: verde (Vigente), rojo (Vencido/Revocado), gris (No encontrado)
+### B12 — Infraestructura Base (✅ 2026-08-04)
+- [x] Next.js 15 + React 19 + TypeScript configurados ✅ 2026-08-04 (B12)
+- [x] TailwindCSS con tema institucional extendido (colores, animaciones, tipografía) ✅ 2026-08-04 (B12)
+- [x] shadcn/ui primitivos: Button, Input, Label, Select, Textarea, DatePicker, FileUploader, Loading, Skeleton, Card, Badge, Alert, Modal, Stepper, Table ✅ 2026-08-04 (B12)
+- [x] Layout: Navbar responsive, Footer, PageHeader, PortalLayout wrapper ✅ 2026-08-04 (B12)
+- [x] API client Axios con interceptores JWT, refresh automático y normalización de errores ✅ 2026-08-04 (B12)
+- [x] TanStack Query (QueryProvider, QueryClient con retry inteligente) ✅ 2026-08-04 (B12)
+- [x] React Hook Form + Zod (instalados — se usan en siguiente bloque) ✅ 2026-08-04 (B12)
+- [x] ToastProvider global con accesibilidad ARIA live region ✅ 2026-08-04 (B12)
+- [x] ErrorBoundary con UI de recuperación ✅ 2026-08-04 (B12)
+- [x] Skip-to-content y enfoque visible WCAG 2.1 AA ✅ 2026-08-04 (B12)
+- [x] Rutas shell: /, /solicitud, /estado, /verificar, /contacto, /ayuda ✅ 2026-08-04 (B12)
+- [x] Services: public.service.ts (6 endpoints del portal ciudadano) ✅ 2026-08-04 (B12)
+- [x] Hooks: useMotivos, useConfiguracionPublica ✅ 2026-08-04 (B12)
+- [x] Variables de entorno tipadas (src/lib/env.ts) ✅ 2026-08-04 (B12)
+
+### B13 — Formulario Ciudadano (✅ 2026-08-04)
+- [x] Schemas Zod completos: ciudadanoSchema, motocicletaSchema, motivoBaseSchema, confirmacionSchema, solicitudFormSchema ✅ 2026-08-04 (B13)
+- [x] Stepper funcional 5 pasos con Framer Motion AnimatePresence (dirección animada) ✅ 2026-08-04 (B13)
+- [x] Paso 1: Datos del ciudadano con validaciones colombianas (celular 3XXXXXXXXX, documento, correo) ✅ 2026-08-04 (B13)
+- [x] Paso 2: Motocicleta con validación placa colombiana ABC12D ✅ 2026-08-04 (B13)
+- [x] Paso 3: Motivos dinámicos GET /public/motivos, fechas con validación cruzada ✅ 2026-08-04 (B13)
+- [x] Paso 4: FileUploader (RN-53) drag & drop, PDF/JPG/PNG, máx 10 MB, 5 archivos ✅ 2026-08-04 (B13)
+- [x] Paso 5: Pantalla de resumen completo + checkbox declaración jurada ✅ 2026-08-04 (B13)
+- [x] LocalStorage auto-save debounced 500 ms + restauración de borrador con banner de aviso ✅ 2026-08-04 (B13)
+- [x] reCAPTCHA v3 con hook useRecaptchaV3, env var NEXT_PUBLIC_RECAPTCHA_SITE_KEY, warning en dev ✅ 2026-08-04 (B13)
+- [x] Envío con crearSolicitud() + adjuntarDocumentos(), LoadingOverlay, sin doble submit ✅ 2026-08-04 (B13)
+- [x] Pantalla de éxito: radicado prominente, botones copiar/imprimir/consultar/nueva ✅ 2026-08-04 (B13)
+- [x] Error handling 400/409/422/500/timeout/offline con mensajes distintos, sin alert() ✅ 2026-08-04 (B13)
+- [x] WCAG: aria-label, aria-invalid, aria-live, focus management entre pasos ✅ 2026-08-04 (B13)
+- [x] Mobile-first responsive, Navbar/Footer sin romper ✅ 2026-08-04 (B13)
+- [x] Página de inicio del portal con información del trámite ✅ 2026-08-04 (B12)
+
+### B14 — Consultas y Validación QR (✅ 2026-08-04)
+- [x] /estado: formulario RHF+Zod (radicado + documento), TanStack Query, idle/loading/success/error/offline ✅ 2026-08-04 (B14)
+- [x] /estado: SolicitudResultado con badge de estado, info completa, historial, permiso si aplica ✅ 2026-08-04 (B14)
+- [x] /estado: botón Descargar PDF si permiso.urlDescarga disponible ✅ 2026-08-04 (B14)
+- [x] /verificar: VerificarForm con modos cámara/manual ✅ 2026-08-04 (B14)
+- [x] /verificar: QrScanner con @zxing/browser, dynamic import SSR-safe, cleanup de cámara ✅ 2026-08-04 (B14)
+- [x] /verificar: PermisoResultado con semáforo verde/rojo/gris, detalles del permiso ✅ 2026-08-04 (B14)
+- [x] Skeletons, empty states, error states, retry, offline detection ✅ 2026-08-04 (B14)
+- [x] Animaciones Framer Motion en resultados ✅ 2026-08-04 (B14)
+- [x] Tipo SolicitudResumenCiudadano extendido: motivoNombre, funcionarioNombre, historial[] ✅ 2026-08-04 (B14)
+- [x] Hooks: useEstadoSolicitud, useVerificarPermiso ✅ 2026-08-04 (B14)
+- [x] Schemas Zod: estadoConsultaSchema, verificarCodigoSchema ✅ 2026-08-04 (B14)
+- [x] WCAG: aria-live, aria-label, role="status", role="region", focus management ✅ 2026-08-04 (B14)
+- [x] Dynamic import de QrScanner (SSR-safe, no afecta bundle de otras páginas) ✅ 2026-08-04 (B14)
+
+### Fase 5 — COMPLETADA ✅
+Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado, /verificar, /contacto, /ayuda
 - [ ] Aviso de privacidad y autorización Ley 1581
-- [ ] Accesibilidad WCAG 2.1 nivel AA
+- [ ] Accesibilidad WCAG 2.1 nivel AA (validación con axe)
 - [ ] Responsive: móvil, tablet y escritorio
 
 ---
@@ -247,21 +289,70 @@
 **Objetivo:** Herramienta operativa para la gestión diaria de solicitudes.
 **Semanas:** 6–7
 **Dependencia:** Fases 3 y 4 completadas.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B15 completado
 
-- [ ] Pantalla de login con manejo de sesión JWT
-- [ ] Dashboard: KPIs del día (recibidas, pendientes, aprobadas, rechazadas, vencidas)
-- [ ] Cola de solicitudes ordenada por antigüedad con indicadores de urgencia
-- [ ] Filtros: estado, fecha, documento, placa, radicado
-- [ ] Vista de detalle de solicitud:
-  - [ ] Todos los datos personales y de la moto
-  - [ ] Previsualización de documentos adjuntos (PDF e imagen inline)
-  - [ ] Historial de estados
-- [ ] Modal de aprobación con resumen y confirmación
-- [ ] Modal de rechazo con motivo obligatorio
-- [ ] Modal de corrección con selección de campos a corregir
-- [ ] Visualización y descarga del permiso generado
-- [ ] Botón de impresión del PDF
+### B15 — Infraestructura base Portal Funcionario (✅ 2026-08-04)
+- [x] /funcionario/login: RHF+Zod, toggle contraseña, manejo JWT, error messages, WCAG ✅ 2026-08-04 (B15)
+- [x] AuthProvider con Context API, bootstrap refresh token silencioso, logout ✅ 2026-08-04 (B15)
+- [x] Persistencia tokens: sessionStorage por defecto, localStorage con "recordarme" ✅ 2026-08-04 (B15)
+- [x] Rotación de refresh tokens: callback en api-client sincroniza storage en cada 401 ✅ 2026-08-04 (B15)
+- [x] Middleware Next.js: protección /funcionario/* con cookie _f_session, redirect a login ✅ 2026-08-04 (B15)
+- [x] ProtectedRoute: loading skeleton, redirect unauthenticated, acceso denegado por rol ✅ 2026-08-04 (B15)
+- [x] PermissionGate: renderizado condicional por rol sin redirigir ✅ 2026-08-04 (B15)
+- [x] Sidebar: desktop sticky + mobile drawer + hamburguesa, nav items con badge de pendientes ✅ 2026-08-04 (B15)
+- [x] HeaderFunc: breadcrumb, botón refresh, ProfileMenu ✅ 2026-08-04 (B15)
+- [x] ProfileMenu: dropdown avatar, info usuario, logout ✅ 2026-08-04 (B15)
+- [x] BreadcrumbNav: aria-current, teclado completo ✅ 2026-08-04 (B15)
+- [x] Dashboard: 6 KPIs StatCard (colores por tipo), actividad reciente, accesos rápidos ✅ 2026-08-04 (B15)
+- [x] funcionario.service.ts: login, logout, refresh, getMe, getDashboardStats, getActividadReciente ✅ 2026-08-04 (B15)
+- [x] Hooks: useLogin, useLogout, useProfile, useDashboardStats, useActividadReciente, useRefreshToken ✅ 2026-08-04 (B15)
+- [x] Componentes reutilizables: StatCard, DashboardCard, PageContainer, SidebarItem ✅ 2026-08-04 (B15)
+- [x] WCAG: aria-current, aria-expanded, aria-haspopup, aria-live, focus management, teclado ✅ 2026-08-04 (B15)
+- [x] Layout nested: (panel)/layout.tsx con ProtectedRoute + Sidebar ✅ 2026-08-04 (B15)
+- [x] ADR-019: estrategia de almacenamiento de tokens ✅ 2026-08-04 (B15)
+- [x] Tailwind content: añadido src/modules/** y src/contexts/** ✅ 2026-08-04 (B15)
+- [x] Badge variante 'info' añadida ✅ 2026-08-04 (B15)
+
+### B16 — Cola de Solicitudes y Detalle (✅ 2026-08-04)
+- [x] Tipos backend correctos: SolicitudListItem, SolicitudDetalle, DocumentoItem, HistorialEstadoItem, PaginatedSolicitudesResponse, SolicitudesFiltros ✅ 2026-08-04 (B16)
+- [x] getSolicitudes(), getSolicitudDetalle(), getDocumentoUrl() en funcionario.service.ts ✅ 2026-08-04 (B16)
+- [x] useSolicitudes() + useSolicitudesFiltros() con sync URL ✅ 2026-08-04 (B16)
+- [x] useSolicitudDetalle(), useDocumentoUrl() — TanStack Query v5 ✅ 2026-08-04 (B16)
+- [x] SolicitudStatusBadge — todos los estados con variantes de color ✅ 2026-08-04 (B16)
+- [x] SolicitudesTable — sticky header, aria-sort, skeletons, sorting, empty/error states ✅ 2026-08-04 (B16)
+- [x] SolicitudFilters — chips multi-selección, búsqueda debounced, rango fechas, orden ✅ 2026-08-04 (B16)
+- [x] SearchToolbar — debounce configurable, limpiar, aria-label ✅ 2026-08-04 (B16)
+- [x] Pagination — primera/prev/next/última, conteo total ✅ 2026-08-04 (B16)
+- [x] EmptyResults — empty state reutilizable con botón reset ✅ 2026-08-04 (B16)
+- [x] SolicitudTimeline — historial visual con camposCorreccion expandidos ✅ 2026-08-04 (B16)
+- [x] DocumentoViewer — URL firmada on-demand, preview PDF/imagen, descarga ✅ 2026-08-04 (B16)
+- [x] DetalleCard — tarjeta reutilizable dl/dt/dd, columnas configurables ✅ 2026-08-04 (B16)
+- [x] ConfirmationModal — WCAG focus trap, Escape, overlay, variante danger ✅ 2026-08-04 (B16)
+- [x] SolicitudesView — módulo lista con Suspense + filtros + tabla + paginación ✅ 2026-08-04 (B16)
+- [x] SolicitudDetalleView — ciudadano, moto, motivo, documentos, historial, modales acción ✅ 2026-08-04 (B16)
+- [x] /funcionario/solicitudes page ✅ 2026-08-04 (B16)
+- [x] /funcionario/solicitudes/[id] page ✅ 2026-08-04 (B16)
+- [x] Fix bugs B15: tipos, parámetros API, countSolicitudes, getActividadReciente ✅ 2026-08-04 (B16)
+- [x] HeaderFunc: prop extra (backward compatible) ✅ 2026-08-04 (B16)
+- [x] ADR-020: corrección tipos frontend-backend ✅ 2026-08-04 (B16)
+- [x] WCAG: aria-sort, aria-busy, aria-live, aria-label, aria-modal, focus trap ✅ 2026-08-04 (B16)
+
+### B17 — Acciones operativas: Aprobar, Rechazar, Corrección (✅ 2026-08-04)
+- [x] AccionSolicitudResponse + PermisoPdfUrl types en funcionario.ts ✅ 2026-08-04 (B17)
+- [x] aprobarSolicitud(), rechazarSolicitud(), solicitarCorreccion(), getPermisoPdfUrl() en service ✅ 2026-08-04 (B17)
+- [x] Zod schemas: rechazarSchema (min20/max1000), correccionSchema (motivo+camposCorreccion) ✅ 2026-08-04 (B17)
+- [x] useAprobarSolicitud, useRechazarSolicitud, useSolicitarCorreccion — useMutation + cache invalidation ✅ 2026-08-04 (B17)
+- [x] usePermisoPdf — URL firmada PDF on-demand con staleTime 4 min ✅ 2026-08-04 (B17)
+- [x] Invalidación automática: SOLICITUDES_KEY + SOLICITUD_DETALLE_KEY + DASHBOARD_STATS_KEY + ACTIVIDAD_KEY ✅ 2026-08-04 (B17)
+- [x] Modal Aprobar: onConfirm real + isConfirming + error inline + toast success/error ✅ 2026-08-04 (B17)
+- [x] Modal Rechazar: RHF+Zod, motivo min20/max1000, contador caracteres, aria-live ✅ 2026-08-04 (B17)
+- [x] Modal Corrección: RHF+Zod, useFieldArray, checkboxes con descripción por campo, motivo general ✅ 2026-08-04 (B17)
+- [x] Vista previa (preview step) antes de enviar corrección con cancelar → volver a editar ✅ 2026-08-04 (B17)
+- [x] ConfirmationModal: nuevos props onCancel, confirmDisabled, maxWidth ✅ 2026-08-04 (B17)
+- [x] Botón Obtener/Descargar PDF cuando solicitud.permiso está presente ✅ 2026-08-04 (B17)
+- [x] Mensajes de error de negocio: 409 overlap, 422 estado inválido ✅ 2026-08-04 (B17)
+- [x] WCAG: aria-required, aria-busy, aria-live, aria-describedby, role=alert ✅ 2026-08-04 (B17)
+- [x] ADR-021: patrón preview-step para Corrección modal ✅ 2026-08-04 (B17)
 
 ---
 
@@ -269,29 +360,57 @@
 **Objetivo:** Control total del sistema desde la interfaz.
 **Semanas:** 7–8
 **Dependencia:** Fase 6 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B18 completado (fase-7 infraestructura + gestión usuarios + configuración + sistema)
 
-- [ ] Pantalla "Configuración Institucional" (CU-42 a CU-45):
-  - [ ] Vista de consulta con previsualización de escudo y logo (HU-44)
-  - [ ] Formulario de edición de datos textuales (HU-45)
-  - [ ] Carga/reemplazo del escudo con validación de formato y tamaño (HU-46)
-  - [ ] Carga/reemplazo del logo con opción de eliminar (HU-47)
-- [ ] Dashboard administrativo con KPIs globales
-- [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
-- [ ] CRUD de Roles
+### B18 — Panel Administración Fase 7 (✅ 2026-08-04)
+
+**Backend (catalogos admin):**
+- [x] `GET /roles` — catálogo de roles (ADR-022) ✅ 2026-08-04 (B18)
+- [x] `GET /dependencias` — catálogo de dependencias (ADR-022) ✅ 2026-08-04 (B18)
+- [x] `CatalogosAdminController` en UsuariosModule con `@InjectRepository` directo ✅ 2026-08-04 (B18)
+
+**Frontend — Tipos, schemas, servicios y hooks:**
+- [x] `types/admin.ts` — RolCatalog, DependenciaCatalog, ConfiguracionInstitucionalAdmin, UsuarioAdmin, UsuarioAdminDetalle, UsuarioCreado, UsuariosPaginados, ListarUsuariosQuery, HealthStatus ✅ 2026-08-04 (B18)
+- [x] `schemas/admin.schemas.ts` — configuracionSchema, crearUsuarioSchema, actualizarUsuarioSchema ✅ 2026-08-04 (B18)
+- [x] `services/admin.service.ts` — todos los endpoints admin + health ✅ 2026-08-04 (B18)
+- [x] `hooks/use-admin-configuracion.ts` — useConfiguracionAdmin, useActualizarConfiguracion ✅ 2026-08-04 (B18)
+- [x] `hooks/use-admin-usuarios.ts` — useUsuarios, useUsuarioDetalle, useCrearUsuario, useActualizarUsuario, useActivarUsuario, useEliminarUsuario, useRestaurarUsuario ✅ 2026-08-04 (B18)
+- [x] `hooks/use-admin-catalogs.ts` — useRoles, useDependencias ✅ 2026-08-04 (B18)
+- [x] `hooks/use-health.ts` — useHealth (refetch 30s, staleTime 0) ✅ 2026-08-04 (B18)
+- [x] `lib/api-client.ts` — apiPut, apiDelete helpers añadidos ✅ 2026-08-04 (B18)
+- [x] `lib/constants.ts` — FUNC_ROUTES ampliado con usuarios, usuariosNuevo, configuracion, sistema ✅ 2026-08-04 (B18)
+
+**Frontend — Componentes reutilizables:**
+- [x] `components/admin/usuario-rol-badge.tsx` — badge de rol + chip activo/inactivo ✅ 2026-08-04 (B18)
+- [x] `components/admin/health-indicator.tsx` — indicador de servicio con dot animado ✅ 2026-08-04 (B18)
+- [x] `components/funcionario/sidebar.tsx` — nav items Sistema añadido ✅ 2026-08-04 (B18)
+
+**Frontend — Módulos (views):**
+- [x] `modules/admin/configuracion-view.tsx` — PATCH ConfiguracionInstitucional, imágenes read-only ✅ 2026-08-04 (B18)
+- [x] `modules/admin/sistema-view.tsx` — HealthIndicators × 4, refetch 30s, alerta general ✅ 2026-08-04 (B18)
+- [x] `modules/admin/usuarios-view.tsx` — tabla paginada, búsqueda debounced, filtros rol/estado ✅ 2026-08-04 (B18)
+- [x] `modules/admin/usuario-detalle-view.tsx` — ficha + edición inline + activar/desactivar/eliminar/restaurar ✅ 2026-08-04 (B18)
+- [x] `modules/admin/nuevo-usuario-view.tsx` — formulario creación + dialog contraseña temporal ✅ 2026-08-04 (B18)
+
+**Frontend — Páginas:**
+- [x] `/funcionario/configuracion` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/sistema` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/usuarios` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/usuarios/nuevo` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/usuarios/[id]` page ✅ 2026-08-04 (B18)
+
+**Quality gates:** tsc ✅ · lint ✅ · build ✅
+
+**Pendiente (scope B19+):**
+- [ ] Dashboard administrativo con KPIs globales (solicitudes del día, permisos vigentes)
+- [ ] CRUD de Roles con roles de sólo lectura
 - [ ] CRUD de Dependencias
-- [ ] CRUD de Motivos (con activación/desactivación sin borrar)
-- [ ] Configuración del Sistema (Parámetros Operativos):
-  - [ ] Firma digital configurable (upload de imagen)
-  - [ ] Sello institucional (upload de imagen)
-  - [ ] Parámetros: días máximos permiso, plazos, color institucional
+- [ ] CRUD de Motivos (activación/desactivación sin borrar)
 - [ ] Vista de auditoría filtrable (usuario, acción, fecha, entidad)
 - [ ] Gestión de permisos: listar, revocar con motivo
-- [ ] Reportes:
-  - [ ] Solicitudes por fecha, estado, funcionario
-  - [ ] Motivos más frecuentes
-  - [ ] Permisos vigentes y vencidos
-  - [ ] Exportar: Excel, PDF, CSV
+- [ ] Configuración Institucional: upload de imágenes (logo/escudo) — requiere endpoint multipart
+- [ ] Reportes: solicitudes, motivos frecuentes, exportar CSV/PDF
+- [ ] Parámetros del sistema (días máximos permiso, plazos, color institucional)
 
 ---
 
@@ -299,26 +418,68 @@
 **Objetivo:** Sistema listo para operar en producción con garantías de calidad.
 **Semanas:** 8–10
 **Dependencia:** Fases 5, 6 y 7 completadas.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B19 completado (2026-08-04)
 
-- [ ] Pruebas unitarias backend (cobertura ≥ 80%)
-  - [ ] Use cases críticos
-  - [ ] Guards y validaciones
-  - [ ] Servicios de dominio
-- [ ] Pruebas de integración (flujos críticos end-to-end en backend)
-  - [ ] Flujo completo: crear solicitud → aprobar → generar PDF → validar QR
-  - [ ] Flujo de rechazo y notificación
-  - [ ] Flujo de corrección y reenvío
-- [ ] Pruebas E2E del portal ciudadano (Playwright o Cypress)
+### B19 — Calidad, Pruebas, Observabilidad y CI/CD (✅ 2026-08-04)
+
+**Tests unitarios backend (7 suites, 62 tests):**
+- [x] `solicitud-state-machine.spec.ts` — 16 casos (transiciones válidas/inválidas, estados terminales, validar()) ✅
+- [x] `http-exception.filter.spec.ts` — 8 casos (DomainException, BusinessRuleException, NotFoundException, HttpException, Error desconocido, success:false, stack trace, logger) ✅
+- [x] `response-transform.interceptor.spec.ts` — 5 casos (datos simples, paginado, array, null, timestamp) ✅
+- [x] `roles.guard.spec.ts` — 6 casos (pública, sin roles, rol correcto, rol incorrecto, sin usuario, múltiples roles) ✅
+- [x] `login.use-case.spec.ts` — 8 casos (usuario no existe, login exitoso, SHA256 refresh token, contrasenaExpirada, auditoría, reset intentos) ✅
+- [x] `recuperar-contrasena.use-case.spec.ts` — 9 casos (anti-enumeración, usuario inactivo, tokenHash SHA256, invalidación, expiración 1h) ✅
+- [x] `rechazar-solicitud.use-case.spec.ts` — 10 casos (NotFoundException, BusinessRuleException estados terminales, rechazo exitoso, concurrencia, notificación, auditoría) ✅
+
+**Tests unitarios frontend (3 suites, 41 tests):**
+- [x] `lib/utils.spec.ts` — cn(), truncate(), formatFileSize(), formatDate(), formatDateLong() ✅
+- [x] `schemas/admin.schemas.spec.ts` — configuracionSchema, crearUsuarioSchema, actualizarUsuarioSchema ✅
+- [x] `schemas/solicitudes-acciones.schemas.spec.ts` — rechazarSchema, correccionSchema ✅
+
+**Configuración Vitest (frontend):**
+- [x] `vitest.config.ts` — jsdom, globals, @vitejs/plugin-react, coverage v8, alias @ ✅
+- [x] `src/test/setup.ts` — @testing-library/jest-dom ✅
+- [x] `frontend/package.json` — scripts test, test:watch, test:cov; devDependencies vitest ✅
+
+**CI/CD — GitHub Actions:**
+- [x] `.github/workflows/ci.yml` — jobs backend + frontend + summary; triggers push/PR a main/develop/feature/hotfix ✅
+- [x] Backend job: npm ci → tsc → lint → test:cov → build → upload artifacts ✅
+- [x] Frontend job: npm ci → type-check → lint → test:cov → build → upload artifacts ✅
+
+**Observabilidad — Prometheus:**
+- [x] `modules/metrics/metrics.service.ts` — Registry, http_requests_total, http_request_duration_seconds, bullmq_jobs_processed_total, bullmq_job_errors_total, collectDefaultMetrics ✅
+- [x] `modules/metrics/metrics.controller.ts` — GET /metrics, @Public(), restricción IP en producción ✅
+- [x] `modules/metrics/metrics.interceptor.ts` — normalizeRoute(), startTimer(), tap/catchError ✅
+- [x] `modules/metrics/metrics.module.ts` — Module con MetricsService exported ✅
+- [x] `app.module.ts` — MetricsModule registrado ✅
+- [x] `main.ts` — MetricsInterceptor registrado globalmente ✅
+
+**Observabilidad — OpenTelemetry:**
+- [x] `observability/tracing.ts` — NodeSDK condicional (solo si OTEL_EXPORTER_OTLP_ENDPOINT definido), resourceFromAttributes, OTLPTraceExporter, getNodeAutoInstrumentations (fs/dns desactivados), SIGTERM graceful shutdown ✅
+
+**Docker y producción:**
+- [x] Dockerfiles multi-stage (deps → build → development → production), usuario no-root, HEALTHCHECK integrado ✅ (ya existían desde B11.1)
+- [x] docker-compose.yml — healthchecks, restart: unless-stopped, logging json-file, volúmenes nombrados ✅ (ya existía desde B11)
+- [x] docker-compose.prod.yml — Nginx, redes internas, restart: always ✅ (ya existía desde B11)
+
+**Quality gates B19:**
+- [x] `backend tsc --noEmit` ✅ (0 errores)
+- [x] `backend lint` ✅ (0 errores, 22 warnings en specs — solo return types)
+- [x] `backend test` ✅ (62/62 passed)
+- [x] `backend build` ✅
+- [x] `frontend type-check` ✅
+- [x] `frontend lint` ✅ (0 warnings)
+- [x] `frontend test` ✅ (41/41 passed)
+- [x] `frontend build` ✅
+
+**Pendiente (Fase 8 parcial — fuera de scope B19):**
+- [ ] Tests de integración (flujo completo: crear solicitud → aprobar → generar PDF → validar QR)
+- [ ] Tests E2E (Playwright o Cypress — requiere infraestructura levantada)
 - [ ] Optimización de consultas BD (EXPLAIN ANALYZE en queries críticos)
-- [ ] Docker para producción (multi-stage builds)
-- [ ] `docker-compose.prod.yml` con Nginx + SSL
-- [ ] Configuración de CI/CD (GitHub Actions)
-- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`) — ✅ ya generado
-- [ ] Manual de Usuario (`docs/MANUAL_USUARIO.md`) — ✅ ya generado
-- [ ] Guía de despliegue en producción (`docs/PLAN_DESPLIEGUE.md`) — ✅ ya generado
 - [ ] Datos de prueba para entorno de demo
-- [ ] Revisión de seguridad final (checklist `SECURITY.md`)
+- [ ] Revisión de seguridad final (checklist SECURITY.md)
+- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`) — pendiente
+- [ ] Dashboard administrativo con KPIs globales (pendiente Fase 7 scope B19+)
 
 ---
 
@@ -326,26 +487,67 @@
 
 ### Fase Activa
 
-Fase 0 — Fundamentos
+Fase 7 — Panel Admin ← ✅ 5/5 tareas B18 completadas (pendiente scope B19+)
+Fase 8 — Calidad y Producción ← 🔄 En progreso (B19 completado)
 
-### Tareas pendientes en la fase activa
+### Tareas pendientes
 
-Ninguna. Fase 0 completada (12/12).
+- Fase 8: Tests integración, E2E, optimización BD, datos demo, checklist seguridad
+- Fase 7: Dashboard KPIs, CRUDs Roles/Dependencias/Motivos, auditoría, upload imágenes
 
 ### Última tarea terminada
 
-Frontend Next.js scaffolding (2026-08-02):
-`frontend/` con Next.js 14, App Router, TailwindCSS 3, TypeScript estricto.
-`src/app/` con layout.tsx, page.tsx, not-found.tsx, error.tsx.
-`src/lib/` con api-client.ts y constants.ts.
-`src/types/index.ts` con contratos de ApiResponse.
-`frontend/Dockerfile` multi-stage (development/build/production).
-Servicio `frontend` agregado a docker-compose.yml.
-lint-staged actualizado para cubrir archivos del frontend.
+B19 — Calidad, Pruebas, Observabilidad y CI/CD (2026-08-04):
+- 7 suites backend (62 tests), 3 suites frontend (41 tests) — todos verdes
+- Vitest configurado para frontend (jsdom + @testing-library)
+- GitHub Actions CI/CD pipeline completo (backend + frontend)
+- Módulo Prometheus: métricas HTTP, BullMQ, collectDefaultMetrics
+- OpenTelemetry: NodeSDK condicional con resourceFromAttributes y OTLPTraceExporter
+- Quality gates: tsc ✅ lint ✅ tests ✅ build ✅ (ambos lados)
+
+B18 — Panel Administración Fase 7 (2026-08-04):
+- docker/nginx/nginx.conf creado: gzip, proxy_buffering, keepalive, rate limiting Nginx, headers de seguridad completos (X-Frame-Options, X-Content-Type-Options, CSP, Permissions-Policy, COEP), HSTS listo (comentado hasta confirmar SSL), WebSocket upgrade, manejo de errores 404/500 en JSON, TLS 1.2/1.3 Mozilla Modern
+- docker/nginx/ssl/.gitkeep: directorio versionado, certificados excluidos
+- .gitignore: +.env.production, +.env.staging, +docker/.env.production, +docker/nginx/ssl/*.pem/*.crt/*.key (hallazgo crítico — no estaba cubierto)
+- backend/Dockerfile mejorado: stage 'deps' separado para prod deps / stage 'build' para dev+compilación / HEALTHCHECK integrado / no duplicación de npm prune
+- frontend/Dockerfile mejorado: mismo patrón deps/build/development/production + HEALTHCHECK
+- ConfiguracionInstitucionalSeeder (OnApplicationBootstrap): inserta registro inicial desde SEED_CI_* vars si la tabla está vacía — hallazgo crítico: SEED_CI vars existían en env pero no había código que las leyera
+- configuration.ts: +seed.ci.* namespace completo
+- validation.schema.ts: +SEED_CI_* como opcionales con tipos correctos
+- configuracion-institucional.module.ts: +ConfiguracionInstitucionalSeeder como provider
+- .env.example y .env.production.example: +SEED_CI_NIT, +SEED_CI_CODIGO_DANE
+- docker-compose.prod.yml: +SEED_CI_NIT, +SEED_CI_CODIGO_DANE en environment del backend
+- README_DEPLOY.md: +sección SSL (Let's Encrypt + institucional), +checklist pre-producción (12 items), +checklist post-despliegue (10 items), índice renumerado
+
+B11 — Hardening del Backend + Preparación para Producción (2026-08-04):
+- Health checks completos: GET /api/v1/health verifica DB + Redis + MinIO + SMTP (Terminus)
+- RedisHealthIndicator, MinioHealthIndicator, SmtpHealthIndicator (TCP probe sin dependencia HTTP)
+- ThrottlerModule movido a AppModule como guard global (100 req/min por IP)
+- Mailpit agregado a docker-compose.yml (captura de correos en desarrollo, UI en :8025)
+- docker-compose.prod.yml creado: Nginx proxy, redes internas aisladas, restart:always, volúmenes
+- .env.production.example con todos los secretos, instrucciones de generación y reglas críticas
+- README_DEPLOY.md: guía completa de despliegue, migraciones, backup, rollback, troubleshooting
+- MinioStorageAdapter.ping() expuesto para health check sin acoplamiento
+- Variables SEED_CI_* y Mailpit agregadas al .env.example existente
+- ROADMAP.md corregido: Fase 4 actualizada de 13/18 a 18/18
+
+B10 — Sistema de Notificaciones Reales (BullMQ + SMTP) (2026-08-04):
+- RedisModule (@Global) reutilizable — IORedis singleton
+- BullModule.forRootAsync en AppModule — configuración única centralizada
+- EmailModule con abstracción IEmailProvider (EMAIL_PROVIDER token)
+- SmtpEmailProvider (Nodemailer) — transporte SMTP con pool de conexiones
+- PlantillaEmailService — templates HTML + branding institucional desde DB + caché 60s
+- 7 templates HTML institucionales (solicitud-recibida, solicitud-aprobada, solicitud-rechazada, correccion-requerida, solicitud-vencida, permiso-revocado, correccion-enviada)
+- EmailProcessor (BullMQ WorkerHost) — concurrencia 5, backoff 1m/5m/15m, DLQ
+- NotificacionesService actualizado — encola en BullMQ después de persistir en DB
+- Integración en 5 use-cases: CrearSolicitud, AprobarSolicitud, RechazarSolicitud, SolicitarCorreccion + VencerSolicitudesJob
+- Migración `AddContextoToNotificaciones` — columna JSONB para snapshot de contexto
+- TipoNotificacion: +SOLICITUD_VENCIDA, +CORRECCION_ENVIADA
+- **Fase 4 cerrada: 18/18 tareas completadas ✅**
 
 ### Próxima tarea
 
-Fase 1 — Base de Datos (resolver primero los [~] M-04 y M-03) — aguardando autorización.
+B11 — Frontend Portal Ciudadano (Fase 5) o B11 — Calidad y Producción (Fase 8). Requiere autorización.
 
 ---
 

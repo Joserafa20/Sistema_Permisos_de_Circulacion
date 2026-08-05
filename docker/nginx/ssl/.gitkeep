@@ -1,0 +1,3 @@
+# Este directorio contiene los certificados SSL de producción.
+# Los archivos cert.pem y key.pem NUNCA se suben al repositorio.
+# Ver README_DEPLOY.md para instrucciones de obtención con Let's Encrypt.

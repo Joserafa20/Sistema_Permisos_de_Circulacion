@@ -66,7 +66,17 @@ CREATE TYPE accion_auditoria AS ENUM (
   'generar_permiso',
   'revocar_permiso',
   'cambiar_contrasena',
-  'exportar_reporte'
+  'exportar_reporte',
+  'usuario_consultado',
+  'usuario_creado',
+  'usuario_actualizado',
+  'usuario_desbloqueado',
+  'usuario_eliminado',
+  'usuario_restaurado',
+  'ciudadano_consultado',
+  'listado_ciudadanos',
+  'motocicleta_consultada',
+  'listado_motos'
 );
 
 

@@ -253,7 +253,62 @@ async function seedConfiguracion(qr: QueryRunner): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECCIÓN 6 — Usuario administrador inicial
+// SECCIÓN 6 — Configuración Institucional (singleton)
+// Ref: MODELO_DATOS.md §9.3 — tabla configuracion_institucional
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function seedConfiguracionInstitucional(qr: QueryRunner): Promise<void> {
+  log('Configuración Institucional...');
+
+  const existing = await qr.query(`SELECT id FROM configuracion_institucional LIMIT 1`);
+  if (existing.length > 0) {
+    log('  ⚠ Registro ya existe — omitido (singleton)');
+    return;
+  }
+
+  const nombreAlcaldia = env('SEED_CI_NOMBRE_ALCALDIA', 'Alcaldía Municipal');
+  const nit = env('SEED_CI_NIT', '000.000.000-0');
+  const codigoDane = env('SEED_CI_CODIGO_DANE', '00000');
+  const departamento = env('SEED_CI_DEPARTAMENTO', 'Departamento');
+  const municipio = env('SEED_CI_MUNICIPIO', 'Municipio Sede');
+  const direccion = env('SEED_CI_DIRECCION', 'Dirección institucional');
+  const telefono = env('SEED_CI_TELEFONO', '(000) 000-0000');
+  const correoInstitucional = env('SEED_CI_CORREO', 'contacto@alcaldia.gov.co');
+  const sitioWeb = process.env['SEED_CI_SITIO_WEB']?.trim() || null;
+  const escudoStorageKey = env('SEED_CI_ESCUDO_KEY', 'institucional/escudo-placeholder.png');
+  const logoStorageKey = process.env['SEED_CI_LOGO_KEY']?.trim() || null;
+
+  await qr.query(
+    `INSERT INTO configuracion_institucional (
+       id, nombre_alcaldia, nit, codigo_dane, departamento, municipio,
+       direccion, telefono, correo_institucional, sitio_web,
+       escudo_storage_key, logo_storage_key
+     )
+     VALUES (
+       gen_random_uuid(), $1, $2, $3, $4, $5,
+       $6, $7, $8, $9,
+       $10, $11
+     )`,
+    [
+      nombreAlcaldia,
+      nit,
+      codigoDane,
+      departamento,
+      municipio,
+      direccion,
+      telefono,
+      correoInstitucional,
+      sitioWeb,
+      escudoStorageKey,
+      logoStorageKey,
+    ],
+  );
+
+  log(`  ✓ ${nombreAlcaldia} — ${municipio}, ${departamento}`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECCIÓN 7 — Usuario administrador inicial
 // Ref: MODELO_DATOS.md §15 — Seed de Usuario Administrador Inicial
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -333,6 +388,7 @@ async function main(): Promise<void> {
     await seedDependencias(qr);
     await seedMotivos(qr);
     await seedConfiguracion(qr);
+    await seedConfiguracionInstitucional(qr);
     await seedUsuarioAdmin(qr);
 
     await qr.commitTransaction();

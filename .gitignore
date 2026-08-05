@@ -19,7 +19,10 @@ out/
 .env
 .env.local
 .env.*.local
-# .env.example se sube al repo (es la plantilla documentada)
+.env.production
+.env.staging
+# .env.example y .env.production.example SE SUBEN al repo (son plantillas)
+# Los archivos de valores reales (.env.production, .env.docker) NUNCA se suben
 
 # ── Cobertura de tests ──────────────────────────────────────────
 coverage/
@@ -42,7 +45,13 @@ logs/
 # ── Docker ──────────────────────────────────────────────────────
 docker/volumes/
 docker/.env.docker
-# .env.example se sube al repo (es la plantilla documentada)
+docker/.env.production
+docker/.env.staging
+# Certificados SSL — NUNCA al repositorio
+docker/nginx/ssl/*.pem
+docker/nginx/ssl/*.crt
+docker/nginx/ssl/*.key
+# .env.example y .env.production.example SE SUBEN (son plantillas)
 
 # ── Archivos de memoria de Claude (no son código del proyecto) ──
 memory/

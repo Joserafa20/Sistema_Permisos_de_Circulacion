@@ -286,6 +286,7 @@ erDiagram
         jsonb          snapshot_ciudadano       "Inmutable - datos al momento de aprobacion"
         jsonb          snapshot_motocicleta     "Inmutable - datos al momento de aprobacion"
         jsonb          snapshot_motivo          "Inmutable - datos al momento de aprobacion"
+        text           condiciones_restricciones "NULL - editable solo por funcionario (RN-38)"
         varchar        hash_pdf
         timestamptz    created_at
         timestamptz    updated_at
@@ -412,7 +413,7 @@ Tablas de referencia controladas por el administrador. Usan `activo BOOLEAN` en 
 
 | Entidad | Propósito |
 |---------|-----------|
-| `permisos` | Documento oficial generado al aprobar una solicitud. Relación 1:1 con `solicitudes` (UNIQUE en `solicitud_id`). Los snapshots JSONB capturan el estado exacto de datos al momento de aprobación — el PDF se genera desde ellos, no consultando tablas en tiempo real. `codigo_qr` es opaco (UUID + SHA-256 + salt), nunca contiene datos personales. |
+| `permisos` | Documento oficial generado al aprobar una solicitud. Relación 1:1 con `solicitudes` (UNIQUE en `solicitud_id`). Los snapshots JSONB capturan el estado exacto de datos al momento de aprobación — el PDF se genera desde ellos, no consultando tablas en tiempo real. `codigo_qr` es opaco (UUID + SHA-256 + salt), nunca contiene datos personales. `condiciones_restricciones` (TEXT NULL) almacena restricciones específicas registradas por el funcionario; no forma parte de los snapshots; editable post-aprobación solo por funcionarios autorizados (RN-38). |
 | `qr_validaciones` | Tabla inmutable. Registra cada escaneo del QR. `permiso_id` puede ser NULL cuando el código escaneado no existe en el sistema. |
 
 ### Módulo 5 — Comunicaciones

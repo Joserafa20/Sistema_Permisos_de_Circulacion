@@ -10,7 +10,7 @@ import {
   Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import { CiudadanoEntity } from './ciudadano.entity';
+import { CiudadanoEntity } from '../../../ciudadanos/infrastructure/persistence/ciudadano.entity';
 
 @Entity({ name: 'motocicletas' })
 @Index('idx_motocicletas_placa', ['placa'])
