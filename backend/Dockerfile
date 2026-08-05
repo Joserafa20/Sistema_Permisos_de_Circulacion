@@ -5,7 +5,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache wget
 COPY package-lock.json package.json ./
-RUN HUSKY=0 npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 2: build — instala dev deps, compila TypeScript
