@@ -649,3 +649,24 @@ Fase 8: Tests unitarios, CI/CD con GitHub Actions, Prometheus, OpenTelemetry, qu
 2026-08-04 — B19 completado. Fase 8 en progreso (8/15). Tests unitarios, CI/CD, Prometheus
 y OpenTelemetry implementados. Pendiente B20: tests integración, E2E, optimización BD.
 No se realizó git push. Esperando autorización para B20.
+
+### B21 — Enterprise Hardening + Preproducción (2026-08-04)
+✓ Fix: AccionAuditoria frontend corregido (valores lowercase iguales al backend)
+✓ MFA (TOTP RFC 6238) para ADMINISTRADOR: setup, activar, desactivar, verificar-login, recovery codes
+✓ Detección de robo de refresh token: familia UUID + revocación de familia completa
+✓ Global logout: POST /auth/logout/all
+✓ Correlation ID middleware: X-Correlation-Id + X-Request-Id por request
+✓ LoggingInterceptor mejorado: correlationId, requestId, duration, userAgent
+✓ Security headers Next.js: CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+✓ Docker resource limits: postgres(1CPU/512MB), redis(0.5/384MB), minio(0.5/256MB), backend(2/1GB), nginx(0.5/128MB)
+✓ Dependabot: npm(backend+frontend) + docker + github-actions
+✓ CodeQL: análisis de seguridad JavaScript/TypeScript en CI
+✓ Trivy: escaneo de contenedores + filesystem + SBOM (CycloneDX)
+✓ Migración DB: columnas MFA en usuarios + columna familia en tokens
+✓ Tests: 81 tests en 11 suites (logout, logout-all, refresh-token, login, middleware, MFA flow)
+✓ Docs: SECURITY_AUDIT.md, PRODUCTION_CHECKLIST.md, PERFORMANCE_REPORT.md, PREDEPLOY_CHECKLIST.md
+✓ Quality gates: tsc ✅ lint ✅ tests ✅ coverage(14%) ✅ build ✅ (backend + frontend)
+✓ ADR-B21-001 (MFA speakeasy), ADR-B21-002 (familia tokens), ADR-B21-003 (Correlation ID)
+
+## Próxima tarea
+B22 — Producción. Requiere autorización del usuario.

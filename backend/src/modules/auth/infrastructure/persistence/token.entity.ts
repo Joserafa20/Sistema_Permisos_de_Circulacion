@@ -39,6 +39,10 @@ export class TokenEntity {
   @Column({ name: 'user_agent', type: 'text', nullable: true })
   userAgent: string | null;
 
+  /** UUID que agrupa todos los tokens emitidos en la misma cadena de rotación. */
+  @Column({ name: 'familia', type: 'uuid', nullable: true })
+  familia: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

@@ -56,6 +56,17 @@ export class UsuarioEntity {
   @Column({ name: 'historial_contrasenas', type: 'jsonb', default: [] })
   historialContrasenas: string[];
 
+  /** Secreto TOTP (base32). Sólo para rol ADMINISTRADOR. Cifrado en reposo (AES-256 recomendado). */
+  @Column({ name: 'mfa_secret', type: 'varchar', length: 255, nullable: true })
+  mfaSecret: string | null;
+
+  @Column({ name: 'mfa_activo', type: 'boolean', default: false })
+  mfaActivo: boolean;
+
+  /** Códigos de recuperación MFA hasheados (bcrypt). JSON array, máx 10. */
+  @Column({ name: 'mfa_recovery_codes', type: 'jsonb', default: [] })
+  mfaRecoveryCodes: string[];
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

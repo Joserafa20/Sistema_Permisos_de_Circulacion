@@ -1059,3 +1059,42 @@ Antes de modificar una decisión existente:
 **Decisión:** Vitest con `environment: 'jsdom'` y `@vitejs/plugin-react` para el frontend. El plugin resuelve JSX/TSX sin configuración adicional. El alias `@` se configura con `path.resolve` en `vitest.config.ts`. La cobertura usa el provider `v8` nativo (sin istanbul).
 
 **Consecuencias:** Setup mínimo, ejecución rápida, sin conflictos con la build de Next.js. Los archivos `.spec.ts` y `.spec.tsx` corren en jsdom con las mismas APIs de `@testing-library/react`. El comando `npm test` en backend → Jest; en frontend → Vitest. Equipos deben tener esto en cuenta al escribir tests.
+
+---
+
+## ADR-B21-001 — MFA con TOTP (speakeasy) exclusivo para ADMINISTRADOR
+
+**Fecha:** 2026-08-04 (B21)
+**Estado:** ✅ Activo
+
+**Contexto:** El PRD y B21 requieren MFA para el rol ADMINISTRADOR compatible con Google Authenticator, Microsoft Authenticator y Authy.
+
+**Decisión:** Se usa `speakeasy` (TOTP RFC 6238 / RFC 4226) como implementación. `otplib` v13 fue descartado por incompatibilidad de API (requiere plugins crypto explícitos en v13). El flujo MFA agrega un "mfaPendingToken" (JWT con TTL 5 min) en el primer paso del login cuando ADMINISTRADOR tiene `mfa_activo=true`. El segundo paso (`POST /auth/mfa/verificar`) valida el código TOTP o un código de recuperación y emite los tokens completos.
+
+**Consecuencias:** Flujo de dos pasos solo para ADMINISTRADOR. Para otros roles el login es igual. Los códigos de recuperación (10 unidades) se almacenan como hashes BCrypt en la columna `mfa_recovery_codes` JSONB y son de un solo uso.
+
+---
+
+## ADR-B21-002 — Familia de refresh tokens para detección de robo de sesión
+
+**Fecha:** 2026-08-04 (B21)
+**Estado:** ✅ Activo
+
+**Contexto:** El PRD y B21 requieren detección de "concurrent use" / robo de refresh token.
+
+**Decisión:** Cada cadena de refresh tokens comparte un `familia` UUID asignado en el login. Al rotarse un token, el nuevo hereda la misma `familia`. Si se detecta un token revocado siendo reutilizado (indicador de robo), se revocan TODOS los tokens de esa familia, invalidando todas las sesiones del atacante y el usuario legítimo. Esto forza re-autenticación.
+
+**Consecuencias:** Migración añade columna `familia UUID NULL` a la tabla `tokens`. Tokens anteriores a B21 tienen `familia=NULL` y no se verán afectados por la revocación de familia.
+
+---
+
+## ADR-B21-003 — Correlation ID por request
+
+**Fecha:** 2026-08-04 (B21)
+**Estado:** ✅ Activo
+
+**Contexto:** Trazabilidad entre logs del mismo request es imposible sin identificadores únicos.
+
+**Decisión:** `CorrelationIdMiddleware` se aplica globalmente en `AppModule`. Reutiliza `X-Correlation-Id` si viene en el request (para trazabilidad entre microservicios o desde el frontend). Genera un nuevo `X-Request-Id` por cada request. El `LoggingInterceptor` incluye ambos IDs en cada línea de log junto con duración y User-Agent truncado.
+
+**Consecuencias:** Cada respuesta HTTP incluye `X-Correlation-Id` y `X-Request-Id` en los headers. Los logs enriquecidos permiten filtrar por correlation ID para debuggear una solicitud end-to-end.

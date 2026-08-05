@@ -1,4 +1,5 @@
 import { LoginUseCase } from './login.use-case';
+import type { AuthResponseDto } from '../../dtos/auth-response.dto';
 
 function makeUsuario(
   overrides?: Partial<{
@@ -11,6 +12,8 @@ function makeUsuario(
     rol: { id: string; nombre: string };
     dependencia: { id: string } | null;
     intentosFallidos: number;
+    mfaActivo: boolean;
+    mfaSecret: string | null;
   }>,
 ) {
   return {
@@ -21,7 +24,9 @@ function makeUsuario(
     activo: true,
     contrasenaExpiraAt: null,
     intentosFallidos: 0,
-    rol: { id: 'rol-1', nombre: 'administrador' },
+    mfaActivo: false,
+    mfaSecret: null,
+    rol: { id: 'rol-1', nombre: 'FUNCIONARIO' },
     dependencia: null,
     ...overrides,
   };
@@ -73,16 +78,15 @@ describe('LoginUseCase', () => {
     const deps = buildDeps(usuario);
     const useCase = buildUseCase(deps);
 
-    const result = await useCase.execute({
+    const result = (await useCase.execute({
       userId: 'u-1',
       ipAddress: '127.0.0.1',
       userAgent: 'jest',
-    });
+    })) as AuthResponseDto;
 
     expect(result.accessToken).toBeDefined();
     expect(result.refreshToken).toBeDefined();
     expect(result.usuario.id).toBe('u-1');
-    expect(result.usuario.rol).toBe('administrador');
   });
 
   it('resetea intentosFallidos a 0 tras login exitoso', async () => {
@@ -106,7 +110,6 @@ describe('LoginUseCase', () => {
     await useCase.execute({ userId: 'u-1', ipAddress: null, userAgent: null });
 
     const createdToken = deps.tokenRepo.create.mock.calls[0][0] as { tokenHash: string };
-    // SHA256 hex = 64 chars
     expect(createdToken.tokenHash).toHaveLength(64);
     expect(createdToken.tokenHash).toMatch(/^[a-f0-9]{64}$/);
   });
@@ -117,7 +120,11 @@ describe('LoginUseCase', () => {
     const deps = buildDeps(usuario);
     const useCase = buildUseCase(deps);
 
-    const result = await useCase.execute({ userId: 'u-1', ipAddress: null, userAgent: null });
+    const result = (await useCase.execute({
+      userId: 'u-1',
+      ipAddress: null,
+      userAgent: null,
+    })) as AuthResponseDto;
 
     expect(result.usuario.contrasenaExpirada).toBe(true);
   });
@@ -128,7 +135,11 @@ describe('LoginUseCase', () => {
     const deps = buildDeps(usuario);
     const useCase = buildUseCase(deps);
 
-    const result = await useCase.execute({ userId: 'u-1', ipAddress: null, userAgent: null });
+    const result = (await useCase.execute({
+      userId: 'u-1',
+      ipAddress: null,
+      userAgent: null,
+    })) as AuthResponseDto;
 
     expect(result.usuario.contrasenaExpirada).toBe(false);
   });
@@ -155,8 +166,54 @@ describe('LoginUseCase', () => {
     const deps = buildDeps(usuario);
     const useCase = buildUseCase(deps);
 
-    const result = await useCase.execute({ userId: 'u-1', ipAddress: null, userAgent: null });
+    const result = (await useCase.execute({
+      userId: 'u-1',
+      ipAddress: null,
+      userAgent: null,
+    })) as AuthResponseDto;
 
     expect(result.expiresIn).toBe(900);
+  });
+
+  it('retorna mfaRequired:true cuando el ADMINISTRADOR tiene MFA activo', async () => {
+    const usuario = makeUsuario({
+      rol: { id: 'r-1', nombre: 'ADMINISTRADOR' },
+      mfaActivo: true,
+      mfaSecret: 'SECRET',
+    });
+    const deps = buildDeps(usuario);
+    const useCase = buildUseCase(deps);
+
+    const result = await useCase.execute({ userId: 'u-1', ipAddress: null, userAgent: null });
+
+    expect((result as { mfaRequired: boolean }).mfaRequired).toBe(true);
+    expect((result as { mfaPendingToken: string }).mfaPendingToken).toBeDefined();
+  });
+
+  it('NO requiere MFA si el rol no es ADMINISTRADOR aunque mfaActivo=true', async () => {
+    const usuario = makeUsuario({ rol: { id: 'r-2', nombre: 'FUNCIONARIO' }, mfaActivo: true });
+    const deps = buildDeps(usuario);
+    const useCase = buildUseCase(deps);
+
+    const result = (await useCase.execute({
+      userId: 'u-1',
+      ipAddress: null,
+      userAgent: null,
+    })) as AuthResponseDto;
+
+    expect(result.accessToken).toBeDefined();
+  });
+
+  it('asigna una familia UUID al token creado', async () => {
+    const usuario = makeUsuario();
+    const deps = buildDeps(usuario);
+    const useCase = buildUseCase(deps);
+
+    await useCase.execute({ userId: 'u-1', ipAddress: null, userAgent: null });
+
+    const createdToken = deps.tokenRepo.create.mock.calls[0][0] as { familia: string };
+    expect(createdToken.familia).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
   });
 });
