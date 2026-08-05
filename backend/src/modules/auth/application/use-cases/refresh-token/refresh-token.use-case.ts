@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,13 +19,13 @@ export interface RefreshTokenCommand {
 
 @Injectable()
 export class RefreshTokenUseCase {
+  private readonly logger = new Logger(RefreshTokenUseCase.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @InjectRepository(TokenEntity)
     private readonly tokenRepo: Repository<TokenEntity>,
-    @InjectRepository(UsuarioEntity)
-    private readonly usuarioRepo: Repository<UsuarioEntity>,
   ) {}
 
   async execute(command: RefreshTokenCommand): Promise<RefreshResponseDto> {
@@ -34,10 +34,29 @@ export class RefreshTokenUseCase {
     const tokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
 
     const token = await this.tokenRepo.findOne({
-      where: { tokenHash, tipo: TipoToken.REFRESH, revocado: false },
+      where: { tokenHash, tipo: TipoToken.REFRESH },
+      relations: ['usuario', 'usuario.rol'],
     });
 
     if (!token) {
+      throw new UnauthorizedException('Token de actualización inválido');
+    }
+
+    // Detección de reutilización: si el token ya estaba revocado y tiene familia,
+    // revocar TODA la familia (indicador de robo de sesión)
+    if (token.revocado) {
+      if (token.familia) {
+        this.logger.warn(
+          `Reutilización de refresh token detectada — familia ${token.familia} — usuario ${userId}. Revocando familia completa.`,
+        );
+        await this.tokenRepo
+          .createQueryBuilder()
+          .update(TokenEntity)
+          .set({ revocado: true, revocadoAt: new Date() })
+          .where('familia = :familia', { familia: token.familia })
+          .andWhere('revocado = :revocado', { revocado: false })
+          .execute();
+      }
       throw new UnauthorizedException('Token de actualización inválido o revocado');
     }
 
@@ -49,11 +68,7 @@ export class RefreshTokenUseCase {
     // Revocar el token actual (rotación)
     await this.tokenRepo.update(token.id, { revocado: true, revocadoAt: new Date() });
 
-    const usuario = await this.usuarioRepo.findOne({
-      where: { id: userId },
-      relations: ['rol'],
-    });
-
+    const usuario = token.usuario;
     if (!usuario || !usuario.activo) {
       throw new UnauthorizedException('Usuario no disponible');
     }
@@ -80,6 +95,7 @@ export class RefreshTokenUseCase {
       revocadoAt: null,
       ipAddress: ipAddress ?? null,
       userAgent: userAgent ?? null,
+      familia: token.familia,
       usuario: { id: userId } as UsuarioEntity,
     });
     await this.tokenRepo.save(newToken);

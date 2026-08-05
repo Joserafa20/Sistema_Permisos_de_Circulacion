@@ -30,13 +30,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
     });
 
     if (!usuario) {
-      await this.auditoriaService.registrar({
-        accion: AccionAuditoria.LOGIN_FALLIDO,
-        entidad: 'usuarios',
-        datosNuevos: { email },
-        ipAddress,
-        userAgent,
-      });
+      // No registrar auditoría con email de terceros desconocidos (evita PII de bots)
       throw new UnauthorizedException('Credenciales inválidas');
     }
 

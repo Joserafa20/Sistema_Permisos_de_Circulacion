@@ -5,10 +5,11 @@ import {
 } from '../../domain/ports/solicitud-repository.interface';
 import { SolicitudBusquedaService } from '../services/solicitud-busqueda.service';
 import { AuditoriaService } from '../../../auditoria/application/auditoria.service';
+import { NotificacionesService } from '../../../notificaciones/notificaciones.service';
 import { SolicitudStateMachine } from '../../domain/services/solicitud-state-machine';
 import { RechazarSolicitudDto } from '../dtos/rechazar-solicitud.dto';
 import { AccionSolicitudResponseDto } from '../dtos/accion-solicitud-response.dto';
-import { AccionAuditoria, EstadoSolicitud } from '../../../../common/enums';
+import { AccionAuditoria, EstadoSolicitud, TipoNotificacion } from '../../../../common/enums';
 import { NotFoundException } from '../../../../common/exceptions/not-found.exception';
 import { BusinessRuleException } from '../../../../common/exceptions/business-rule.exception';
 
@@ -24,6 +25,7 @@ export class RechazarSolicitudUseCase {
     @Inject(SOLICITUD_REPOSITORY_TOKEN)
     private readonly solicitudRepo: ISolicitudRepository,
     private readonly auditoriaService: AuditoriaService,
+    private readonly notificacionesService: NotificacionesService,
   ) {}
 
   async ejecutar(
@@ -75,6 +77,21 @@ export class RechazarSolicitudUseCase {
       ipAddress,
       usuarioId,
     });
+
+    // Notificar al ciudadano (fire-and-forget — RN-76)
+    if (solicitud.ciudadanoEmail) {
+      void this.notificacionesService.encolar({
+        tipo: TipoNotificacion.RECHAZADA,
+        destinatario: solicitud.ciudadanoEmail,
+        asunto: `Solicitud no aprobada — Radicado ${solicitud.numeroRadicado}`,
+        solicitudId,
+        contexto: {
+          nombreCiudadano: `${solicitud.ciudadanoNombre} ${solicitud.ciudadanoApellido}`,
+          numeroRadicado: solicitud.numeroRadicado,
+          motivoRechazo: dto.motivo,
+        },
+      });
+    }
 
     return {
       solicitudId,

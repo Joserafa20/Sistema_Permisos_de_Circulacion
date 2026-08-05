@@ -10,6 +10,7 @@ import {
   ConfiguracionInstitucionalController,
   ConfiguracionInstitucionalPublicController,
 } from './infrastructure/controllers/configuracion-institucional.controller';
+import { ConfiguracionInstitucionalSeeder } from './infrastructure/persistence/configuracion-institucional.seeder';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ConfiguracionInstitucionalEntity])],
@@ -18,6 +19,7 @@ import {
     ObtenerConfiguracionInstitucionalUseCase,
     ActualizarConfiguracionInstitucionalUseCase,
     ObtenerConfiguracionPublicaUseCase,
+    ConfiguracionInstitucionalSeeder,
     {
       provide: CONFIGURACION_INSTITUCIONAL_REPOSITORY_TOKEN,
       useClass: TypeOrmConfiguracionInstitucionalRepository,

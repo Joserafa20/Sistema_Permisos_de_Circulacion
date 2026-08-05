@@ -50,8 +50,14 @@ export class MinioStorageAdapter implements OnModuleInit {
     });
   }
 
-  /** TTL en segundos. Máx 7 días según MinIO. */
+  /** TTL en segundos. Máximo 300 s (5 min) según RN-78. */
   async getSignedUrl(bucket: string, key: string, ttlSeconds: number): Promise<string> {
-    return this.client.presignedGetObject(bucket, key, ttlSeconds);
+    const safeTtl = Math.min(ttlSeconds, 300);
+    return this.client.presignedGetObject(bucket, key, safeTtl);
+  }
+
+  /** Verifica conectividad con MinIO comprobando que el bucket principal existe. */
+  async ping(): Promise<boolean> {
+    return this.client.bucketExists(this.bucketPdfs);
   }
 }

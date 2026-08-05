@@ -15,13 +15,14 @@ import { ListarUsuariosUseCase } from './application/use-cases/listar-usuarios/l
 import { ObtenerUsuarioPorIdUseCase } from './application/use-cases/obtener-usuario-por-id/obtener-usuario-por-id.use-case';
 import { RestaurarUsuarioUseCase } from './application/use-cases/restaurar-usuario/restaurar-usuario.use-case';
 import { UsuariosController } from './infrastructure/controllers/usuarios.controller';
+import { CatalogosAdminController } from './infrastructure/controllers/catalogos-admin.controller';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UsuarioEntity, RoleEntity, DependenciaEntity, TokenEntity]),
     AuditoriaModule,
   ],
-  controllers: [UsuariosController],
+  controllers: [UsuariosController, CatalogosAdminController],
   providers: [
     ListarUsuariosUseCase,
     ObtenerUsuarioPorIdUseCase,

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuditoriaService } from '../../../auditoria/application/auditoria.service';
+import { NotificacionesService } from '../../../notificaciones/notificaciones.service';
 import { MotivoBusquedaService } from '../../../motivos/application/services/motivo-busqueda.service';
 import { MotocicletaBusquedaService } from '../../../motocicletas/application/services/motocicleta-busqueda.service';
 import { SolicitudBusquedaService } from '../services/solicitud-busqueda.service';
@@ -8,7 +9,7 @@ import { ConfiguracionSistemaService } from '../../infrastructure/services/confi
 import { SolicitudTransaccionService } from '../../infrastructure/services/solicitud-transaccion.service';
 import { CrearSolicitudDto } from '../dtos/crear-solicitud.dto';
 import { SolicitudCreadaDto } from '../dtos/solicitud-creada.dto';
-import { AccionAuditoria, EstadoSolicitud } from '../../../../common/enums';
+import { AccionAuditoria, EstadoSolicitud, TipoNotificacion } from '../../../../common/enums';
 import { BusinessRuleException } from '../../../../common/exceptions/business-rule.exception';
 import { ConflictException } from '../../../../common/exceptions/conflict.exception';
 import { NotFoundException } from '../../../../common/exceptions/not-found.exception';
@@ -23,6 +24,7 @@ export class CrearSolicitudUseCase {
     private readonly configuracionSistemaService: ConfiguracionSistemaService,
     private readonly solicitudTransaccionService: SolicitudTransaccionService,
     private readonly auditoriaService: AuditoriaService,
+    private readonly notificacionesService: NotificacionesService,
   ) {}
 
   async ejecutar(
@@ -116,6 +118,23 @@ export class CrearSolicitudUseCase {
       ipAddress: ipSolicitante,
       usuarioId: null,
     });
+
+    // Notificar al ciudadano (fire-and-forget — RN-76)
+    if (dto.ciudadano.email) {
+      void this.notificacionesService.encolar({
+        tipo: TipoNotificacion.SOLICITUD_RECIBIDA,
+        destinatario: dto.ciudadano.email,
+        asunto: `Solicitud recibida — Radicado ${resultado.numeroRadicado}`,
+        solicitudId: resultado.solicitudId,
+        contexto: {
+          nombreCiudadano: `${dto.ciudadano.nombre} ${dto.ciudadano.apellido}`,
+          numeroRadicado: resultado.numeroRadicado,
+          motivoNombre: motivo.nombre,
+          fechaInicio: dto.fechaInicio,
+          fechaFin,
+        },
+      });
+    }
 
     return {
       id: resultado.solicitudId,

@@ -1,10 +1,13 @@
 import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { UsuarioEntity } from '../../../../usuarios/infrastructure/persistence/usuario.entity';
 import { TokenEntity } from '../../../infrastructure/persistence/token.entity';
 import { TipoToken } from '../../../../../common/enums/tipo-token.enum';
+import { TipoNotificacion } from '../../../../../common/enums/tipo-notificacion.enum';
+import { NotificacionesService } from '../../../../notificaciones/notificaciones.service';
 
 export interface RecuperarContrasenaCommand {
   email: string;
@@ -23,6 +26,8 @@ export class RecuperarContrasenaUseCase {
     private readonly usuarioRepo: Repository<UsuarioEntity>,
     @InjectRepository(TokenEntity)
     private readonly tokenRepo: Repository<TokenEntity>,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly configService: ConfigService,
   ) {}
 
   async execute(command: RecuperarContrasenaCommand): Promise<RecuperarContrasenaResult> {
@@ -68,8 +73,18 @@ export class RecuperarContrasenaUseCase {
     });
     await this.tokenRepo.save(tokenEntity);
 
-    // TODO: integrar servicio de correo — enviar rawToken al email del usuario
-    // El rawToken NO se devuelve en la respuesta para evitar exposición
+    const publicUrl = this.configService.get<string>('app.publicUrl') ?? '';
+    const enlaceRecuperacion = `${publicUrl}/restablecer-contrasena?token=${rawToken}`;
+
+    void this.notificacionesService.encolar({
+      tipo: TipoNotificacion.RECUPERACION_CONTRASENA,
+      destinatario: usuario.email,
+      asunto: 'Recuperación de contraseña — Sistema Pico y Placa',
+      contexto: {
+        nombreUsuario: `${usuario.nombre} ${usuario.apellido}`,
+        enlaceRecuperacion,
+      },
+    });
 
     return respuestaGenerica;
   }

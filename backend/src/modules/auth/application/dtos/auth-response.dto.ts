@@ -22,3 +22,9 @@ export class RefreshResponseDto {
   @ApiProperty() refreshToken: string;
   @ApiProperty({ example: 900 }) expiresIn: number;
 }
+
+export class MfaRequiredResponseDto {
+  @ApiProperty({ example: true }) mfaRequired: boolean;
+  @ApiProperty({ description: 'Token temporal (5 min) para verificar MFA' })
+  mfaPendingToken: string;
+}

@@ -8,7 +8,9 @@ export class QrCodeService {
   private readonly salt: string;
 
   constructor(private readonly config: ConfigService) {
-    this.salt = this.config.get<string>('qr.secretSalt') ?? 'pyp-default-salt';
+    const salt = this.config.get<string>('qr.secretSalt');
+    if (!salt) throw new Error('QR_SECRET_SALT no está configurado');
+    this.salt = salt;
   }
 
   /**

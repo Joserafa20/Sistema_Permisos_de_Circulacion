@@ -18,6 +18,183 @@ Su objetivo es mantener la coherencia del desarrollo y evitar que se reevalúen 
 
 ---
 
+## ADR-023 — Portal Administrador bajo /funcionario/(panel)/ (no /admin/)
+**Fecha:** 2026-08-04
+**Bloque:** B18
+**Estado:** Aprobado
+
+### Contexto
+
+El PRD describe un "Portal Administrador" separado del Portal Funcionario. En la implementación, la pregunta es si crear un route group `/admin/(panel)/` independiente con su propio layout, middleware y AuthProvider, o reutilizar la infraestructura existente de `/funcionario/(panel)/`.
+
+### Decisión
+
+El panel admin vive bajo `/funcionario/(panel)/` junto con el panel funcionario. Los accesos específicos de administrador (usuarios, configuración, sistema) se protegen mediante `PermissionGate` con `requiredRole="administrador"`. El middleware, el JWT, el AuthProvider y los componentes de layout (Sidebar, HeaderFunc, PageContainer) son compartidos.
+
+### Justificación
+
+- Reutiliza todo el scaffolding de B15 sin duplicación.
+- El backend usa el mismo JWT y los mismos guards (JwtAuthGuard + RolesGuard) para ambos roles.
+- La diferenciación visual se logra con `ADMIN_NAV_ITEMS` en el Sidebar condicional por rol.
+- Crea una ruta `/admin/` separada implicaría duplicar: middleware, AuthProvider, layout, interceptores, componentes de UI — sin beneficio funcional.
+
+### Consecuencias
+
+- Las rutas admin son: `/funcionario/usuarios`, `/funcionario/configuracion`, `/funcionario/sistema`.
+- Un funcionario que intente acceder a estas rutas verá un `PermissionGate` de acceso denegado.
+- Si en el futuro se requiere un subdominio `admin.alcaldia.gov.co`, se puede crear un redirect en Next.js sin cambiar los componentes.
+
+---
+
+## ADR-022 — Endpoints GET /roles y GET /dependencias en UsuariosModule
+**Fecha:** 2026-08-04
+**Bloque:** B18
+**Estado:** Aprobado
+
+### Contexto
+
+El formulario de creación/edición de usuarios requiere los UUIDs de roles y dependencias para los campos `rolId` y `dependenciaId` del DTO. Sin endpoints de catálogo, el formulario no puede poblarse con selects y es literalmente inutilizable.
+
+El PRD no especifica explícitamente estos endpoints en la lista de APIs, pero son prerequisito funcional para CU-30 (crear usuario).
+
+### Decisión
+
+Se añadieron dos endpoints read-only dentro del `UsuariosModule`:
+
+- `GET /api/v1/roles` — devuelve `RolCatalogoDto[]` (id, nombre, descripcion)
+- `GET /api/v1/dependencias` — devuelve `DependenciaCatalogoDto[]` (id, nombre, codigo)
+
+Implementados en `CatalogosAdminController` usando `@InjectRepository` directo (sin capa hexagonal), dado que son lecturas simples sin lógica de dominio. Requieren rol `ADMINISTRADOR`.
+
+### Justificación
+
+- Son endpoints de catálogo (solo lectura, sin estado mutable).
+- La arquitectura hexagonal añadiría 4 archivos de overhead (use-case, port, repository-impl, service) para un `findAll()` simple.
+- Precedente: el `ConfiguracionInstitucionalModule` en Fase 2 también usa `@InjectRepository` para la lectura inicial del seed.
+
+### Consecuencias
+
+- El frontend puede poblar correctamente los selects de Rol y Dependencia.
+- Si en el futuro se necesita lógica (e.g., filtrar por módulo, permisos granulares), se migra al patrón hexagonal en ese momento.
+- Los endpoints requieren `@ApiBearerAuth` y el guard de rol — no son endpoints públicos.
+
+---
+
+## ADR-021 — Patrón preview-step en modal de Corrección
+
+**Fecha:** 2026-08-04
+**Bloque:** B17
+**Estado:** Aprobado
+
+### Contexto
+
+El modal de Solicitar Corrección requería que el funcionario revisara su selección antes de enviar, dado que la acción notifica al ciudadano y es difícil de revertir. La `ConfirmationModal` solo tiene un botón de confirmar y uno de cancelar.
+
+### Decisión
+
+Se implementó un estado `correccionStep: 'form' | 'preview'` dentro de `solicitud-detalle-view.tsx`. El flujo es:
+1. Paso "form": el funcionario selecciona campos y escribe observaciones + motivo. El botón confirmar dice "Revisar →".
+2. Al hacer clic, el form se valida con Zod. Si es válido, se pasa a paso "preview".
+3. Paso "preview": muestra resumen de campos seleccionados y motivo. El botón cancelar dice "← Editar" (vuelve al paso form vía `onCancel`). El botón confirmar ejecuta la mutación.
+
+Se agregaron los props `onCancel`, `confirmDisabled` y `maxWidth` a `ConfirmationModal` para soportar este patrón de forma genérica y retrocompatible.
+
+### Consecuencias
+
+- La experiencia es más segura: el funcionario ve exactamente qué se enviará antes de confirmar.
+- `ConfirmationModal` es más flexible para futuros flows multi-paso.
+- El `maxWidth="max-w-xl"` del modal de corrección permite mostrar los campos+descripciones sin truncar.
+
+---
+
+## ADR-020 — Corrección de tipos frontend vs. DTOs del backend
+
+**Fecha:** 2026-08-04
+**Bloque:** B16
+**Estado:** Aprobado
+
+### Contexto
+
+En B15 se creó el tipo `SolicitudListItem` en `frontend/src/types/funcionario.ts` con campos planos (e.g., `ciudadanoNombre`, `radicado`, `fechaCreacion`) que no coincidían con el backend `SolicitudListItemDto` real, el cual usa una estructura anidada (`ciudadano.nombre`, `numeroRadicado`, `createdAt`).
+
+También se usaba `ApiListResponse<T>` (espera `meta.total` plano) para el endpoint de listado, cuando el backend devuelve `ApiResponse<PaginatedSolicitudesResponse>` (con `data.pagination.total` anidado). Esto hacía que `getDashboardStats()` siempre devolviera 0.
+
+Parámetro `fechaDesde` era incorrecto — el backend acepta `fechaInicio`. El orden `order=createdAt:DESC` tampoco era el formato correcto del backend (`sortBy=createdAt&sortOrder=DESC`).
+
+### Decisión
+
+- `SolicitudListItem` se actualizó para reflejar exactamente el `SolicitudListItemDto` del backend: `numeroRadicado`, `ciudadano: { nombre, numeroDocumento }`, `motocicleta: { placa, marca, modelo }`, `motivo: string`, `tiempoEspera`, `createdAt`.
+- Se añadieron nuevos tipos: `SolicitudDetalle`, `CiudadanoDetalle`, `MotocicletaDetalle`, `MotivoDetalle`, `DocumentoItem`, `HistorialEstadoItem`, `DocumentoUrl`, `PaginatedSolicitudesResponse`, `SolicitudesFiltros`.
+- `countSolicitudes` y `countPermisos` usan `ApiResponse<PaginatedSolicitudesResponse>` y acceden a `res.data.pagination.total`.
+- `getActividadReciente` usa `sortBy=createdAt&sortOrder=DESC`.
+- `dashboard-view.tsx` actualizado para usar los campos correctos del nuevo tipo.
+
+### Consecuencias
+
+- Los datos del dashboard ahora se cargan correctamente desde el backend.
+- Los tipos del frontend son fuente de verdad derivada de los DTOs del backend.
+- Se establece el patrón: cuando se crea un tipo de respuesta, verificar el backend DTO real antes de asumir la estructura.
+
+---
+
+## ADR-019 — Estrategia de almacenamiento de tokens en el Portal Funcionario
+
+**Fecha:** 2026-08-04
+**Bloque:** B15
+**Estado:** Aprobado
+
+### Contexto
+
+El Portal Funcionario requiere persistencia de sesión autenticada. Se evaluaron tres estrategias:
+
+1. **httpOnly cookie** para access token — requeriría cambios en el backend para leer cookies en lugar de Authorization header.
+2. **localStorage** para tokens — expuesto a XSS; access token jamás debe persistirse en storage accesible desde JS.
+3. **Híbrido**: access token solo en memoria, refresh token en sessionStorage (o localStorage con "recordarme").
+
+### Decisión
+
+- **Access token**: en memoria únicamente (variable de módulo en `api-client.ts`).
+- **Refresh token**: `sessionStorage['_f_rt']` por defecto; `localStorage['_f_rt']` si "recordarme" está activo.
+- **Cookie de presencia** `_f_session=1`: set desde el cliente, usada por el middleware Next.js para evitar flash de contenido protegido. No contiene tokens.
+- **Token rotation tracking**: `setTokenUpdateCallback()` en api-client permite que el AuthProvider sincronice el storage cuando el interceptor 401 rota los tokens automáticamente.
+
+### Consecuencias
+
+- Cierre de tab = sesión terminada (sessionStorage se borra). Comportamiento más seguro para un portal gubernamental.
+- Con "recordarme" la sesión sobrevive al cierre del browser (localStorage persiste).
+- El middleware puede redirigir a login sin esperar la hidratación del cliente (mejor UX).
+- Si el backend rota refresh tokens (como está implementado), el nuevo refresh se guarda en storage inmediatamente vía callback, evitando que la siguiente página recargada use un token ya rotado.
+
+---
+
+## ADR-018 — Librería QR scanner: @zxing/browser
+
+**Fecha:** 2026-08-04  
+**Bloque:** B14  
+**Estado:** Aprobado
+
+### Contexto
+
+La página /verificar requiere leer códigos QR con la cámara del dispositivo (móvil/escritorio). Se evaluaron tres alternativas:
+
+1. **html5-qrcode** — popular, pero usa una API interna de ZXing y tiene dependencias de mantenimiento cuestionables en 2026.
+2. **@zxing/browser** — wrapper oficial TypeScript de la biblioteca ZXing, mantenido por la comunidad ZXing-JS. API tipada, IScannerControls para cleanup determinista.
+3. **react-qr-reader** — wrapper de React sobre html5-qrcode; añade una capa de abstracción sin beneficios claros para nuestro caso.
+
+### Decisión
+
+Se adoptó **@zxing/browser** por:
+- API TypeScript tipada (`BrowserQRCodeReader`, `IScannerControls`)
+- Control determinista del ciclo de vida de la cámara (`controls.stop()` en cleanup)
+- Compatible con `next/dynamic` y `ssr: false` (no depende de APIs de servidor)
+- Sin peer dependencies conflictivas con React 19
+
+### Consecuencias
+
+- `QrScanner` debe importarse con `dynamic(..., { ssr: false })` para evitar errores en SSR de Next.js
+- `@zxing/browser` solo debe importarse dentro de `useEffect` para garantizar que corra exclusivamente en el cliente
+- El bundle de /verificar excluye el scanner del First Load JS (~4.83 kB); carga solo cuando el usuario activa la cámara
+
 # Formato
 
 ## ADR-NNN — AAAA-MM-DD
@@ -646,6 +823,86 @@ Antes del inicio de Fase 2 — Autenticación y Seguridad.
 
 ---
 
+---
+
+## ADR-B10-001 — RedisModule @Global reutilizable (no exclusivo para BullMQ)
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** BullMQ requiere una conexión Redis. El sistema también necesitará Redis para caché (RN-86), rate limiting distribuido y locks en fases posteriores.
+
+**Decisión:** `RedisModule` con `@Global()` exporta un cliente `ioredis` bajo `REDIS_CLIENT`. `BullModule.forRootAsync()` en `AppModule` usa la misma configuración. Única fuente de verdad: `ConfigService`.
+
+**Consecuencias:** Una sola conexión documentada. Reutilizable sin nueva infraestructura en B11+. La separación `RedisModule` (cliente) vs `BullModule` (cola) es explícita e intencional.
+
+---
+
+## ADR-B10-002 — IEmailProvider como abstracción del transporte de email
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** El proveedor de email puede cambiar (SMTP institucional → SES → SendGrid) en sistemas gubernamentales, sin que ningún caso de uso ni processor deba cambiar.
+
+**Decisión:** `IEmailProvider` (símbolo `EMAIL_PROVIDER`) en `EmailModule`. Implementación actual: `SmtpEmailProvider` (Nodemailer con pool). Para cambiar: solo crear un nuevo provider y cambiar el binding en `EmailModule`.
+
+**Consecuencias:** En desarrollo, apuntar `MAIL_HOST=localhost MAIL_PORT=1025` activa Mailhog sin cambiar código. Desacoplamiento total del transporte.
+
+---
+
+## ADR-B10-003 — Templates HTML en archivos independientes con sustitución segura
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** Los correos institucionales requieren branding. Embeber HTML en TypeScript mezcla presentación con lógica.
+
+**Decisión:** Templates en `src/templates/email/*.html` con placeholders `{{variable}}`. `PlantillaEmailService` carga, cachea (60 s en memoria) y reemplaza con escape XSS básico (`&`, `<`, `>`, `"`). `nest-cli.json` copia los templates a `dist/` en el build.
+
+**Consecuencias:** Templates editables por personal no técnico. Cache evita lecturas de disco en cada envío. El escape XSS previene inyección desde datos de DB o ciudadano.
+
+---
+
+## ADR-B10-004 — Contexto snapshot en columna JSONB de notificaciones
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** El `EmailProcessor` necesita datos (nombre ciudadano, radicado, etc.) para renderizar templates. Opciones: (a) re-fetch en el processor, (b) payload en job BullMQ, (c) columna JSONB en DB.
+
+**Decisión:** Opción (c) — columna `contexto JSONB nullable` en `notificaciones`. Snapshot capturado en `encolar()`. Migración: `AddContextoToNotificaciones`.
+
+**Consecuencias:** El contexto es inmutable. Si la solicitud es eliminada, el email puede enviarse igualmente. Los reintentos BullMQ usan el mismo contexto sin re-fetch.
+
+---
+
+## ADR-B10-005 — Dead Letter Queue como cola BullMQ separada
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** BullMQ no tiene DLQ nativa. Los jobs fallidos quedan en el set `failed` de la cola principal.
+
+**Decisión:** Cola `email-notifications-dlq` separada. Evento `failed` con `attemptsMade >= maxAttempts` → actualiza `estadoEnvio = ERROR` en DB + mueve al DLQ para intervención manual futura.
+
+**Consecuencias:** Los emails fallidos son identificables y procesables. La cola principal se mantiene limpia (`removeOnFail: { count: 200 }`).
+
+---
+
+## ADR-B10-006 — TipoNotificacion: añadir sin renombrar valores existentes
+
+**Fecha:** 2026-08-04 (B10)  
+**Estado:** ✅ Activo
+
+**Contexto:** El PRD usa `solicitud_aprobada` pero el enum existente tiene `APROBADA = 'aprobada'`. La DB usa VARCHAR (no ENUM nativo PostgreSQL), el renombre sería posible con migración.
+
+**Decisión:** NO renombrar valores existentes. Solo añadir los 2 faltantes: `SOLICITUD_VENCIDA` y `CORRECCION_ENVIADA`. El comportamiento funcional es idéntico al PRD; la diferencia es cosmética.
+
+**Consecuencias:** Deuda menor. Si en el futuro se decide alinear, se crea una migración UPDATE + rename con impacto controlado.
+
+---
+
 # Instrucciones para Claude Code
 
 Antes de modificar una decisión existente:
@@ -654,3 +911,190 @@ Antes de modificar una decisión existente:
 2. Verificar si la decisión continúa vigente.
 3. Si se requiere un cambio, registrar una nueva entrada explicando el motivo.
 4. Nunca eliminar decisiones anteriores; conservar el historial para auditoría.
+
+---
+
+## ADR-B11-001 — Health Checks con indicadores custom (sin @nestjs/axios)
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** `@nestjs/terminus` v10 ofrece `HttpHealthIndicator` para verificar servicios HTTP, pero requiere `@nestjs/axios` como dependencia adicional. Redis y MinIO no tienen endpoints HTTP nativos accesibles desde el backend.
+
+**Decisión:** Tres `HealthIndicator` personalizados sin `@nestjs/axios`:
+- `RedisHealthIndicator`: `ioredis.ping()` con REDIS_CLIENT inyectado (ya disponible vía @Global)
+- `MinioHealthIndicator`: `MinioStorageAdapter.ping()` (nuevo método público sobre el cliente Minio ya existente)
+- `SmtpHealthIndicator`: TCP socket probe al host:port del SMTP (sin abrir sesión SMTP completa, mínimo overhead)
+
+**Consecuencias:** Sin nuevas dependencias. Reutiliza clientes ya instanciados. SMTP probe es TCP-only (no valida credenciales, solo verifica alcanzabilidad de red), lo cual es apropiado para un health check — la validación real de credenciales ocurre al enviar el primer email.
+
+---
+
+## ADR-B11-002 — ThrottlerModule global en AppModule
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** `ThrottlerModule` estaba registrado solo en `AuthModule`, lo que significaba que únicamente los endpoints de autenticación tenían rate limiting. Endpoints públicos como `POST /solicitudes` y `GET /public/verificar/:qr` eran vulnerables a flood.
+
+**Decisión:** `ThrottlerModule.forRootAsync()` movido a `AppModule` con `ThrottlerGuard` como `APP_GUARD`. Configuración: 100 req/min por IP como límite global. Los endpoints críticos definen su propio `@Throttle()` con límites más estrictos (login: 5/15min, recuperar-contrasena: 3/hora).
+
+**Consecuencias:** Protección por defecto en todos los endpoints. El nombre `'default'` se mantiene para compatibilidad con los `@Throttle({default: ...})` existentes en auth.controller.ts y permisos-public.controller.ts.
+
+---
+
+## ADR-B11-003 — Red `internal: true` en docker-compose.prod.yml
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** En producción, PostgreSQL, Redis y MinIO no deben ser accesibles desde fuera del servidor Docker. Solo el backend necesita comunicarse con ellos. Nginx es el único punto de entrada externo.
+
+**Decisión:** Dos redes en `docker-compose.prod.yml`:
+- `internal` (driver: bridge, internal: true): PostgreSQL + Redis + MinIO + Backend. No tiene ruta hacia internet.
+- `web` (driver: bridge): Solo Nginx y Backend. Nginx expone los puertos 80/443.
+
+**Consecuencias:** Los servicios de infraestructura no son accesibles desde el host ni desde internet, incluso si el servidor tiene la IP expuesta. El backend vive en ambas redes: consume los servicios internos y recibe tráfico de Nginx.
+
+---
+
+## ADR-B11-004 — Mailpit como capturador de emails en desarrollo
+
+**Fecha:** 2026-08-04 (B11)  
+**Estado:** ✅ Activo
+
+**Contexto:** El sistema necesita enviar emails en desarrollo para probar las 7 plantillas HTML sin riesgo de enviar correos reales a ciudadanos. Mailhog (alternativa anterior) no tiene mantenimiento activo.
+
+**Decisión:** `axllent/mailpit:latest` en `docker-compose.yml` (desarrollo). El backend apunta a `MAIL_HOST=mailpit, MAIL_PORT=1025` por defecto. UI disponible en http://localhost:8025.
+
+**Consecuencias:** Todos los correos enviados en desarrollo son capturados y visibles en la UI de Mailpit. No se requieren credenciales SMTP reales. En producción el valor de `MAIL_HOST` en `.env.production` apunta al SMTP institucional real.
+
+---
+
+## ADR-B11.1-001 — nginx.conf con rate limiting en capa Nginx (doble capa con ThrottlerGuard)
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** ThrottlerGuard de NestJS opera a nivel de aplicación — en el momento en que NestJS recibe la request, ya consumió recursos de red y CPU. Para ataques volumétricos, el rate limiting debe actuar antes en la pila.
+
+**Decisión:** Dos zonas de rate limiting en Nginx: `api_general` (100 req/s, burst 200) para todos los endpoints, y `api_auth` (5 req/s, burst 10) para `/auth/login` y `/auth/recuperar-contrasena`. Esto complementa — no reemplaza — el ThrottlerGuard de NestJS.
+
+**Consecuencias:** Los ataques de fuerza bruta sobre el login son bloqueados en Nginx antes de alcanzar NestJS. Los límites son deliberadamente más permisivos que los de NestJS para evitar bloquear usuarios legítimos con conexiones lentas.
+
+---
+
+## ADR-B11.1-002 — HSTS comentado hasta confirmar SSL estable
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** HSTS con `max-age=31536000` es irreversible para los navegadores que lo reciben durante ese período. Si el certificado SSL vence o hay un error de configuración, el dominio queda inaccesible hasta que expire el HSTS en los navegadores de los ciudadanos.
+
+**Decisión:** La línea HSTS está en `nginx.conf` pero comentada. El administrador debe activarla explícitamente después de verificar que el SSL funciona correctamente en producción durante al menos 24 horas.
+
+**Consecuencias:** Sin HSTS en el primer despliegue. Riesgo de downgrade attack durante ese período. Aceptable para MVP — la activación posterior es un paso documentado en README_DEPLOY.md.
+
+---
+
+## ADR-B11.1-003 — ConfiguracionInstitucionalSeeder en OnApplicationBootstrap
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** Las variables `SEED_CI_*` existían en `.env.example` y `docker-compose.prod.yml` desde B11, pero no había código que las leyera. La tabla `configuracion_institucional` quedaba vacía después de las migraciones, lo cual haría fallar la generación de PDF institucional al primer uso.
+
+**Decisión:** `ConfiguracionInstitucionalSeeder` implementa `OnApplicationBootstrap`. Comprueba `count()` y si es 0, inserta un registro con los valores de `SEED_CI_*` o defaults documentados. El `escudoStorageKey` se inicializa como `'_placeholder_sin_escudo_'` — el admin debe subir el escudo desde el panel antes de aprobar solicitudes.
+
+**Consecuencias:** El sistema arranca en estado funcional (tabla no vacía). El PDF falla gracefully si el escudo no existe en MinIO — no bloquea el arranque del backend. Se añadieron `SEED_CI_NIT` y `SEED_CI_CODIGO_DANE` que faltaban en las variables de entorno.
+
+---
+
+## ADR-B11.1-004 — Dockerfile multi-stage con stage 'deps' separado
+
+**Fecha:** 2026-08-04 (B11.1)  
+**Estado:** ✅ Activo
+
+**Contexto:** El Dockerfile anterior tenía un único stage `base` que copiaba `package*.json` y luego se derivaban `development` y `build` — ambos ejecutando `npm ci` con distintos conjuntos. La imagen de producción copiaba `node_modules` del stage `build` y luego ejecutaba `npm prune --production`, lo cual es redundante y extiende el tiempo de build.
+
+**Decisión:** Stage `deps` separado ejecuta `npm ci --omit=dev` una vez y la imagen de producción copia sus `node_modules`. Stage `build` ejecuta `npm ci` (con dev deps) y compila TypeScript. La imagen final copia `dist/` de `build` y `node_modules/` de `deps`. Zero `npm prune`.
+
+**Consecuencias:** Layer cache más efectivo — cambios en código fuente no invalidan el layer de producción deps. Imagen final no contiene dev deps, `src/`, ni herramientas de TypeScript.
+
+---
+
+## ADR-B19-001 — Prometheus con prom-client nativo (sin NestJS PrometheusModule)
+
+**Fecha:** 2026-08-04 (B19)  
+**Estado:** ✅ Activo
+
+**Contexto:** Existen módulos de terceros como `@willsoto/nestjs-prometheus` que integran prom-client en NestJS. Sin embargo, añaden una capa de abstracción que complica el control de la cardinalidad de labels y el acceso al Registry.
+
+**Decisión:** `MetricsModule` usa `prom-client` directamente. `MetricsService` crea su propio `Registry` con label `{app: 'pyp-backend'}`, expone los contadores e histogramas como propiedades públicas, y llama `collectDefaultMetrics()` en `onModuleInit()`. `MetricsInterceptor` se inyecta en `main.ts` junto a los demás interceptores globales. El endpoint `GET /metrics` está marcado `@Public()` y restringe acceso a IPs internas en producción.
+
+**Consecuencias:** Control total sobre métricas, sin dependencia de módulos de terceros. `MetricsService` es el único punto de acceso al Registry — no hay registros globales implícitos que puedan colisionar con tests.
+
+---
+
+## ADR-B19-002 — OpenTelemetry condicional por variable de entorno
+
+**Fecha:** 2026-08-04 (B19)  
+**Estado:** ✅ Activo
+
+**Contexto:** OpenTelemetry requiere infraestructura externa (Jaeger, Tempo, OTLP collector). En desarrollo y CI, esta infraestructura no existe. Inicializar el SDK sin collector causa errores de conexión en los logs.
+
+**Decisión:** `observability/tracing.ts` comprueba `OTEL_EXPORTER_OTLP_ENDPOINT` antes de inicializar el SDK. Si la variable no está definida, el módulo imprime un mensaje informativo (silencioso en NODE_ENV=test) y no registra ningún SpanProcessor. Se usa `resourceFromAttributes` de `@opentelemetry/resources` v2 (no `new Resource(...)` que solo exporta tipo en v2). El exporter usa `@opentelemetry/exporter-trace-otlp-http` (paquete moderno) en lugar de `@opentelemetry/exporter-otlp-http` (legacy deprecado).
+
+**Consecuencias:** En desarrollo y CI el tracing es un no-op. En producción, basta con definir `OTEL_EXPORTER_OTLP_ENDPOINT` para habilitar spans automáticos de HTTP, PostgreSQL, Redis y BullMQ. SIGTERM dispara `sdk.shutdown()` para evitar pérdida de spans al detener el proceso.
+
+---
+
+## ADR-B19-003 — Vitest para tests frontend (no Jest)
+
+**Fecha:** 2026-08-04 (B19)  
+**Estado:** ✅ Activo
+
+**Contexto:** El backend usa Jest con ts-jest. El frontend (Next.js 15 + React 19) tiene una configuración webpack/turbopack que hace difícil integrar Jest — requiere mocks de módulos CSS, SVG, y transformadores específicos para cada versión de Next.js.
+
+**Decisión:** Vitest con `environment: 'jsdom'` y `@vitejs/plugin-react` para el frontend. El plugin resuelve JSX/TSX sin configuración adicional. El alias `@` se configura con `path.resolve` en `vitest.config.ts`. La cobertura usa el provider `v8` nativo (sin istanbul).
+
+**Consecuencias:** Setup mínimo, ejecución rápida, sin conflictos con la build de Next.js. Los archivos `.spec.ts` y `.spec.tsx` corren en jsdom con las mismas APIs de `@testing-library/react`. El comando `npm test` en backend → Jest; en frontend → Vitest. Equipos deben tener esto en cuenta al escribir tests.
+
+---
+
+## ADR-B21-001 — MFA con TOTP (speakeasy) exclusivo para ADMINISTRADOR
+
+**Fecha:** 2026-08-04 (B21)
+**Estado:** ✅ Activo
+
+**Contexto:** El PRD y B21 requieren MFA para el rol ADMINISTRADOR compatible con Google Authenticator, Microsoft Authenticator y Authy.
+
+**Decisión:** Se usa `speakeasy` (TOTP RFC 6238 / RFC 4226) como implementación. `otplib` v13 fue descartado por incompatibilidad de API (requiere plugins crypto explícitos en v13). El flujo MFA agrega un "mfaPendingToken" (JWT con TTL 5 min) en el primer paso del login cuando ADMINISTRADOR tiene `mfa_activo=true`. El segundo paso (`POST /auth/mfa/verificar`) valida el código TOTP o un código de recuperación y emite los tokens completos.
+
+**Consecuencias:** Flujo de dos pasos solo para ADMINISTRADOR. Para otros roles el login es igual. Los códigos de recuperación (10 unidades) se almacenan como hashes BCrypt en la columna `mfa_recovery_codes` JSONB y son de un solo uso.
+
+---
+
+## ADR-B21-002 — Familia de refresh tokens para detección de robo de sesión
+
+**Fecha:** 2026-08-04 (B21)
+**Estado:** ✅ Activo
+
+**Contexto:** El PRD y B21 requieren detección de "concurrent use" / robo de refresh token.
+
+**Decisión:** Cada cadena de refresh tokens comparte un `familia` UUID asignado en el login. Al rotarse un token, el nuevo hereda la misma `familia`. Si se detecta un token revocado siendo reutilizado (indicador de robo), se revocan TODOS los tokens de esa familia, invalidando todas las sesiones del atacante y el usuario legítimo. Esto forza re-autenticación.
+
+**Consecuencias:** Migración añade columna `familia UUID NULL` a la tabla `tokens`. Tokens anteriores a B21 tienen `familia=NULL` y no se verán afectados por la revocación de familia.
+
+---
+
+## ADR-B21-003 — Correlation ID por request
+
+**Fecha:** 2026-08-04 (B21)
+**Estado:** ✅ Activo
+
+**Contexto:** Trazabilidad entre logs del mismo request es imposible sin identificadores únicos.
+
+**Decisión:** `CorrelationIdMiddleware` se aplica globalmente en `AppModule`. Reutiliza `X-Correlation-Id` si viene en el request (para trazabilidad entre microservicios o desde el frontend). Genera un nuevo `X-Request-Id` por cada request. El `LoggingInterceptor` incluye ambos IDs en cada línea de log junto con duración y User-Agent truncado.
+
+**Consecuencias:** Cada respuesta HTTP incluye `X-Correlation-Id` y `X-Request-Id` en los headers. Los logs enriquecidos permiten filtrar por correlation ID para debuggear una solicitud end-to-end.

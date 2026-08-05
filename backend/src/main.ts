@@ -11,6 +11,8 @@ import { SWAGGER_BEARER_TOKEN } from './common/constants/swagger.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
+import { MetricsService } from './modules/metrics/metrics.service';
+import { MetricsInterceptor } from './modules/metrics/metrics.interceptor';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
@@ -85,7 +87,12 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // ── Interceptores globales ───────────────────────────────────────
-  app.useGlobalInterceptors(new LoggingInterceptor(), new ResponseTransformInterceptor());
+  const metricsService = app.get(MetricsService);
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new MetricsInterceptor(metricsService),
+    new ResponseTransformInterceptor(),
+  );
 
   // ── Swagger / OpenAPI ────────────────────────────────────────────
   if (nodeEnv !== 'production') {

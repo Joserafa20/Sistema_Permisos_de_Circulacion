@@ -121,7 +121,7 @@
 **Objetivo:** El documento oficial generado automáticamente con verificación pública.  
 **Duración estimada:** Semanas 4–5  
 **Dependencia:** Fase 3 completada (al menos el endpoint de aprobación).  
-**Estado:** 🔄 En progreso — 13 / 18 tareas completadas
+**Estado:** ✅ Completada — 18 / 18 tareas completadas (B10)
 
 - [x] PDFModule: generación de PDF institucional con template ✅ 2026-08-04 (B6)
   - [x] Encabezado con logo/escudo desde configuración ✅ 2026-08-04
@@ -141,11 +141,14 @@
 - [x] `PATCH /api/v1/permisos/{id}/condiciones` — Funcionario/Admin, máx 500 chars (RN-38) ✅ 2026-08-04 (B7)
 - [x] Job automático: marcar permisos `VENCIDO` diario 00:01 COT (RN-08, RN-31) ✅ 2026-08-04 (B7)
 - [x] NotificacionesModule: persistencia desacoplada en BD (estado PENDIENTE) ✅ 2026-08-04 (B7)
-  - [ ] Envío real de correos (SMTP + BullMQ) — deuda técnica B9+
-  - [ ] Correo: solicitud recibida (con número de radicado)
-  - [ ] Correo: solicitud aprobada (con enlace de descarga)
-  - [ ] Correo: solicitud rechazada (con motivo)
-  - [ ] Correo: solicitud requiere corrección (con campos específicos)
+- [x] Envío real de correos: BullMQ worker + SMTP Nodemailer + templates HTML (RN-76, RN-77, RN-78, RN-79) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud recibida (con número de radicado) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud aprobada (con código permiso y enlace al portal) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud rechazada (con motivo) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud requiere corrección (con campos específicos) ✅ 2026-08-04 (B10)
+  - [x] Correo: solicitud vencida (RN-77) ✅ 2026-08-04 (B10)
+  - [x] Correo: permiso revocado (RN-77) ✅ 2026-08-04 (B10)
+  - [x] Correo: corrección enviada (interno — funcionario) ✅ 2026-08-04 (B10)
 
 ### Pendientes de Diseño — Fase 4
 
@@ -162,45 +165,38 @@
 **Duración estimada:** Semanas 5–6  
 **Dependencia:** Fases 3 y 4 completadas.
 
-- [ ] Página de inicio del portal con información del trámite
-- [ ] Formulario de solicitud en pasos (stepper):
-  - [ ] Paso 1: Datos personales del ciudadano
-  - [ ] Paso 2: Datos de la motocicleta
-  - [ ] Paso 3: Motivo y fechas
-  - [ ] Paso 4: Carga de documentos adjuntos
-  - [ ] Paso 5: Declaración y confirmación
-- [ ] Guardado automático en localStorage (prevenir pérdida de datos)
-- [ ] Validación en tiempo real (placa, documento, correo, fechas)
-- [ ] reCAPTCHA v3 integrado
-- [ ] Pantalla de confirmación con número de radicado prominente
-- [ ] Página de consulta de estado (radicado + documento)
-- [ ] Página de descarga del permiso aprobado
-- [ ] Página pública de validación QR (optimizada para móvil)
-  - [ ] Estado visual claro: verde (Vigente), rojo (Vencido/Revocado), gris (No encontrado)
-- [ ] Aviso de privacidad y autorización Ley 1581
-- [ ] Accesibilidad WCAG 2.1 nivel AA
-- [ ] Responsive: móvil, tablet y escritorio
+- [x] Infraestructura base: Next.js 15, React 19, Axios, TanStack Query, RHF+Zod, shadcn/ui primitivos, layout, 6 rutas shell, services, hooks ✅ 2026-08-04 (B12)
+- [x] Formulario de solicitud 5 pasos con Framer Motion, Zod, RHF, localStorage, reCAPTCHA v3, éxito y errores ✅ 2026-08-04 (B13)
+- [x] Página de inicio del portal con información del trámite ✅ 2026-08-04 (B12)
+- [x] Aviso de privacidad y autorización Ley 1581 (integrado en formulario) ✅ 2026-08-04 (B13)
+- [x] Accesibilidad WCAG 2.1 nivel AA (aria-label, aria-invalid, focus, aria-live) ✅ 2026-08-04 (B13)
+- [x] Responsive: móvil, tablet y escritorio ✅ 2026-08-04 (B13)
+- [x] Página de consulta de estado (radicado + documento) — funcional con TanStack Query, estados skeleton/error/offline ✅ 2026-08-04 (B14)
+- [x] Página pública de validación QR con lector de cámara (@zxing/browser) + manual ✅ 2026-08-04 (B14)
+  - [x] Estado visual claro: verde (Vigente), rojo (Revocado), gris (No encontrado/Vencido) ✅ 2026-08-04 (B14)
+- [x] Descarga de PDF del permiso desde /estado cuando está aprobado ✅ 2026-08-04 (B14)
 
 ---
 
 ## Fase 6 — Frontend Panel Funcionario
 **Objetivo:** Herramienta operativa para la gestión diaria de solicitudes.  
 **Duración estimada:** Semanas 6–7  
-**Dependencia:** Fases 3 y 4 completadas.
+**Dependencia:** Fases 3 y 4 completadas.  
+**Estado:** ✅ Completada — B15+B16+B17 (2026-08-04)
 
-- [ ] Pantalla de login con manejo de sesión JWT
-- [ ] Dashboard: KPIs del día (recibidas, pendientes, aprobadas, rechazadas, vencidas)
-- [ ] Cola de solicitudes ordenada por antigüedad con indicadores de urgencia
-- [ ] Filtros: estado, fecha, documento, placa, radicado
-- [ ] Vista de detalle de solicitud:
-  - [ ] Todos los datos personales y de la moto
-  - [ ] Previsualización de documentos adjuntos (PDF e imagen inline)
-  - [ ] Historial de estados
-- [ ] Modal de aprobación con resumen y confirmación
-- [ ] Modal de rechazo con motivo obligatorio
-- [ ] Modal de corrección con selección de campos a corregir
-- [ ] Visualización y descarga del permiso generado
-- [ ] Botón de impresión del PDF
+- [x] Pantalla de login con manejo de sesión JWT ✅ (B15)
+- [x] Dashboard: KPIs del día (recibidas, pendientes, aprobadas, rechazadas, vencidas) ✅ (B15)
+- [x] Cola de solicitudes ordenada por antigüedad con indicadores de urgencia ✅ (B16)
+- [x] Filtros: estado, fecha, documento, placa, radicado ✅ (B16)
+- [x] Vista de detalle de solicitud: ✅ (B16)
+  - [x] Todos los datos personales y de la moto ✅ (B16)
+  - [x] Previsualización de documentos adjuntos (PDF e imagen inline) ✅ (B16)
+  - [x] Historial de estados ✅ (B16)
+- [x] Modal de aprobación con resumen y confirmación ✅ (B17)
+- [x] Modal de rechazo con motivo obligatorio y contador de caracteres ✅ (B17)
+- [x] Modal de corrección con selección de campos, descripción por campo y preview paso a paso ✅ (B17)
+- [x] Visualización y descarga del permiso generado (URL firmada PDF on-demand) ✅ (B17)
+- [x] Botón de impresión del PDF ✅ (B16)
 
 ---
 
@@ -208,17 +204,20 @@
 **Objetivo:** Control total del sistema desde la interfaz.  
 **Duración estimada:** Semanas 7–8  
 **Dependencia:** Fase 6 completada.
+**Estado:** 🔄 En progreso — B18 completado (2026-08-04)
 
-- [ ] Pantalla de Configuración Institucional (CU-42 a CU-45): consulta, edición, carga de escudo y logo
+- [x] Configuración Institucional — edición textos, imágenes read-only (B18) ✅ 2026-08-04
+- [x] Estado del Sistema — health indicators, refetch 30s (B18) ✅ 2026-08-04
+- [x] CRUD de Usuarios — lista, detalle, crear, editar, activar/desactivar, eliminar, restaurar (B18) ✅ 2026-08-04
 - [ ] Dashboard administrativo con KPIs globales
-- [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
-- [ ] CRUD de Roles
+- [ ] CRUD de Roles (solo lectura por ahora)
 - [ ] CRUD de Dependencias
 - [ ] CRUD de Motivos (con activación/desactivación sin borrar)
 - [ ] Configuración del Sistema (Parámetros Operativos):
   - [ ] Firma digital configurable (upload de imagen)
   - [ ] Sello institucional (upload de imagen)
   - [ ] Parámetros: días máximos permiso, plazos, color institucional
+  - [ ] Upload logo/escudo institucional (requiere endpoint multipart — pendiente backend)
 - [ ] Vista de auditoría filtrable (usuario, acción, fecha, entidad)
 - [ ] Gestión de permisos: listar, revocar con motivo
 - [ ] Reportes:
@@ -234,24 +233,35 @@
 **Duración estimada:** Semanas 8–10  
 **Dependencia:** Fases 5, 6 y 7 completadas.
 
-- [ ] Pruebas unitarias backend (cobertura ≥ 80%)
-  - [ ] Use cases críticos
-  - [ ] Guards y validaciones
-  - [ ] Servicios de dominio
-- [ ] Pruebas de integración (flujos críticos end-to-end en backend)
-  - [ ] Flujo completo: crear solicitud → aprobar → generar PDF → validar QR
-  - [ ] Flujo de rechazo y notificación
-  - [ ] Flujo de corrección y reenvío
-- [ ] Pruebas E2E del portal ciudadano (Playwright o Cypress)
+### Adelantado en B11 (2026-08-04)
+
+- [x] `GET /api/v1/health` verifica PostgreSQL + Redis + MinIO + SMTP (Terminus) ✅ 2026-08-04 (B11)
+- [x] ThrottlerModule global en AppModule (100 req/min) + endpoints críticos con límites propios ✅ 2026-08-04 (B11)
+- [x] Mailpit en docker-compose.yml para captura de correos en desarrollo ✅ 2026-08-04 (B11)
+- [x] `docker-compose.prod.yml` con Nginx, redes internas aisladas, restart:always ✅ 2026-08-04 (B11)
+- [x] `.env.production.example` con todos los secretos y guía de generación ✅ 2026-08-04 (B11)
+- [x] `README_DEPLOY.md` con flujo completo: variables, migraciones, backup, rollback ✅ 2026-08-04 (B11)
+- [x] `MinioStorageAdapter.ping()` para health check sin acoplamiento ✅ 2026-08-04 (B11)
+
+### B19 — Calidad, Pruebas, Observabilidad y CI/CD (✅ 2026-08-04)
+
+- [x] Tests unitarios backend: 7 suites, 62 tests verdes ✅ 2026-08-04 (B19)
+  - [x] SolicitudStateMachine (16 casos), HttpExceptionFilter (8), ResponseTransformInterceptor (5)
+  - [x] RolesGuard (6), LoginUseCase (8), RecuperarContrasenaUseCase (9), RechazarSolicitudUseCase (10)
+- [x] Tests unitarios frontend: 3 suites, 41 tests verdes ✅ 2026-08-04 (B19)
+  - [x] lib/utils, schemas/admin, schemas/solicitudes-acciones
+- [x] Vitest configurado (jsdom, @testing-library/react, coverage v8) ✅ 2026-08-04 (B19)
+- [x] GitHub Actions CI/CD pipeline (backend + frontend, artifacts, summary job) ✅ 2026-08-04 (B19)
+- [x] Prometheus: metrics.service, metrics.controller, metrics.interceptor, MetricsModule ✅ 2026-08-04 (B19)
+- [x] OpenTelemetry: tracing.ts condicional, OTLPTraceExporter, resourceFromAttributes ✅ 2026-08-04 (B19)
+
+**Pendiente (Fase 8 — scope B20+):**
+- [ ] Tests de integración (flujo completo solicitud → permiso → QR)
+- [ ] Tests E2E (Playwright — requiere infraestructura levantada)
 - [ ] Optimización de consultas BD (EXPLAIN ANALYZE en queries críticos)
-- [ ] Docker para producción (multi-stage builds)
-- [ ] `docker-compose.prod.yml` con Nginx + SSL
-- [ ] Configuración de CI/CD (GitHub Actions)
-- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`)
-- [ ] Manual de Usuario (`docs/MANUAL_USUARIO.md`)
-- [ ] Guía de despliegue en producción (`docs/GUIA_DESPLIEGUE.md`)
 - [ ] Datos de prueba para entorno de demo
-- [ ] Revisión de seguridad final (checklist `SECURITY.md`)
+- [ ] Revisión de seguridad final (checklist SECURITY.md)
+- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`)
 
 ---
 
@@ -266,11 +276,11 @@
 | Fase 1 | Base de Datos | 7 | 7 | ✅ Completada |
 | Fase 2 | Auth y Seguridad | 17 | 17 | ✅ Completada (B8) |
 | Fase 3 | Solicitudes Backend | 16 | 16 | ✅ Completada (B9) |
-| Fase 4 | Permisos PDF/QR | 13 | 18 | 🔄 En progreso ← |
-| Fase 5 | Frontend Ciudadano | 0 | 13 | ⬜ No iniciada |
-| Fase 6 | Frontend Funcionario | 0 | 10 | ⬜ No iniciada |
-| Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
-| Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
+| Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
+| Fase 5 | Frontend Ciudadano | 33 | 33 | ✅ Completada (B14) |
+| Fase 6 | Frontend Funcionario | 42 | 42 | ✅ Completada (B17) |
+| Fase 7 | Panel Admin | 5 | 10 | 🔄 En progreso (B18, pendiente B20+) |
+| Fase 8 | Calidad y Producción | 8 | 15 | 🔄 En progreso (B19) |
 
 **Duración total estimada:** 10 semanas para un equipo de 2–3 desarrolladores.
 

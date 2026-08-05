@@ -1,25 +1,51 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request } from 'express';
 import { SWAGGER_BEARER_TOKEN } from '../../../../common/constants/swagger.constants';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
+import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
 import { LoginDto } from '../../application/dtos/login.dto';
 import { LogoutDto } from '../../application/dtos/logout.dto';
 import { RefreshTokenDto } from '../../application/dtos/refresh-token.dto';
 import { RecuperarContrasenaDto } from '../../application/dtos/recuperar-contrasena.dto';
 import { RestablecerContrasenaDto } from '../../application/dtos/restablecer-contrasena.dto';
 import { CambiarContrasenaDto } from '../../application/dtos/cambiar-contrasena.dto';
-import { AuthResponseDto, RefreshResponseDto } from '../../application/dtos/auth-response.dto';
+import {
+  AuthResponseDto,
+  MfaRequiredResponseDto,
+  RefreshResponseDto,
+} from '../../application/dtos/auth-response.dto';
 import { MeResponseDto } from '../../application/dtos/me-response.dto';
+import {
+  MfaSetupResponseDto,
+  MfaActivateDto,
+  MfaVerifyDto,
+  MfaLoginVerifyDto,
+} from '../../application/dtos/mfa.dto';
 import { LoginUseCase } from '../../application/use-cases/login/login.use-case';
 import { LogoutUseCase } from '../../application/use-cases/logout/logout.use-case';
+import { LogoutAllUseCase } from '../../application/use-cases/logout-all/logout-all.use-case';
 import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token/refresh-token.use-case';
 import { RecuperarContrasenaUseCase } from '../../application/use-cases/recuperar-contrasena/recuperar-contrasena.use-case';
 import { RestablecerContrasenaUseCase } from '../../application/use-cases/restablecer-contrasena/restablecer-contrasena.use-case';
 import { CambiarContrasenaUseCase } from '../../application/use-cases/cambiar-contrasena/cambiar-contrasena.use-case';
 import { MeUseCase } from '../../application/use-cases/me/me.use-case';
+import { SetupMfaUseCase } from '../../application/use-cases/mfa/setup-mfa.use-case';
+import { ActivateMfaUseCase } from '../../application/use-cases/mfa/activate-mfa.use-case';
+import { DisableMfaUseCase } from '../../application/use-cases/mfa/disable-mfa.use-case';
+import { VerifyMfaLoginUseCase } from '../../application/use-cases/mfa/verify-mfa-login.use-case';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { AuthUser } from '../strategies/jwt.strategy';
@@ -31,11 +57,16 @@ export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
     private readonly logoutUseCase: LogoutUseCase,
+    private readonly logoutAllUseCase: LogoutAllUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly recuperarContrasenaUseCase: RecuperarContrasenaUseCase,
     private readonly restablecerContrasenaUseCase: RestablecerContrasenaUseCase,
     private readonly cambiarContrasenaUseCase: CambiarContrasenaUseCase,
     private readonly meUseCase: MeUseCase,
+    private readonly setupMfaUseCase: SetupMfaUseCase,
+    private readonly activateMfaUseCase: ActivateMfaUseCase,
+    private readonly disableMfaUseCase: DisableMfaUseCase,
+    private readonly verifyMfaLoginUseCase: VerifyMfaLoginUseCase,
   ) {}
 
   // ── Login ──────────────────────────────────────────────────────────────────
@@ -45,21 +76,87 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @Throttle({ default: { limit: 5, ttl: 900000 } })
-  @ApiOperation({
-    summary: 'Iniciar sesión',
-    description:
-      'Autentica al funcionario y retorna access token + refresh token. Máximo 5 intentos por 15 minutos.',
+  @ApiOperation({ summary: 'Iniciar sesión' })
+  @ApiResponse({
+    status: 200,
+    description: 'Sesión iniciada o MFA requerido',
+    type: AuthResponseDto,
   })
-  @ApiResponse({ status: 200, description: 'Sesión iniciada correctamente', type: AuthResponseDto })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas o cuenta bloqueada' })
-  @ApiResponse({ status: 429, description: 'Demasiados intentos. Intente en 15 minutos' })
+  @ApiResponse({ status: 429, description: 'Demasiados intentos' })
   async login(
     @Body() _dto: LoginDto,
     @Req() req: Request & { user: { id: string } },
-  ): Promise<AuthResponseDto> {
+  ): Promise<AuthResponseDto | MfaRequiredResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
     const userAgent = (req.headers['user-agent'] ?? null) as string | null;
     return this.loginUseCase.execute({ userId: req.user.id, ipAddress, userAgent });
+  }
+
+  // ── MFA — verificar en flujo de login ─────────────────────────────────────
+
+  @Post('mfa/verificar')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 300000 } })
+  @ApiOperation({ summary: 'Verificar código MFA en flujo de login (paso 2)' })
+  @ApiResponse({ status: 200, description: 'Autenticación MFA completada', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Código o token MFA inválido' })
+  async verifyMfaLogin(
+    @Body() dto: MfaLoginVerifyDto,
+    @Req() req: Request,
+  ): Promise<AuthResponseDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    const userAgent = (req.headers['user-agent'] ?? null) as string | null;
+    return this.verifyMfaLoginUseCase.execute({
+      mfaPendingToken: dto.mfaPendingToken,
+      code: dto.code,
+      ipAddress,
+      userAgent,
+    });
+  }
+
+  // ── MFA — setup ────────────────────────────────────────────────────────────
+
+  @Post('mfa/setup')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
+  @Roles(UserRole.ADMINISTRADOR)
+  @ApiOperation({ summary: 'Iniciar configuración MFA (genera secreto TOTP y QR)' })
+  @ApiResponse({ status: 200, description: 'Secreto y QR generados', type: MfaSetupResponseDto })
+  async setupMfa(@CurrentUser() user: AuthUser): Promise<MfaSetupResponseDto> {
+    return this.setupMfaUseCase.execute(user.id);
+  }
+
+  // ── MFA — activar ──────────────────────────────────────────────────────────
+
+  @Post('mfa/activar')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
+  @Roles(UserRole.ADMINISTRADOR)
+  @ApiOperation({ summary: 'Activar MFA con código TOTP de confirmación' })
+  @ApiResponse({ status: 200, description: 'MFA activado correctamente' })
+  async activateMfa(
+    @Body() dto: MfaActivateDto,
+    @CurrentUser() user: AuthUser,
+  ): Promise<{ message: string }> {
+    return this.activateMfaUseCase.execute(user.id, dto.code);
+  }
+
+  // ── MFA — desactivar ───────────────────────────────────────────────────────
+
+  @Delete('mfa')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
+  @Roles(UserRole.ADMINISTRADOR)
+  @ApiOperation({ summary: 'Desactivar MFA (requiere código TOTP)' })
+  @ApiResponse({ status: 200, description: 'MFA desactivado correctamente' })
+  async disableMfa(
+    @Body() dto: MfaVerifyDto,
+    @CurrentUser() user: AuthUser,
+  ): Promise<{ message: string }> {
+    return this.disableMfaUseCase.execute(user.id, dto.code);
   }
 
   // ── Logout ─────────────────────────────────────────────────────────────────
@@ -67,11 +164,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
-  @ApiOperation({
-    summary: 'Cerrar sesión',
-    description:
-      'Revoca el refresh token del usuario autenticado. El access token expira de forma natural.',
-  })
+  @ApiOperation({ summary: 'Cerrar sesión (revoca refresh token actual)' })
   @ApiResponse({ status: 200, description: 'Sesión cerrada correctamente' })
   @ApiResponse({ status: 401, description: 'No autenticado o access token inválido' })
   async logout(
@@ -89,22 +182,30 @@ export class AuthController {
     });
   }
 
+  // ── Logout All ─────────────────────────────────────────────────────────────
+
+  @Post('logout/all')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
+  @ApiOperation({ summary: 'Cerrar todas las sesiones activas del usuario' })
+  @ApiResponse({ status: 200, description: 'Todas las sesiones revocadas' })
+  async logoutAll(
+    @CurrentUser() user: AuthUser,
+    @Req() req: Request,
+  ): Promise<{ message: string; revocados: number }> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    const userAgent = (req.headers['user-agent'] ?? null) as string | null;
+    return this.logoutAllUseCase.execute({ userId: user.id, ipAddress, userAgent });
+  }
+
   // ── Refresh ────────────────────────────────────────────────────────────────
 
   @Post('refresh')
   @Public()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
-  @ApiOperation({
-    summary: 'Renovar tokens',
-    description:
-      'Emite un nuevo par de tokens. El refresh token anterior queda revocado (rotación obligatoria).',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Tokens renovados correctamente',
-    type: RefreshResponseDto,
-  })
+  @ApiOperation({ summary: 'Renovar tokens (rotación obligatoria)' })
+  @ApiResponse({ status: 200, description: 'Tokens renovados', type: RefreshResponseDto })
   @ApiResponse({ status: 401, description: 'Refresh token inválido, expirado o revocado' })
   async refresh(
     @Body() _dto: RefreshTokenDto,
@@ -127,13 +228,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 3, ttl: 3600000 } })
-  @ApiOperation({
-    summary: 'Solicitar recuperación de contraseña',
-    description:
-      'Genera un token de recuperación y lo asocia al correo. La respuesta es idéntica si el correo existe o no para evitar enumeración de usuarios. La integración con el servicio de correo se activará en la fase correspondiente.',
-  })
+  @ApiOperation({ summary: 'Solicitar recuperación de contraseña' })
   @ApiResponse({ status: 200, description: 'Solicitud procesada correctamente' })
-  @ApiResponse({ status: 400, description: 'Correo electrónico inválido' })
   async recuperarContrasena(
     @Body() dto: RecuperarContrasenaDto,
     @Req() req: Request,
@@ -148,14 +244,10 @@ export class AuthController {
   @Post('restablecer-contrasena')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Restablecer contraseña con token',
-    description:
-      'Valida el token de recuperación (expiración 1 h, uso único) y actualiza la contraseña. Revoca todos los refresh tokens activos del usuario.',
-  })
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 3600000 } })
+  @ApiOperation({ summary: 'Restablecer contraseña con token' })
   @ApiResponse({ status: 200, description: 'Contraseña restablecida correctamente' })
-  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos o contraseña insegura' })
-  @ApiResponse({ status: 401, description: 'Token inválido, expirado o ya utilizado' })
   async restablecerContrasena(
     @Body() dto: RestablecerContrasenaDto,
     @Req() req: Request,
@@ -175,17 +267,8 @@ export class AuthController {
   @Post('cambiar-contrasena')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
-  @ApiOperation({
-    summary: 'Cambiar contraseña',
-    description:
-      'Requiere autenticación. Valida la contraseña actual, aplica política RN-51 y verifica historial de las últimas 5 contraseñas. Revoca todos los refresh tokens activos.',
-  })
+  @ApiOperation({ summary: 'Cambiar contraseña' })
   @ApiResponse({ status: 200, description: 'Contraseña actualizada correctamente' })
-  @ApiResponse({
-    status: 400,
-    description: 'Datos inválidos o política de contraseñas no cumplida',
-  })
-  @ApiResponse({ status: 401, description: 'No autenticado o contraseña actual incorrecta' })
   async cambiarContrasena(
     @Body() dto: CambiarContrasenaDto,
     @CurrentUser() user: AuthUser,
@@ -206,13 +289,8 @@ export class AuthController {
 
   @Get('me')
   @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
-  @ApiOperation({
-    summary: 'Obtener perfil del usuario autenticado',
-    description:
-      'Retorna los datos del usuario autenticado. Nunca expone contraseñas, hashes ni tokens.',
-  })
-  @ApiResponse({ status: 200, description: 'Perfil obtenido correctamente', type: MeResponseDto })
-  @ApiResponse({ status: 401, description: 'No autenticado o token expirado' })
+  @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
+  @ApiResponse({ status: 200, description: 'Perfil obtenido', type: MeResponseDto })
   async me(@CurrentUser() user: AuthUser): Promise<MeResponseDto> {
     return this.meUseCase.execute(user.id);
   }

@@ -8,13 +8,89 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 3 ✅ COMPLETADA + Fase 4 🔄 en progreso
+Fase: Fase 7 🔄 En progreso — B18 completado
 
-Bloque actual: B9 ✅ COMPLETADO — StorageModule (@Global), POST documentos (multipart), GET URL firmada documentos, VencerSolicitudesJob
+Bloque actual: B18 ✅ COMPLETADO — Panel Administración Fase 7 (configuración, usuarios CRUD, sistema health)
 
 Rama: `feature/fase-2-auth`
 
-Estado: Fase 3: 16/16 completadas. Fase 4: 13/18 completadas. Pendiente B10: envío real de correos (BullMQ+SMTP).
+Estado: Portal Administrador parcialmente implementado. B18 entrega: configuración institucional, gestión usuarios completa (lista + detalle + crear), estado del sistema. Pendiente B19: dashboard admin KPIs, roles, dependencias, motivos, auditoría, reportes.
+
+### B17 — Acciones operativas Aprobar/Rechazar/Corrección (2026-08-04)
+✓ AccionSolicitudResponse + PermisoPdfUrl types añadidos a funcionario.ts
+✓ aprobarSolicitud(), rechazarSolicitud(), solicitarCorreccion(), getPermisoPdfUrl() en service
+✓ Zod schemas: rechazarSchema (min20/max1000) + correccionSchema (motivo + camposCorreccion array)
+✓ useAprobarSolicitud, useRechazarSolicitud, useSolicitarCorreccion — useMutation con invalidación completa
+✓ usePermisoPdf — URL firmada PDF on-demand, staleTime 4 min
+✓ Invalidación: SOLICITUDES_KEY + SOLICITUD_DETALLE_KEY + DASHBOARD_STATS_KEY + ACTIVIDAD_KEY
+✓ Modal Aprobar: acción real + loading state + toast success/error + error inline
+✓ Modal Rechazar: RHF+Zod, contador caracteres, aria-live, confirmDisabled
+✓ Modal Corrección: RHF+Zod+useFieldArray, checkboxes campos con descripción, motivo general
+✓ Preview step corrección (ADR-021): "Revisar →" → preview → "← Editar" / "Enviar corrección"
+✓ Botón Obtener/Descargar PDF cuando solicitud.permiso está presente
+✓ ConfirmationModal: props onCancel + confirmDisabled + maxWidth (retrocompatibles)
+✓ Mensajes de error de negocio: 409 overlap, 422 estado inválido
+✓ WCAG: aria-required, aria-busy, aria-live, aria-describedby, role=alert
+
+### B18 — Panel Administración Fase 7 (2026-08-04)
+
+**Backend:**
+✓ CatalogosAdminController: GET /roles + GET /dependencias (ADR-022)
+✓ UsuariosModule registra CatalogosAdminController
+
+**Frontend — infraestructura:**
+✓ api-client.ts: apiPut + apiDelete helpers
+✓ types/admin.ts — todos los tipos admin + health
+✓ schemas/admin.schemas.ts — configuracion + crearUsuario + actualizarUsuario
+✓ services/admin.service.ts — todos los endpoints admin (getConfiguracion, patchConfiguracion, CRUD usuarios, getRoles, getDependencias, getHealth)
+✓ hooks/use-admin-configuracion.ts
+✓ hooks/use-admin-usuarios.ts (7 hooks + cache invalidation)
+✓ hooks/use-admin-catalogs.ts (useRoles, useDependencias — staleTime 10min)
+✓ hooks/use-health.ts (refetch 30s, staleTime 0, retry 0)
+✓ constants.ts: FUNC_ROUTES ampliado (usuarios, usuariosNuevo, configuracion, sistema)
+✓ sidebar.tsx: nav item Sistema con Activity icon
+
+**Frontend — componentes:**
+✓ components/admin/usuario-rol-badge.tsx
+✓ components/admin/health-indicator.tsx
+
+**Frontend — módulos y páginas:**
+✓ modules/admin/configuracion-view.tsx → /funcionario/configuracion
+✓ modules/admin/sistema-view.tsx → /funcionario/sistema
+✓ modules/admin/usuarios-view.tsx → /funcionario/usuarios (lista + filtros + paginación)
+✓ modules/admin/usuario-detalle-view.tsx → /funcionario/usuarios/[id] (ficha + editar + acciones)
+✓ modules/admin/nuevo-usuario-view.tsx → /funcionario/usuarios/nuevo (form + dialog contraseña temp)
+✓ ADR-022: endpoints catálogo roles/dependencias
+✓ ADR-023: portal admin bajo /funcionario/(panel)/ reutilizando infraestructura
+
+**Quality gates:** tsc ✅ · lint ✅ · build ✅
+
+### B16 — Cola de Solicitudes y Detalle (2026-08-04)
+✓ Tipos backend correctos: SolicitudListItem, SolicitudDetalle, CiudadanoDetalle, MotocicletaDetalle, MotivoDetalle, DocumentoItem, HistorialEstadoItem, PaginatedSolicitudesResponse, SolicitudesFiltros (ADR-020)
+✓ Corrección bug B15: SolicitudListItem tenía campos incorrectos que no coincidían con el backend DTO real
+✓ Corrección bug B15: countSolicitudes usaba ApiListResponse (meta.total) — backend usa ApiResponse<PaginatedSolicitudesResponse> (data.pagination.total)
+✓ Corrección bug B15: countSolicitudes usaba parámetro erróneo "fechaDesde" → correcto "fechaInicio"
+✓ Corrección bug B15: getActividadReciente usaba "order=fechaCreacion:DESC" → correcto "sortBy=createdAt&sortOrder=DESC"
+✓ getSolicitudes(), getSolicitudDetalle(), getDocumentoUrl() añadidos a funcionario.service.ts
+✓ useSolicitudes() + useSolicitudesFiltros() con sincronización URL (useSearchParams + useRouter)
+✓ useSolicitudDetalle() — TanStack Query v5, staleTime 60s
+✓ useDocumentoUrl() — enabled on demand, staleTime 4 min (URL firmada TTL 5 min)
+✓ SolicitudStatusBadge — mapeo estado → color/label, exporta ESTADOS_OPTIONS
+✓ SolicitudesTable — sticky header, aria-sort, skeletons, empty/error states, sorting por columna
+✓ SolicitudFilters — chips de estado multi-selección, búsqueda debounced x3, rango fechas, orden
+✓ SolicitudTimeline — visualización historial con motivo y campos corrección
+✓ DocumentoViewer — URL firmada on-demand, preview PDF (iframe), preview imagen, descarga
+✓ DetalleCard — tarjeta reutilizable para secciones de información (dl/dt/dd)
+✓ ConfirmationModal — modal WCAG con focus trap, Escape, overlay, variante danger
+✓ SearchToolbar — input con debounce configurable, limpiar, aria
+✓ Pagination — primera/prev/next/última, conteo total
+✓ EmptyResults — empty state reutilizable
+✓ SolicitudesView — vista lista con Suspense, filtros, tabla, paginación
+✓ SolicitudDetalleView — ciudadano, moto, motivo, documentos, historial, modales acción (B17 placeholder)
+✓ /funcionario/solicitudes page + /funcionario/solicitudes/[id] page
+✓ HeaderFunc: prop extra añadida (backward compatible) para botón "Volver"
+✓ dashboard-view.tsx: campo ciudadanoNombre → ciudadano.nombre; radicado → numeroRadicado; fechaCreacion → createdAt
+✓ ADR-020: Corrección tipos frontend vs backend DTOs
 
 ---
 
@@ -77,7 +153,7 @@ Estado: ✅ COMPLETADA (parcial) — Login/Logout/Refresh implementados. Pendien
 
 ## Próxima tarea sugerida
 
-B10 — Envío real de correos: BullMQ + SMTP (Fase 4 — deuda técnica). Requiere autorización.
+B11 — Frontend Portal Ciudadano (Fase 5) o Fase 8 (Calidad y Producción). Requiere autorización.
 
 ---
 
@@ -337,8 +413,260 @@ B10 — Envío real de correos: BullMQ + SMTP (Fase 4 — deuda técnica). Requi
 - `eslint`: ✅ 0 errors (3 warnings pre-existentes)
 - `nest build`: ✅ exit 0
 
+---
+
+## Bloque B10 — Sistema de Notificaciones Reales (2026-08-04)
+
+### Nuevos módulos creados
+- `backend/src/modules/redis/redis.module.ts` — RedisModule @Global, exporta REDIS_CLIENT (IORedis)
+- `backend/src/modules/redis/redis.constants.ts` — tokens REDIS_CLIENT, EMAIL_NOTIFICATIONS_QUEUE, DLQ
+- `backend/src/modules/email/email.module.ts` — EmailModule con IEmailProvider + PlantillaEmailService
+- `backend/src/modules/email/domain/ports/email-provider.interface.ts` — IEmailProvider port
+- `backend/src/modules/email/infrastructure/providers/smtp-email.provider.ts` — SmtpEmailProvider (Nodemailer)
+- `backend/src/modules/email/infrastructure/services/plantilla-email.service.ts` — HTML rendering + branding + XSS escape
+
+### Templates HTML creados
+- `backend/src/templates/email/solicitud-recibida.html`
+- `backend/src/templates/email/solicitud-aprobada.html`
+- `backend/src/templates/email/solicitud-rechazada.html`
+- `backend/src/templates/email/correccion-requerida.html`
+- `backend/src/templates/email/solicitud-vencida.html`
+- `backend/src/templates/email/permiso-revocado.html`
+- `backend/src/templates/email/correccion-enviada.html`
+
+### Processor y migración creados
+- `backend/src/modules/notificaciones/infrastructure/processors/email.processor.ts` — BullMQ WorkerHost, concurrencia 5, backoff 1m/5m/15m, DLQ
+- `backend/database/migrations/1786060800000-AddContextoToNotificaciones.ts` — columna contexto JSONB
+
+### Archivos modificados
+- `backend/src/common/enums/tipo-notificacion.enum.ts` — +SOLICITUD_VENCIDA, +CORRECCION_ENVIADA
+- `backend/src/modules/notificaciones/infrastructure/persistence/notificacion.entity.ts` — +contexto JSONB
+- `backend/src/modules/notificaciones/notificaciones.service.ts` — encola en BullMQ después de persistir en DB
+- `backend/src/modules/notificaciones/notificaciones.module.ts` — +BullModule, +EmailModule, +EmailProcessor
+- `backend/src/app.module.ts` — +RedisModule, +BullModule.forRootAsync
+- `backend/src/modules/solicitudes/solicitudes.module.ts` — +NotificacionesModule
+- `backend/nest-cli.json` — assets para copiar templates/*.html a dist/
+- `backend/src/modules/solicitudes/application/use-cases/crear-solicitud.use-case.ts` — notifica SOLICITUD_RECIBIDA
+- `backend/src/modules/solicitudes/application/use-cases/aprobar-solicitud.use-case.ts` — notifica APROBADA
+- `backend/src/modules/solicitudes/application/use-cases/rechazar-solicitud.use-case.ts` — notifica RECHAZADA
+- `backend/src/modules/solicitudes/application/use-cases/solicitar-correccion.use-case.ts` — notifica CORRECCION
+- `backend/src/modules/solicitudes/infrastructure/jobs/vencer-solicitudes.job.ts` — notifica SOLICITUD_VENCIDA
+
+### Reglas de negocio implementadas
+- RN-76: BullMQ asíncrono, 3 reintentos, backoff 1m/5m/15m, DLQ
+- RN-77: 7 tipos de notificación al ciudadano y funcionario
+- RN-78: emails contienen enlaces al portal web, nunca URLs directas de MinIO
+- RN-79: templates HTML con branding institucional desde configuracion_institucional
+
+### Quality Gates — B10
+- `tsc --noEmit`: ✅ exit 0
+- `eslint`: ✅ 0 errors (3 warnings pre-existentes)
+- `nest build`: ✅ exit 0
+
+### Nuevas dependencias
+- `@nestjs/bullmq@11.0.4`
+- `bullmq`
+- `ioredis`
+- `nodemailer`
+- `@types/nodemailer` (dev)
+
+---
+
+## Bloque B11–B14 — Frontend Portal Ciudadano (2026-08-04)
+
+### B12 — Infraestructura base portal ciudadano
+Scaffolding Next.js 15 + React 19, TanStack Query, RHF, Zod, shadcn/ui primitivos, layout, 6 rutas shell (/solicitud /estado /verificar /ayuda /contacto), services, hooks base. Build 9/9 páginas ✅.
+
+### B13 — Formulario ciudadano 5 pasos
+- React Hook Form + Zod, FormProvider, zodResolver, PASO_FIELDS para validación parcial
+- Stepper con Framer Motion AnimatePresence dirección
+- Paso 1: datos ciudadano (colombiano) / Paso 2: motocicleta (placa ABC12D) / Paso 3: motivos dinámicos / Paso 4: FileUploader documentos / Paso 5: resumen + declaración jurada
+- localStorage auto-save 500ms, restauración de borrador
+- reCAPTCHA v3 dinámico, advertencia en dev si no configurado
+- SuccessScreen: radicado prominente, copy/print/consultar/nueva
+- Error handling: 400/409/422/500/timeout/offline sin alert()
+- WCAG: aria-label, aria-invalid, aria-live, focus management
+- Quality gates: tsc + lint + build ✅
+
+### B14 — Consultas ciudadano y validación QR
+Archivos creados:
+- `frontend/src/schemas/estado.schemas.ts` — estadoConsultaSchema (radicado + documento)
+- `frontend/src/schemas/verificar.schemas.ts` — verificarCodigoSchema
+- `frontend/src/hooks/use-estado-solicitud.ts` — TanStack Query, fetch-on-demand
+- `frontend/src/hooks/use-verificar-permiso.ts` — TanStack Query, enabled por código activo
+- `frontend/src/modules/estado/estado-consulta.tsx` — orquestador fetch-on-demand
+- `frontend/src/modules/estado/components/solicitud-resultado.tsx` — badge estado, historial timeline, permiso card, PDF download
+- `frontend/src/modules/verificar/verificar-form.tsx` — modos idle/manual/camera, dynamic import ssr:false
+- `frontend/src/modules/verificar/components/qr-scanner.tsx` — @zxing/browser, cleanup IScannerControls.stop()
+- `frontend/src/modules/verificar/components/permiso-resultado.tsx` — semáforo visual verde/rojo/gris
+
+Archivos modificados:
+- `frontend/src/types/index.ts` — extendido SolicitudResumenCiudadano (historial[], motivoNombre, funcionarioNombre, permiso.urlDescarga)
+- `frontend/src/app/estado/page.tsx` — server component con metadata
+- `frontend/src/app/verificar/page.tsx` — server component con metadata
+
+Dependencia añadida: `@zxing/browser` (ADR-018)
+
+Quality gates B14:
+- `tsc --noEmit`: ✅ exit 0
+- `eslint`: ✅ 0 errores
+- `next build`: ✅ 9/9 páginas, /estado 4.88 kB, /verificar 4.83 kB (QrScanner excluido del bundle inicial)
+
+Commit: `feat(frontend): portal ciudadano consultas y validacion QR — B14`
+
+---
+
+## Bloque B15 — Infraestructura Portal Funcionario (2026-08-04)
+
+### Archivos creados
+- `frontend/src/types/funcionario.ts` — UsuarioPerfil, LoginResponse, RefreshResponse, DashboardStats, SolicitudListItem, AuthStatus
+- `frontend/src/schemas/login.schemas.ts` — loginSchema (correo + contrasena + recordarme)
+- `frontend/src/services/funcionario.service.ts` — login, logout, refresh, getMe, getDashboardStats (6 queries en paralelo), getActividadReciente
+- `frontend/src/contexts/auth-context.tsx` — AuthProvider, useAuth, bootstrap silencioso, TokenUpdateCallback
+- `frontend/src/hooks/use-login.ts` — useMutation, manejo de errores por código HTTP, redirect post-login
+- `frontend/src/hooks/use-logout.ts` — useMutation wrapper
+- `frontend/src/hooks/use-profile.ts` — useQuery, 5 min staleTime
+- `frontend/src/hooks/use-dashboard.ts` — useDashboardStats + useActividadReciente, refetchInterval 2 min
+- `frontend/src/hooks/use-refresh-token.ts` — refresh manual, sincroniza storage
+- `frontend/src/components/funcionario/protected-route.tsx` — loading skeleton, redirect, role check
+- `frontend/src/components/funcionario/permission-gate.tsx` — render condicional por rol
+- `frontend/src/components/funcionario/page-container.tsx` — layout wrapper con title/description/actions
+- `frontend/src/components/funcionario/stat-card.tsx` — KPI card con 6 variantes de color, skeleton
+- `frontend/src/components/funcionario/dashboard-card.tsx` — card genérica con icon header
+- `frontend/src/components/funcionario/sidebar-item.tsx` — link con aria-current, badge de conteo
+- `frontend/src/components/funcionario/sidebar.tsx` — desktop sticky + mobile drawer + hamburguesa
+- `frontend/src/components/funcionario/header-func.tsx` — breadcrumb + refresh + ProfileMenu
+- `frontend/src/components/funcionario/profile-menu.tsx` — dropdown con avatar, info, logout
+- `frontend/src/components/funcionario/breadcrumb-nav.tsx` — nav con aria-current, links intermedios
+- `frontend/src/modules/funcionario/login-form.tsx` — formulario login completo con toggle contraseña
+- `frontend/src/modules/funcionario/dashboard-view.tsx` — dashboard con KPIs + actividad + accesos rápidos
+- `frontend/src/app/funcionario/layout.tsx` — AuthProvider wrapper
+- `frontend/src/app/funcionario/login/page.tsx` — página login
+- `frontend/src/app/funcionario/(panel)/layout.tsx` — ProtectedRoute + Sidebar
+- `frontend/src/app/funcionario/(panel)/page.tsx` — dashboard page
+- `frontend/src/middleware.ts` — protección /funcionario/* con cookie _f_session
+
+### Archivos modificados
+- `frontend/src/lib/api-client.ts` — +setTokenUpdateCallback, _tokenUpdateCallback invocado en interceptor 401
+- `frontend/src/lib/constants.ts` — +FUNC_ROUTES, +FUNC_STORAGE, +SESSION_COOKIE_NAME
+- `frontend/src/components/ui/badge.tsx` — +variante 'info'
+- `frontend/src/tailwind.config.ts` — +src/modules/**, +src/contexts/**
+- `.claude/TASKS.md` — B15 completado, B16 pendiente
+- `.claude/ROADMAP.md` — Fase 6: 20/27
+
+### ADR registrado: ADR-019 — Estrategia de almacenamiento de tokens funcionario
+
+### Quality gates
+- `tsc --noEmit`: ✅ exit 0
+- `next lint`: ✅ 0 errores
+- `next build`: ✅ 11/11 páginas, /funcionario 8.97 kB, /funcionario/login 5.27 kB
+
+---
+
 ## Última actualización
 
-2026-08-04 — B9 completado. Fase 3 cerrada (16/16). StorageModule @Global extraído, POST documentos
-multipart con SHA-256 + MinIO, GET URL firmada TTL 5 min (RN-53), VencerSolicitudesJob (RN-08).
-Próximo: B10 — Envío real de correos (BullMQ + SMTP).
+2026-08-04 — B15 completado. Fase 6 iniciada (20/27). Portal Funcionario: infraestructura
+completa (auth, layout, dashboard). Próximo: B16 — Cola de solicitudes y flujos de gestión.
+Requiere autorización.
+
+---
+
+## Sesión B18 — Panel Administración Fase 7 (2026-08-04)
+
+### Objetivo
+Implementar el Panel Administrador completo (módulos de usuarios, configuración, sistema) y sus páginas Next.js.
+
+### Archivos creados/modificados
+- `backend/src/modules/usuarios/infrastructure/controllers/catalogos-admin.controller.ts` — GET /roles, GET /dependencias
+- `frontend/src/modules/admin/usuarios-view.tsx` — tabla paginada, búsqueda debounced, filtros
+- `frontend/src/modules/admin/usuario-detalle-view.tsx` — ficha + edición inline + modales confirmación
+- `frontend/src/modules/admin/nuevo-usuario-view.tsx` — formulario + diálogo contraseña temporal
+- `frontend/src/app/funcionario/(panel)/usuarios/page.tsx` — página usuarios
+- `frontend/src/app/funcionario/(panel)/usuarios/nuevo/page.tsx` — página nuevo usuario
+- `frontend/src/app/funcionario/(panel)/usuarios/[id]/page.tsx` — página detalle usuario
+- `frontend/src/app/funcionario/(panel)/configuracion/page.tsx` — página configuración
+- `frontend/src/app/funcionario/(panel)/sistema/page.tsx` — página estado sistema
+
+### ADRs registrados
+- ADR-022 — GET /roles y GET /dependencias con @InjectRepository directo (sin hexagonal para catálogos simples)
+- ADR-023 — Portal Administrador bajo /funcionario/(panel)/ reutilizando middleware y AuthProvider
+
+### Quality gates
+- `tsc --noEmit`: ✅ (5 errores corregidos antes del commit)
+- `lint`: ✅ 0 errores
+- `next build`: ✅
+
+### Commit
+`c3b2ac4` — `feat(frontend): panel administracion fase-7 — B18`
+
+---
+
+## Sesión B19 — Calidad, Pruebas, Observabilidad y CI/CD (2026-08-04)
+
+### Objetivo
+Fase 8: Tests unitarios, CI/CD con GitHub Actions, Prometheus, OpenTelemetry, quality gates completos.
+
+### Archivos creados/modificados
+
+**Tests backend (7 nuevos spec files):**
+- `src/modules/solicitudes/domain/services/solicitud-state-machine.spec.ts`
+- `src/common/filters/http-exception.filter.spec.ts`
+- `src/common/interceptors/response-transform.interceptor.spec.ts`
+- `src/modules/auth/infrastructure/guards/roles.guard.spec.ts`
+- `src/modules/auth/application/use-cases/login/login.use-case.spec.ts`
+- `src/modules/auth/application/use-cases/recuperar-contrasena/recuperar-contrasena.use-case.spec.ts`
+- `src/modules/solicitudes/application/use-cases/rechazar-solicitud.use-case.spec.ts`
+
+**Tests frontend (3 nuevos spec files + config):**
+- `src/lib/utils.spec.ts`
+- `src/schemas/admin.schemas.spec.ts`
+- `src/schemas/solicitudes-acciones.schemas.spec.ts`
+- `vitest.config.ts`, `src/test/setup.ts`
+
+**CI/CD:**
+- `.github/workflows/ci.yml` — pipeline backend + frontend + summary
+
+**Observabilidad:**
+- `backend/src/modules/metrics/metrics.service.ts`
+- `backend/src/modules/metrics/metrics.controller.ts`
+- `backend/src/modules/metrics/metrics.interceptor.ts`
+- `backend/src/modules/metrics/metrics.module.ts`
+- `backend/src/observability/tracing.ts`
+- `backend/src/app.module.ts` — +MetricsModule
+- `backend/src/main.ts` — +MetricsInterceptor
+
+### ADRs registrados
+- ADR-B19-001 — Prometheus con prom-client nativo
+- ADR-B19-002 — OpenTelemetry condicional por OTEL_EXPORTER_OTLP_ENDPOINT
+- ADR-B19-003 — Vitest para tests frontend
+
+### Quality gates
+- Backend: `tsc` ✅ · `lint` ✅ (0 errores) · `test` ✅ (62/62) · `build` ✅
+- Frontend: `type-check` ✅ · `lint` ✅ · `test` ✅ (41/41) · `build` ✅
+
+## Última actualización
+
+2026-08-04 — B19 completado. Fase 8 en progreso (8/15). Tests unitarios, CI/CD, Prometheus
+y OpenTelemetry implementados. Pendiente B20: tests integración, E2E, optimización BD.
+No se realizó git push. Esperando autorización para B20.
+
+### B21 — Enterprise Hardening + Preproducción (2026-08-04)
+✓ Fix: AccionAuditoria frontend corregido (valores lowercase iguales al backend)
+✓ MFA (TOTP RFC 6238) para ADMINISTRADOR: setup, activar, desactivar, verificar-login, recovery codes
+✓ Detección de robo de refresh token: familia UUID + revocación de familia completa
+✓ Global logout: POST /auth/logout/all
+✓ Correlation ID middleware: X-Correlation-Id + X-Request-Id por request
+✓ LoggingInterceptor mejorado: correlationId, requestId, duration, userAgent
+✓ Security headers Next.js: CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+✓ Docker resource limits: postgres(1CPU/512MB), redis(0.5/384MB), minio(0.5/256MB), backend(2/1GB), nginx(0.5/128MB)
+✓ Dependabot: npm(backend+frontend) + docker + github-actions
+✓ CodeQL: análisis de seguridad JavaScript/TypeScript en CI
+✓ Trivy: escaneo de contenedores + filesystem + SBOM (CycloneDX)
+✓ Migración DB: columnas MFA en usuarios + columna familia en tokens
+✓ Tests: 81 tests en 11 suites (logout, logout-all, refresh-token, login, middleware, MFA flow)
+✓ Docs: SECURITY_AUDIT.md, PRODUCTION_CHECKLIST.md, PERFORMANCE_REPORT.md, PREDEPLOY_CHECKLIST.md
+✓ Quality gates: tsc ✅ lint ✅ tests ✅ coverage(14%) ✅ build ✅ (backend + frontend)
+✓ ADR-B21-001 (MFA speakeasy), ADR-B21-002 (familia tokens), ADR-B21-003 (Correlation ID)
+
+## Próxima tarea
+B22 — Producción. Requiere autorización del usuario.

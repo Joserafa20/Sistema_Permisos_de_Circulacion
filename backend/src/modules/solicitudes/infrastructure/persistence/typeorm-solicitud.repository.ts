@@ -11,7 +11,7 @@ import { SolicitudDomainEntity } from '../../domain/entities/solicitud.domain-en
 import { SolicitudEntity } from './solicitud.entity';
 import { HistorialEstadoEntity } from './historial-estado.entity';
 import { SolicitudMapper } from './solicitud.mapper';
-import { EstadoSolicitud } from '../../../../common/enums';
+import { EstadoSolicitud, EstadoPermiso } from '../../../../common/enums';
 import { UsuarioEntity } from '../../../usuarios/infrastructure/persistence/usuario.entity';
 
 /** Estados que bloquean la creación de una nueva solicitud para la misma moto (RN-03). */
@@ -241,7 +241,7 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
       .innerJoin('solicitudes', 's', 'p.solicitud_id = s.id')
       .innerJoin('motocicletas', 'm', 's.motocicleta_id = m.id')
       .where('m.id = :motocicletaId', { motocicletaId })
-      .andWhere("p.estado = 'vigente'")
+      .andWhere('p.estado = :estado', { estado: EstadoPermiso.VIGENTE })
       .andWhere(':fechaInicio::date <= p.fecha_vencimiento::date', { fechaInicio })
       .andWhere(':fechaFin::date >= s.fecha_inicio::date', { fechaFin })
       .andWhere('s.deleted_at IS NULL')
@@ -281,7 +281,7 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
     if (todos.length === 0) return [];
 
     await this.dataSource.transaction(async (em) => {
-      // Actualizar estados a VENCIDA
+      // Actualizar estados a VENCIDA en una sola operación
       await em
         .createQueryBuilder()
         .update(SolicitudEntity)
@@ -289,36 +289,34 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
         .whereInIds(todos)
         .execute();
 
-      // Insertar historial para recibidas
-      for (const id of idsRecibidas) {
-        await em.save(
-          HistorialEstadoEntity,
-          em.create(HistorialEstadoEntity, {
-            estadoAnterior: EstadoSolicitud.RECIBIDA,
-            estadoNuevo: EstadoSolicitud.VENCIDA,
-            motivo: 'Vencimiento automático por superación de plazo de revisión',
-            camposCorreccion: null,
-            ipAddress: null,
-            solicitud: { id } as SolicitudEntity,
-            usuario: null,
-          }),
-        );
-      }
+      // Batch insert del historial (una sola query por grupo)
+      const historialRecibidas = idsRecibidas.map((id) =>
+        em.create(HistorialEstadoEntity, {
+          estadoAnterior: EstadoSolicitud.RECIBIDA,
+          estadoNuevo: EstadoSolicitud.VENCIDA,
+          motivo: 'Vencimiento automático por superación de plazo de revisión',
+          camposCorreccion: null,
+          ipAddress: null,
+          solicitud: { id } as SolicitudEntity,
+          usuario: null,
+        }),
+      );
 
-      // Insertar historial para pendientes de corrección
-      for (const id of idsPendientes) {
-        await em.save(
-          HistorialEstadoEntity,
-          em.create(HistorialEstadoEntity, {
-            estadoAnterior: EstadoSolicitud.PENDIENTE_CORRECCION,
-            estadoNuevo: EstadoSolicitud.VENCIDA,
-            motivo: 'Vencimiento automático por superación de plazo de corrección',
-            camposCorreccion: null,
-            ipAddress: null,
-            solicitud: { id } as SolicitudEntity,
-            usuario: null,
-          }),
-        );
+      const historialPendientes = idsPendientes.map((id) =>
+        em.create(HistorialEstadoEntity, {
+          estadoAnterior: EstadoSolicitud.PENDIENTE_CORRECCION,
+          estadoNuevo: EstadoSolicitud.VENCIDA,
+          motivo: 'Vencimiento automático por superación de plazo de corrección',
+          camposCorreccion: null,
+          ipAddress: null,
+          solicitud: { id } as SolicitudEntity,
+          usuario: null,
+        }),
+      );
+
+      const batchHistorial = [...historialRecibidas, ...historialPendientes];
+      if (batchHistorial.length > 0) {
+        await em.save(HistorialEstadoEntity, batchHistorial);
       }
     });
 

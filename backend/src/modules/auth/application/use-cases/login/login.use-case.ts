@@ -10,12 +10,16 @@ import { AuditoriaService } from '../../../../auditoria/application/auditoria.se
 import { AccionAuditoria } from '../../../../../common/enums/accion-auditoria.enum';
 import { TipoToken } from '../../../../../common/enums/tipo-token.enum';
 import { AuthResponseDto } from '../../dtos/auth-response.dto';
+import { UnauthorizedException } from '../../../../../common/exceptions';
+import { UserRole } from '../../../../../common/decorators/roles.decorator';
 
 export interface LoginCommand {
   userId: string;
   ipAddress: string | null;
   userAgent: string | null;
 }
+
+export type LoginResult = AuthResponseDto | { mfaRequired: true; mfaPendingToken: string };
 
 @Injectable()
 export class LoginUseCase {
@@ -29,7 +33,7 @@ export class LoginUseCase {
     private readonly tokenRepo: Repository<TokenEntity>,
   ) {}
 
-  async execute(command: LoginCommand): Promise<AuthResponseDto> {
+  async execute(command: LoginCommand): Promise<LoginResult> {
     const { userId, ipAddress, userAgent } = command;
 
     const usuario = await this.usuarioRepo.findOne({
@@ -38,7 +42,7 @@ export class LoginUseCase {
     });
 
     if (!usuario) {
-      throw new Error('Usuario no encontrado tras validación');
+      throw new UnauthorizedException('Sesión no válida');
     }
 
     await this.usuarioRepo.update(userId, {
@@ -47,6 +51,17 @@ export class LoginUseCase {
       ultimoLogin: new Date(),
     });
 
+    // Si el usuario es ADMINISTRADOR y tiene MFA activo, devolver token pendiente
+    if (usuario.rol.nombre === UserRole.ADMINISTRADOR && usuario.mfaActivo) {
+      const familia = crypto.randomUUID();
+      const mfaPendingToken = this.jwtService.sign(
+        { sub: userId, mfaPending: true, familia },
+        { expiresIn: 300 }, // 5 minutos
+      );
+      return { mfaRequired: true, mfaPendingToken };
+    }
+
+    const familia = crypto.randomUUID();
     const rol = usuario.rol.nombre;
     const payload = { sub: userId, rol };
 
@@ -69,6 +84,7 @@ export class LoginUseCase {
       revocadoAt: null,
       ipAddress: ipAddress ?? null,
       userAgent: userAgent ?? null,
+      familia,
       usuario: { id: userId } as UsuarioEntity,
     });
     await this.tokenRepo.save(tokenEntity);
