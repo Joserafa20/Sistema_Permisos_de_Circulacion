@@ -337,14 +337,22 @@ Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado,
 - [x] ADR-020: corrección tipos frontend-backend ✅ 2026-08-04 (B16)
 - [x] WCAG: aria-sort, aria-busy, aria-live, aria-label, aria-modal, focus trap ✅ 2026-08-04 (B16)
 
-### Pendiente — B17
-- [ ] Ejecutar acción aprobar solicitud (POST /solicitudes/{id}/aprobar)
-- [ ] Ejecutar acción rechazar solicitud con motivo obligatorio (POST /solicitudes/{id}/rechazar)
-- [ ] Ejecutar acción solicitar corrección con campos específicos (POST /solicitudes/{id}/correccion)
-- [ ] Toast de confirmación post-acción
-- [ ] Invalidar caché y refrescar lista tras acción
-- [ ] Visualización del permiso generado (URL firmada PDF)
-- [ ] Formularios RHF+Zod dentro de modales (motivo rechazar, campos corrección)
+### B17 — Acciones operativas: Aprobar, Rechazar, Corrección (✅ 2026-08-04)
+- [x] AccionSolicitudResponse + PermisoPdfUrl types en funcionario.ts ✅ 2026-08-04 (B17)
+- [x] aprobarSolicitud(), rechazarSolicitud(), solicitarCorreccion(), getPermisoPdfUrl() en service ✅ 2026-08-04 (B17)
+- [x] Zod schemas: rechazarSchema (min20/max1000), correccionSchema (motivo+camposCorreccion) ✅ 2026-08-04 (B17)
+- [x] useAprobarSolicitud, useRechazarSolicitud, useSolicitarCorreccion — useMutation + cache invalidation ✅ 2026-08-04 (B17)
+- [x] usePermisoPdf — URL firmada PDF on-demand con staleTime 4 min ✅ 2026-08-04 (B17)
+- [x] Invalidación automática: SOLICITUDES_KEY + SOLICITUD_DETALLE_KEY + DASHBOARD_STATS_KEY + ACTIVIDAD_KEY ✅ 2026-08-04 (B17)
+- [x] Modal Aprobar: onConfirm real + isConfirming + error inline + toast success/error ✅ 2026-08-04 (B17)
+- [x] Modal Rechazar: RHF+Zod, motivo min20/max1000, contador caracteres, aria-live ✅ 2026-08-04 (B17)
+- [x] Modal Corrección: RHF+Zod, useFieldArray, checkboxes con descripción por campo, motivo general ✅ 2026-08-04 (B17)
+- [x] Vista previa (preview step) antes de enviar corrección con cancelar → volver a editar ✅ 2026-08-04 (B17)
+- [x] ConfirmationModal: nuevos props onCancel, confirmDisabled, maxWidth ✅ 2026-08-04 (B17)
+- [x] Botón Obtener/Descargar PDF cuando solicitud.permiso está presente ✅ 2026-08-04 (B17)
+- [x] Mensajes de error de negocio: 409 overlap, 422 estado inválido ✅ 2026-08-04 (B17)
+- [x] WCAG: aria-required, aria-busy, aria-live, aria-describedby, role=alert ✅ 2026-08-04 (B17)
+- [x] ADR-021: patrón preview-step para Corrección modal ✅ 2026-08-04 (B17)
 
 ---
 

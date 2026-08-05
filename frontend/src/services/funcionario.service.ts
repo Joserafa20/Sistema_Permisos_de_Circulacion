@@ -11,6 +11,8 @@ import type {
   SolicitudDetalle,
   DocumentoUrl,
   SolicitudesFiltros,
+  AccionSolicitudResponse,
+  PermisoPdfUrl,
 } from '@/types/funcionario';
 
 /* ── Auth ──────────────────────────────────────── */
@@ -124,5 +126,44 @@ export async function getDocumentoUrl(solicitudId: string, docId: string): Promi
   const res = await apiGet<ApiResponse<DocumentoUrl>>(
     `/solicitudes/${solicitudId}/documentos/${docId}`,
   );
+  return res.data;
+}
+
+/* ── Acciones de solicitud ─────────────────────── */
+
+export async function aprobarSolicitud(id: string): Promise<AccionSolicitudResponse> {
+  const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(`/solicitudes/${id}/aprobar`, {});
+  return res.data;
+}
+
+export async function rechazarSolicitud(
+  id: string,
+  body: { motivo: string },
+): Promise<AccionSolicitudResponse> {
+  const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(
+    `/solicitudes/${id}/rechazar`,
+    body,
+  );
+  return res.data;
+}
+
+export async function solicitarCorreccion(
+  id: string,
+  body: {
+    motivo: string;
+    camposCorreccion: Array<{ campo: string; descripcion: string }>;
+  },
+): Promise<AccionSolicitudResponse> {
+  const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(
+    `/solicitudes/${id}/correccion`,
+    body,
+  );
+  return res.data;
+}
+
+/* ── Permisos PDF ──────────────────────────────── */
+
+export async function getPermisoPdfUrl(permisoId: string): Promise<PermisoPdfUrl> {
+  const res = await apiGet<ApiResponse<PermisoPdfUrl>>(`/permisos/${permisoId}/pdf`);
   return res.data;
 }

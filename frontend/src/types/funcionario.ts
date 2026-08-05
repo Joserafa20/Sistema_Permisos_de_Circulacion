@@ -196,6 +196,20 @@ export interface DocumentoUrl {
   mimeType: string;
 }
 
+export interface AccionSolicitudResponse {
+  solicitudId: string;
+  numeroRadicado: string;
+  estado: EstadoSolicitud;
+  mensaje: string | null;
+}
+
+export interface PermisoPdfUrl {
+  url: string;
+  expiraEn: string;
+  codigoPermiso: string;
+  nombreArchivo: string;
+}
+
 /* ═══════════════════════════════════════════
    Solicitudes — Filtros UI
 ═══════════════════════════════════════════ */

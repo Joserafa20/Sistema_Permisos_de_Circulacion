@@ -18,6 +18,33 @@ Su objetivo es mantener la coherencia del desarrollo y evitar que se reevalúen 
 
 ---
 
+## ADR-021 — Patrón preview-step en modal de Corrección
+
+**Fecha:** 2026-08-04
+**Bloque:** B17
+**Estado:** Aprobado
+
+### Contexto
+
+El modal de Solicitar Corrección requería que el funcionario revisara su selección antes de enviar, dado que la acción notifica al ciudadano y es difícil de revertir. La `ConfirmationModal` solo tiene un botón de confirmar y uno de cancelar.
+
+### Decisión
+
+Se implementó un estado `correccionStep: 'form' | 'preview'` dentro de `solicitud-detalle-view.tsx`. El flujo es:
+1. Paso "form": el funcionario selecciona campos y escribe observaciones + motivo. El botón confirmar dice "Revisar →".
+2. Al hacer clic, el form se valida con Zod. Si es válido, se pasa a paso "preview".
+3. Paso "preview": muestra resumen de campos seleccionados y motivo. El botón cancelar dice "← Editar" (vuelve al paso form vía `onCancel`). El botón confirmar ejecuta la mutación.
+
+Se agregaron los props `onCancel`, `confirmDisabled` y `maxWidth` a `ConfirmationModal` para soportar este patrón de forma genérica y retrocompatible.
+
+### Consecuencias
+
+- La experiencia es más segura: el funcionario ve exactamente qué se enviará antes de confirmar.
+- `ConfirmationModal` es más flexible para futuros flows multi-paso.
+- El `maxWidth="max-w-xl"` del modal de corrección permite mostrar los campos+descripciones sin truncar.
+
+---
+
 ## ADR-020 — Corrección de tipos frontend vs. DTOs del backend
 
 **Fecha:** 2026-08-04

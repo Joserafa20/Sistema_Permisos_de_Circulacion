@@ -181,21 +181,22 @@
 ## Fase 6 — Frontend Panel Funcionario
 **Objetivo:** Herramienta operativa para la gestión diaria de solicitudes.  
 **Duración estimada:** Semanas 6–7  
-**Dependencia:** Fases 3 y 4 completadas.
+**Dependencia:** Fases 3 y 4 completadas.  
+**Estado:** ✅ Completada — B15+B16+B17 (2026-08-04)
 
-- [ ] Pantalla de login con manejo de sesión JWT
-- [ ] Dashboard: KPIs del día (recibidas, pendientes, aprobadas, rechazadas, vencidas)
-- [ ] Cola de solicitudes ordenada por antigüedad con indicadores de urgencia
-- [ ] Filtros: estado, fecha, documento, placa, radicado
-- [ ] Vista de detalle de solicitud:
-  - [ ] Todos los datos personales y de la moto
-  - [ ] Previsualización de documentos adjuntos (PDF e imagen inline)
-  - [ ] Historial de estados
-- [ ] Modal de aprobación con resumen y confirmación
-- [ ] Modal de rechazo con motivo obligatorio
-- [ ] Modal de corrección con selección de campos a corregir
-- [ ] Visualización y descarga del permiso generado
-- [ ] Botón de impresión del PDF
+- [x] Pantalla de login con manejo de sesión JWT ✅ (B15)
+- [x] Dashboard: KPIs del día (recibidas, pendientes, aprobadas, rechazadas, vencidas) ✅ (B15)
+- [x] Cola de solicitudes ordenada por antigüedad con indicadores de urgencia ✅ (B16)
+- [x] Filtros: estado, fecha, documento, placa, radicado ✅ (B16)
+- [x] Vista de detalle de solicitud: ✅ (B16)
+  - [x] Todos los datos personales y de la moto ✅ (B16)
+  - [x] Previsualización de documentos adjuntos (PDF e imagen inline) ✅ (B16)
+  - [x] Historial de estados ✅ (B16)
+- [x] Modal de aprobación con resumen y confirmación ✅ (B17)
+- [x] Modal de rechazo con motivo obligatorio y contador de caracteres ✅ (B17)
+- [x] Modal de corrección con selección de campos, descripción por campo y preview paso a paso ✅ (B17)
+- [x] Visualización y descarga del permiso generado (URL firmada PDF on-demand) ✅ (B17)
+- [x] Botón de impresión del PDF ✅ (B16)
 
 ---
 
@@ -273,7 +274,7 @@
 | Fase 3 | Solicitudes Backend | 16 | 16 | ✅ Completada (B9) |
 | Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
 | Fase 5 | Frontend Ciudadano | 33 | 33 | ✅ Completada (B14) |
-| Fase 6 | Frontend Funcionario | 42 | 42 | 🔄 En progreso (B16) |
+| Fase 6 | Frontend Funcionario | 42 | 42 | ✅ Completada (B17) |
 | Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
 

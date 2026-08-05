@@ -14,7 +14,10 @@ interface Props {
   cancelLabel?: string;
   confirmVariant?: 'primary' | 'danger';
   onConfirm: () => void;
+  onCancel?: () => void;
   isConfirming?: boolean;
+  confirmDisabled?: boolean;
+  maxWidth?: string;
   children?: React.ReactNode;
 }
 
@@ -27,7 +30,10 @@ export function ConfirmationModal({
   cancelLabel = 'Cancelar',
   confirmVariant = 'primary',
   onConfirm,
+  onCancel,
   isConfirming = false,
+  confirmDisabled = false,
+  maxWidth = 'max-w-md',
   children,
 }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -63,7 +69,7 @@ export function ConfirmationModal({
       />
 
       {/* Panel */}
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white shadow-xl">
+      <div className={`relative z-10 w-full ${maxWidth} rounded-2xl bg-white shadow-xl`}>
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-neutral-100">
           <h2 id="modal-title" className="text-base font-semibold text-neutral-900">
@@ -92,7 +98,7 @@ export function ConfirmationModal({
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-6 pb-6 pt-2">
-          <Button variant="ghost" size="sm" onClick={onClose} disabled={isConfirming}>
+          <Button variant="ghost" size="sm" onClick={onCancel ?? onClose} disabled={isConfirming}>
             {cancelLabel}
           </Button>
           <Button
@@ -104,7 +110,7 @@ export function ConfirmationModal({
             )}
             onClick={onConfirm}
             loading={isConfirming}
-            disabled={isConfirming}
+            disabled={isConfirming || confirmDisabled}
           >
             {confirmLabel}
           </Button>

@@ -8,13 +8,29 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 6 🔄 EN PROGRESO — 27/27 tareas (B15+B16 completados)
+Fase: Fase 6 ✅ COMPLETADA — B15+B16+B17 completos
 
-Bloque actual: B16 ✅ COMPLETADO — Cola de solicitudes, detalle, documentos, modales de acción, componentes reutilizables
+Bloque actual: B17 ✅ COMPLETADO — Acciones operativas: Aprobar, Rechazar, Solicitar Corrección
 
 Rama: `feature/fase-2-auth`
 
-Estado: B15+B16 completados. Portal Funcionario operativo (login, dashboard, cola solicitudes, detalle). Siguiente: B17 (acciones: aprobar/rechazar/correccion).
+Estado: Fase 6 Frontend Funcionario completada. Portal Funcionario totalmente operativo. Siguiente: B18 (Fase 7 — Panel Administrador).
+
+### B17 — Acciones operativas Aprobar/Rechazar/Corrección (2026-08-04)
+✓ AccionSolicitudResponse + PermisoPdfUrl types añadidos a funcionario.ts
+✓ aprobarSolicitud(), rechazarSolicitud(), solicitarCorreccion(), getPermisoPdfUrl() en service
+✓ Zod schemas: rechazarSchema (min20/max1000) + correccionSchema (motivo + camposCorreccion array)
+✓ useAprobarSolicitud, useRechazarSolicitud, useSolicitarCorreccion — useMutation con invalidación completa
+✓ usePermisoPdf — URL firmada PDF on-demand, staleTime 4 min
+✓ Invalidación: SOLICITUDES_KEY + SOLICITUD_DETALLE_KEY + DASHBOARD_STATS_KEY + ACTIVIDAD_KEY
+✓ Modal Aprobar: acción real + loading state + toast success/error + error inline
+✓ Modal Rechazar: RHF+Zod, contador caracteres, aria-live, confirmDisabled
+✓ Modal Corrección: RHF+Zod+useFieldArray, checkboxes campos con descripción, motivo general
+✓ Preview step corrección (ADR-021): "Revisar →" → preview → "← Editar" / "Enviar corrección"
+✓ Botón Obtener/Descargar PDF cuando solicitud.permiso está presente
+✓ ConfirmationModal: props onCancel + confirmDisabled + maxWidth (retrocompatibles)
+✓ Mensajes de error de negocio: 409 overlap, 422 estado inválido
+✓ WCAG: aria-required, aria-busy, aria-live, aria-describedby, role=alert
 
 ### B16 — Cola de Solicitudes y Detalle (2026-08-04)
 ✓ Tipos backend correctos: SolicitudListItem, SolicitudDetalle, CiudadanoDetalle, MotocicletaDetalle, MotivoDetalle, DocumentoItem, HistorialEstadoItem, PaginatedSolicitudesResponse, SolicitudesFiltros (ADR-020)
