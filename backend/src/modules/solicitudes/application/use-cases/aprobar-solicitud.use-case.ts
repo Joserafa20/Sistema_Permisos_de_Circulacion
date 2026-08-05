@@ -107,8 +107,23 @@ export class AprobarSolicitudUseCase {
       usuarioId,
     });
 
-    // Generar permiso (PDF + QR + MinIO + DB) de forma sincrónica
-    const permiso = await this.generarPermisoUseCase.ejecutar(solicitudId, usuarioId, ipAddress);
+    // Generar permiso (PDF + QR + MinIO + DB) de forma sincrónica.
+    // Si falla, revertir la solicitud a EN_REVISION para evitar estado APROBADA sin permiso.
+    let permiso: Awaited<ReturnType<typeof this.generarPermisoUseCase.ejecutar>>;
+    try {
+      permiso = await this.generarPermisoUseCase.ejecutar(solicitudId, usuarioId, ipAddress);
+    } catch (err) {
+      await this.solicitudRepo.cambiarEstado({
+        id: solicitudId,
+        estadoNuevo: EstadoSolicitud.EN_REVISION,
+        estadosPermitidos: [EstadoSolicitud.APROBADA],
+        motivo: 'Revertido: fallo en generación de permiso',
+        camposCorreccion: null,
+        usuarioId,
+        ipAddress,
+      });
+      throw err;
+    }
 
     // Notificar al ciudadano (fire-and-forget — RN-76)
     if (solicitud.ciudadanoEmail) {

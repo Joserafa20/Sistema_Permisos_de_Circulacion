@@ -139,6 +139,7 @@ export class VerifyMfaLoginUseCase {
 
   private async verifyRecoveryCode(usuario: UsuarioEntity, code: string): Promise<boolean> {
     const codes = usuario.mfaRecoveryCodes;
+    if (!codes || codes.length === 0) return false;
     for (let i = 0; i < codes.length; i++) {
       const match = await bcrypt.compare(code.toUpperCase(), codes[i]);
       if (match) {
