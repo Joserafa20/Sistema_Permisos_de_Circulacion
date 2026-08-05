@@ -243,24 +243,25 @@
 - [x] `README_DEPLOY.md` con flujo completo: variables, migraciones, backup, rollback ✅ 2026-08-04 (B11)
 - [x] `MinioStorageAdapter.ping()` para health check sin acoplamiento ✅ 2026-08-04 (B11)
 
-- [ ] Pruebas unitarias backend (cobertura ≥ 80%)
-  - [ ] Use cases críticos
-  - [ ] Guards y validaciones
-  - [ ] Servicios de dominio
-- [ ] Pruebas de integración (flujos críticos end-to-end en backend)
-  - [ ] Flujo completo: crear solicitud → aprobar → generar PDF → validar QR
-  - [ ] Flujo de rechazo y notificación
-  - [ ] Flujo de corrección y reenvío
-- [ ] Pruebas E2E del portal ciudadano (Playwright o Cypress)
+### B19 — Calidad, Pruebas, Observabilidad y CI/CD (✅ 2026-08-04)
+
+- [x] Tests unitarios backend: 7 suites, 62 tests verdes ✅ 2026-08-04 (B19)
+  - [x] SolicitudStateMachine (16 casos), HttpExceptionFilter (8), ResponseTransformInterceptor (5)
+  - [x] RolesGuard (6), LoginUseCase (8), RecuperarContrasenaUseCase (9), RechazarSolicitudUseCase (10)
+- [x] Tests unitarios frontend: 3 suites, 41 tests verdes ✅ 2026-08-04 (B19)
+  - [x] lib/utils, schemas/admin, schemas/solicitudes-acciones
+- [x] Vitest configurado (jsdom, @testing-library/react, coverage v8) ✅ 2026-08-04 (B19)
+- [x] GitHub Actions CI/CD pipeline (backend + frontend, artifacts, summary job) ✅ 2026-08-04 (B19)
+- [x] Prometheus: metrics.service, metrics.controller, metrics.interceptor, MetricsModule ✅ 2026-08-04 (B19)
+- [x] OpenTelemetry: tracing.ts condicional, OTLPTraceExporter, resourceFromAttributes ✅ 2026-08-04 (B19)
+
+**Pendiente (Fase 8 — scope B20+):**
+- [ ] Tests de integración (flujo completo solicitud → permiso → QR)
+- [ ] Tests E2E (Playwright — requiere infraestructura levantada)
 - [ ] Optimización de consultas BD (EXPLAIN ANALYZE en queries críticos)
-- [ ] Docker para producción (multi-stage builds)
-- [ ] `docker-compose.prod.yml` con Nginx + SSL
-- [ ] Configuración de CI/CD (GitHub Actions)
-- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`)
-- [ ] Manual de Usuario (`docs/MANUAL_USUARIO.md`)
-- [ ] Guía de despliegue en producción (`docs/GUIA_DESPLIEGUE.md`)
 - [ ] Datos de prueba para entorno de demo
-- [ ] Revisión de seguridad final (checklist `SECURITY.md`)
+- [ ] Revisión de seguridad final (checklist SECURITY.md)
+- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`)
 
 ---
 
@@ -278,8 +279,8 @@
 | Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
 | Fase 5 | Frontend Ciudadano | 33 | 33 | ✅ Completada (B14) |
 | Fase 6 | Frontend Funcionario | 42 | 42 | ✅ Completada (B17) |
-| Fase 7 | Panel Admin | 5 | 10 | 🔄 En progreso (B18) |
-| Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
+| Fase 7 | Panel Admin | 5 | 10 | 🔄 En progreso (B18, pendiente B20+) |
+| Fase 8 | Calidad y Producción | 8 | 15 | 🔄 En progreso (B19) |
 
 **Duración total estimada:** 10 semanas para un equipo de 2–3 desarrolladores.
 

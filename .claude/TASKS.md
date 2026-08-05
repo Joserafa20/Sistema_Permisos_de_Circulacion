@@ -418,26 +418,68 @@ Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado,
 **Objetivo:** Sistema listo para operar en producción con garantías de calidad.
 **Semanas:** 8–10
 **Dependencia:** Fases 5, 6 y 7 completadas.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B19 completado (2026-08-04)
 
-- [ ] Pruebas unitarias backend (cobertura ≥ 80%)
-  - [ ] Use cases críticos
-  - [ ] Guards y validaciones
-  - [ ] Servicios de dominio
-- [ ] Pruebas de integración (flujos críticos end-to-end en backend)
-  - [ ] Flujo completo: crear solicitud → aprobar → generar PDF → validar QR
-  - [ ] Flujo de rechazo y notificación
-  - [ ] Flujo de corrección y reenvío
-- [ ] Pruebas E2E del portal ciudadano (Playwright o Cypress)
+### B19 — Calidad, Pruebas, Observabilidad y CI/CD (✅ 2026-08-04)
+
+**Tests unitarios backend (7 suites, 62 tests):**
+- [x] `solicitud-state-machine.spec.ts` — 16 casos (transiciones válidas/inválidas, estados terminales, validar()) ✅
+- [x] `http-exception.filter.spec.ts` — 8 casos (DomainException, BusinessRuleException, NotFoundException, HttpException, Error desconocido, success:false, stack trace, logger) ✅
+- [x] `response-transform.interceptor.spec.ts` — 5 casos (datos simples, paginado, array, null, timestamp) ✅
+- [x] `roles.guard.spec.ts` — 6 casos (pública, sin roles, rol correcto, rol incorrecto, sin usuario, múltiples roles) ✅
+- [x] `login.use-case.spec.ts` — 8 casos (usuario no existe, login exitoso, SHA256 refresh token, contrasenaExpirada, auditoría, reset intentos) ✅
+- [x] `recuperar-contrasena.use-case.spec.ts` — 9 casos (anti-enumeración, usuario inactivo, tokenHash SHA256, invalidación, expiración 1h) ✅
+- [x] `rechazar-solicitud.use-case.spec.ts` — 10 casos (NotFoundException, BusinessRuleException estados terminales, rechazo exitoso, concurrencia, notificación, auditoría) ✅
+
+**Tests unitarios frontend (3 suites, 41 tests):**
+- [x] `lib/utils.spec.ts` — cn(), truncate(), formatFileSize(), formatDate(), formatDateLong() ✅
+- [x] `schemas/admin.schemas.spec.ts` — configuracionSchema, crearUsuarioSchema, actualizarUsuarioSchema ✅
+- [x] `schemas/solicitudes-acciones.schemas.spec.ts` — rechazarSchema, correccionSchema ✅
+
+**Configuración Vitest (frontend):**
+- [x] `vitest.config.ts` — jsdom, globals, @vitejs/plugin-react, coverage v8, alias @ ✅
+- [x] `src/test/setup.ts` — @testing-library/jest-dom ✅
+- [x] `frontend/package.json` — scripts test, test:watch, test:cov; devDependencies vitest ✅
+
+**CI/CD — GitHub Actions:**
+- [x] `.github/workflows/ci.yml` — jobs backend + frontend + summary; triggers push/PR a main/develop/feature/hotfix ✅
+- [x] Backend job: npm ci → tsc → lint → test:cov → build → upload artifacts ✅
+- [x] Frontend job: npm ci → type-check → lint → test:cov → build → upload artifacts ✅
+
+**Observabilidad — Prometheus:**
+- [x] `modules/metrics/metrics.service.ts` — Registry, http_requests_total, http_request_duration_seconds, bullmq_jobs_processed_total, bullmq_job_errors_total, collectDefaultMetrics ✅
+- [x] `modules/metrics/metrics.controller.ts` — GET /metrics, @Public(), restricción IP en producción ✅
+- [x] `modules/metrics/metrics.interceptor.ts` — normalizeRoute(), startTimer(), tap/catchError ✅
+- [x] `modules/metrics/metrics.module.ts` — Module con MetricsService exported ✅
+- [x] `app.module.ts` — MetricsModule registrado ✅
+- [x] `main.ts` — MetricsInterceptor registrado globalmente ✅
+
+**Observabilidad — OpenTelemetry:**
+- [x] `observability/tracing.ts` — NodeSDK condicional (solo si OTEL_EXPORTER_OTLP_ENDPOINT definido), resourceFromAttributes, OTLPTraceExporter, getNodeAutoInstrumentations (fs/dns desactivados), SIGTERM graceful shutdown ✅
+
+**Docker y producción:**
+- [x] Dockerfiles multi-stage (deps → build → development → production), usuario no-root, HEALTHCHECK integrado ✅ (ya existían desde B11.1)
+- [x] docker-compose.yml — healthchecks, restart: unless-stopped, logging json-file, volúmenes nombrados ✅ (ya existía desde B11)
+- [x] docker-compose.prod.yml — Nginx, redes internas, restart: always ✅ (ya existía desde B11)
+
+**Quality gates B19:**
+- [x] `backend tsc --noEmit` ✅ (0 errores)
+- [x] `backend lint` ✅ (0 errores, 22 warnings en specs — solo return types)
+- [x] `backend test` ✅ (62/62 passed)
+- [x] `backend build` ✅
+- [x] `frontend type-check` ✅
+- [x] `frontend lint` ✅ (0 warnings)
+- [x] `frontend test` ✅ (41/41 passed)
+- [x] `frontend build` ✅
+
+**Pendiente (Fase 8 parcial — fuera de scope B19):**
+- [ ] Tests de integración (flujo completo: crear solicitud → aprobar → generar PDF → validar QR)
+- [ ] Tests E2E (Playwright o Cypress — requiere infraestructura levantada)
 - [ ] Optimización de consultas BD (EXPLAIN ANALYZE en queries críticos)
-- [ ] Docker para producción (multi-stage builds)
-- [ ] `docker-compose.prod.yml` con Nginx + SSL
-- [ ] Configuración de CI/CD (GitHub Actions)
-- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`) — ✅ ya generado
-- [ ] Manual de Usuario (`docs/MANUAL_USUARIO.md`) — ✅ ya generado
-- [ ] Guía de despliegue en producción (`docs/PLAN_DESPLIEGUE.md`) — ✅ ya generado
 - [ ] Datos de prueba para entorno de demo
-- [ ] Revisión de seguridad final (checklist `SECURITY.md`)
+- [ ] Revisión de seguridad final (checklist SECURITY.md)
+- [ ] Manual Técnico (`docs/MANUAL_TECNICO.md`) — pendiente
+- [ ] Dashboard administrativo con KPIs globales (pendiente Fase 7 scope B19+)
 
 ---
 
@@ -445,17 +487,25 @@ Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado,
 
 ### Fase Activa
 
-Fase 4 — Generación de Permiso (PDF + QR) ← ✅ COMPLETADA — 18/18 tareas
-Fase 5 — Frontend Portal Ciudadano ← Siguiente fase (no iniciada)
+Fase 7 — Panel Admin ← ✅ 5/5 tareas B18 completadas (pendiente scope B19+)
+Fase 8 — Calidad y Producción ← 🔄 En progreso (B19 completado)
 
 ### Tareas pendientes
 
-Todas las tareas de Backend (Fases 0–4) están completadas.
-El próximo desarrollo es Frontend (Fases 5, 6, 7) o Fase 8 (calidad y producción).
+- Fase 8: Tests integración, E2E, optimización BD, datos demo, checklist seguridad
+- Fase 7: Dashboard KPIs, CRUDs Roles/Dependencias/Motivos, auditoría, upload imágenes
 
 ### Última tarea terminada
 
-B11.1 — Cierre de Infraestructura de Producción (2026-08-04):
+B19 — Calidad, Pruebas, Observabilidad y CI/CD (2026-08-04):
+- 7 suites backend (62 tests), 3 suites frontend (41 tests) — todos verdes
+- Vitest configurado para frontend (jsdom + @testing-library)
+- GitHub Actions CI/CD pipeline completo (backend + frontend)
+- Módulo Prometheus: métricas HTTP, BullMQ, collectDefaultMetrics
+- OpenTelemetry: NodeSDK condicional con resourceFromAttributes y OTLPTraceExporter
+- Quality gates: tsc ✅ lint ✅ tests ✅ build ✅ (ambos lados)
+
+B18 — Panel Administración Fase 7 (2026-08-04):
 - docker/nginx/nginx.conf creado: gzip, proxy_buffering, keepalive, rate limiting Nginx, headers de seguridad completos (X-Frame-Options, X-Content-Type-Options, CSP, Permissions-Policy, COEP), HSTS listo (comentado hasta confirmar SSL), WebSocket upgrade, manejo de errores 404/500 en JSON, TLS 1.2/1.3 Mozilla Modern
 - docker/nginx/ssl/.gitkeep: directorio versionado, certificados excluidos
 - .gitignore: +.env.production, +.env.staging, +docker/.env.production, +docker/nginx/ssl/*.pem/*.crt/*.key (hallazgo crítico — no estaba cubierto)

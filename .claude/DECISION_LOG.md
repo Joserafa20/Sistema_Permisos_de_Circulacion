@@ -1020,3 +1020,42 @@ Antes de modificar una decisión existente:
 **Decisión:** Stage `deps` separado ejecuta `npm ci --omit=dev` una vez y la imagen de producción copia sus `node_modules`. Stage `build` ejecuta `npm ci` (con dev deps) y compila TypeScript. La imagen final copia `dist/` de `build` y `node_modules/` de `deps`. Zero `npm prune`.
 
 **Consecuencias:** Layer cache más efectivo — cambios en código fuente no invalidan el layer de producción deps. Imagen final no contiene dev deps, `src/`, ni herramientas de TypeScript.
+
+---
+
+## ADR-B19-001 — Prometheus con prom-client nativo (sin NestJS PrometheusModule)
+
+**Fecha:** 2026-08-04 (B19)  
+**Estado:** ✅ Activo
+
+**Contexto:** Existen módulos de terceros como `@willsoto/nestjs-prometheus` que integran prom-client en NestJS. Sin embargo, añaden una capa de abstracción que complica el control de la cardinalidad de labels y el acceso al Registry.
+
+**Decisión:** `MetricsModule` usa `prom-client` directamente. `MetricsService` crea su propio `Registry` con label `{app: 'pyp-backend'}`, expone los contadores e histogramas como propiedades públicas, y llama `collectDefaultMetrics()` en `onModuleInit()`. `MetricsInterceptor` se inyecta en `main.ts` junto a los demás interceptores globales. El endpoint `GET /metrics` está marcado `@Public()` y restringe acceso a IPs internas en producción.
+
+**Consecuencias:** Control total sobre métricas, sin dependencia de módulos de terceros. `MetricsService` es el único punto de acceso al Registry — no hay registros globales implícitos que puedan colisionar con tests.
+
+---
+
+## ADR-B19-002 — OpenTelemetry condicional por variable de entorno
+
+**Fecha:** 2026-08-04 (B19)  
+**Estado:** ✅ Activo
+
+**Contexto:** OpenTelemetry requiere infraestructura externa (Jaeger, Tempo, OTLP collector). En desarrollo y CI, esta infraestructura no existe. Inicializar el SDK sin collector causa errores de conexión en los logs.
+
+**Decisión:** `observability/tracing.ts` comprueba `OTEL_EXPORTER_OTLP_ENDPOINT` antes de inicializar el SDK. Si la variable no está definida, el módulo imprime un mensaje informativo (silencioso en NODE_ENV=test) y no registra ningún SpanProcessor. Se usa `resourceFromAttributes` de `@opentelemetry/resources` v2 (no `new Resource(...)` que solo exporta tipo en v2). El exporter usa `@opentelemetry/exporter-trace-otlp-http` (paquete moderno) en lugar de `@opentelemetry/exporter-otlp-http` (legacy deprecado).
+
+**Consecuencias:** En desarrollo y CI el tracing es un no-op. En producción, basta con definir `OTEL_EXPORTER_OTLP_ENDPOINT` para habilitar spans automáticos de HTTP, PostgreSQL, Redis y BullMQ. SIGTERM dispara `sdk.shutdown()` para evitar pérdida de spans al detener el proceso.
+
+---
+
+## ADR-B19-003 — Vitest para tests frontend (no Jest)
+
+**Fecha:** 2026-08-04 (B19)  
+**Estado:** ✅ Activo
+
+**Contexto:** El backend usa Jest con ts-jest. El frontend (Next.js 15 + React 19) tiene una configuración webpack/turbopack que hace difícil integrar Jest — requiere mocks de módulos CSS, SVG, y transformadores específicos para cada versión de Next.js.
+
+**Decisión:** Vitest con `environment: 'jsdom'` y `@vitejs/plugin-react` para el frontend. El plugin resuelve JSX/TSX sin configuración adicional. El alias `@` se configura con `path.resolve` en `vitest.config.ts`. La cobertura usa el provider `v8` nativo (sin istanbul).
+
+**Consecuencias:** Setup mínimo, ejecución rápida, sin conflictos con la build de Next.js. Los archivos `.spec.ts` y `.spec.tsx` corren en jsdom con las mismas APIs de `@testing-library/react`. El comando `npm test` en backend → Jest; en frontend → Vitest. Equipos deben tener esto en cuenta al escribir tests.

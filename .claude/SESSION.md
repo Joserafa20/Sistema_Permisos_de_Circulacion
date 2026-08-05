@@ -568,3 +568,84 @@ Commit: `feat(frontend): portal ciudadano consultas y validacion QR — B14`
 2026-08-04 — B15 completado. Fase 6 iniciada (20/27). Portal Funcionario: infraestructura
 completa (auth, layout, dashboard). Próximo: B16 — Cola de solicitudes y flujos de gestión.
 Requiere autorización.
+
+---
+
+## Sesión B18 — Panel Administración Fase 7 (2026-08-04)
+
+### Objetivo
+Implementar el Panel Administrador completo (módulos de usuarios, configuración, sistema) y sus páginas Next.js.
+
+### Archivos creados/modificados
+- `backend/src/modules/usuarios/infrastructure/controllers/catalogos-admin.controller.ts` — GET /roles, GET /dependencias
+- `frontend/src/modules/admin/usuarios-view.tsx` — tabla paginada, búsqueda debounced, filtros
+- `frontend/src/modules/admin/usuario-detalle-view.tsx` — ficha + edición inline + modales confirmación
+- `frontend/src/modules/admin/nuevo-usuario-view.tsx` — formulario + diálogo contraseña temporal
+- `frontend/src/app/funcionario/(panel)/usuarios/page.tsx` — página usuarios
+- `frontend/src/app/funcionario/(panel)/usuarios/nuevo/page.tsx` — página nuevo usuario
+- `frontend/src/app/funcionario/(panel)/usuarios/[id]/page.tsx` — página detalle usuario
+- `frontend/src/app/funcionario/(panel)/configuracion/page.tsx` — página configuración
+- `frontend/src/app/funcionario/(panel)/sistema/page.tsx` — página estado sistema
+
+### ADRs registrados
+- ADR-022 — GET /roles y GET /dependencias con @InjectRepository directo (sin hexagonal para catálogos simples)
+- ADR-023 — Portal Administrador bajo /funcionario/(panel)/ reutilizando middleware y AuthProvider
+
+### Quality gates
+- `tsc --noEmit`: ✅ (5 errores corregidos antes del commit)
+- `lint`: ✅ 0 errores
+- `next build`: ✅
+
+### Commit
+`c3b2ac4` — `feat(frontend): panel administracion fase-7 — B18`
+
+---
+
+## Sesión B19 — Calidad, Pruebas, Observabilidad y CI/CD (2026-08-04)
+
+### Objetivo
+Fase 8: Tests unitarios, CI/CD con GitHub Actions, Prometheus, OpenTelemetry, quality gates completos.
+
+### Archivos creados/modificados
+
+**Tests backend (7 nuevos spec files):**
+- `src/modules/solicitudes/domain/services/solicitud-state-machine.spec.ts`
+- `src/common/filters/http-exception.filter.spec.ts`
+- `src/common/interceptors/response-transform.interceptor.spec.ts`
+- `src/modules/auth/infrastructure/guards/roles.guard.spec.ts`
+- `src/modules/auth/application/use-cases/login/login.use-case.spec.ts`
+- `src/modules/auth/application/use-cases/recuperar-contrasena/recuperar-contrasena.use-case.spec.ts`
+- `src/modules/solicitudes/application/use-cases/rechazar-solicitud.use-case.spec.ts`
+
+**Tests frontend (3 nuevos spec files + config):**
+- `src/lib/utils.spec.ts`
+- `src/schemas/admin.schemas.spec.ts`
+- `src/schemas/solicitudes-acciones.schemas.spec.ts`
+- `vitest.config.ts`, `src/test/setup.ts`
+
+**CI/CD:**
+- `.github/workflows/ci.yml` — pipeline backend + frontend + summary
+
+**Observabilidad:**
+- `backend/src/modules/metrics/metrics.service.ts`
+- `backend/src/modules/metrics/metrics.controller.ts`
+- `backend/src/modules/metrics/metrics.interceptor.ts`
+- `backend/src/modules/metrics/metrics.module.ts`
+- `backend/src/observability/tracing.ts`
+- `backend/src/app.module.ts` — +MetricsModule
+- `backend/src/main.ts` — +MetricsInterceptor
+
+### ADRs registrados
+- ADR-B19-001 — Prometheus con prom-client nativo
+- ADR-B19-002 — OpenTelemetry condicional por OTEL_EXPORTER_OTLP_ENDPOINT
+- ADR-B19-003 — Vitest para tests frontend
+
+### Quality gates
+- Backend: `tsc` ✅ · `lint` ✅ (0 errores) · `test` ✅ (62/62) · `build` ✅
+- Frontend: `type-check` ✅ · `lint` ✅ · `test` ✅ (41/41) · `build` ✅
+
+## Última actualización
+
+2026-08-04 — B19 completado. Fase 8 en progreso (8/15). Tests unitarios, CI/CD, Prometheus
+y OpenTelemetry implementados. Pendiente B20: tests integración, E2E, optimización BD.
+No se realizó git push. Esperando autorización para B20.

@@ -21,6 +21,7 @@ import { PermisosModule } from './modules/permisos/permisos.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { RedisModule } from './modules/redis/redis.module';
 
     // ── Módulos funcionales ────────────────────────────────────────
     StorageModule,
+    MetricsModule,
     HealthModule,
     ConfiguracionInstitucionalModule,
     AuthModule,
