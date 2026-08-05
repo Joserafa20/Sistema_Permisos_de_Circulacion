@@ -8,13 +8,13 @@ Este documento mantiene el estado actual del desarrollo para permitir la continu
 
 ## Fase actual
 
-Fase: Fase 6 ✅ COMPLETADA — B15+B16+B17 completos
+Fase: Fase 7 🔄 En progreso — B18 completado
 
-Bloque actual: B17 ✅ COMPLETADO — Acciones operativas: Aprobar, Rechazar, Solicitar Corrección
+Bloque actual: B18 ✅ COMPLETADO — Panel Administración Fase 7 (configuración, usuarios CRUD, sistema health)
 
 Rama: `feature/fase-2-auth`
 
-Estado: Fase 6 Frontend Funcionario completada. Portal Funcionario totalmente operativo. Siguiente: B18 (Fase 7 — Panel Administrador).
+Estado: Portal Administrador parcialmente implementado. B18 entrega: configuración institucional, gestión usuarios completa (lista + detalle + crear), estado del sistema. Pendiente B19: dashboard admin KPIs, roles, dependencias, motivos, auditoría, reportes.
 
 ### B17 — Acciones operativas Aprobar/Rechazar/Corrección (2026-08-04)
 ✓ AccionSolicitudResponse + PermisoPdfUrl types añadidos a funcionario.ts
@@ -31,6 +31,39 @@ Estado: Fase 6 Frontend Funcionario completada. Portal Funcionario totalmente op
 ✓ ConfirmationModal: props onCancel + confirmDisabled + maxWidth (retrocompatibles)
 ✓ Mensajes de error de negocio: 409 overlap, 422 estado inválido
 ✓ WCAG: aria-required, aria-busy, aria-live, aria-describedby, role=alert
+
+### B18 — Panel Administración Fase 7 (2026-08-04)
+
+**Backend:**
+✓ CatalogosAdminController: GET /roles + GET /dependencias (ADR-022)
+✓ UsuariosModule registra CatalogosAdminController
+
+**Frontend — infraestructura:**
+✓ api-client.ts: apiPut + apiDelete helpers
+✓ types/admin.ts — todos los tipos admin + health
+✓ schemas/admin.schemas.ts — configuracion + crearUsuario + actualizarUsuario
+✓ services/admin.service.ts — todos los endpoints admin (getConfiguracion, patchConfiguracion, CRUD usuarios, getRoles, getDependencias, getHealth)
+✓ hooks/use-admin-configuracion.ts
+✓ hooks/use-admin-usuarios.ts (7 hooks + cache invalidation)
+✓ hooks/use-admin-catalogs.ts (useRoles, useDependencias — staleTime 10min)
+✓ hooks/use-health.ts (refetch 30s, staleTime 0, retry 0)
+✓ constants.ts: FUNC_ROUTES ampliado (usuarios, usuariosNuevo, configuracion, sistema)
+✓ sidebar.tsx: nav item Sistema con Activity icon
+
+**Frontend — componentes:**
+✓ components/admin/usuario-rol-badge.tsx
+✓ components/admin/health-indicator.tsx
+
+**Frontend — módulos y páginas:**
+✓ modules/admin/configuracion-view.tsx → /funcionario/configuracion
+✓ modules/admin/sistema-view.tsx → /funcionario/sistema
+✓ modules/admin/usuarios-view.tsx → /funcionario/usuarios (lista + filtros + paginación)
+✓ modules/admin/usuario-detalle-view.tsx → /funcionario/usuarios/[id] (ficha + editar + acciones)
+✓ modules/admin/nuevo-usuario-view.tsx → /funcionario/usuarios/nuevo (form + dialog contraseña temp)
+✓ ADR-022: endpoints catálogo roles/dependencias
+✓ ADR-023: portal admin bajo /funcionario/(panel)/ reutilizando infraestructura
+
+**Quality gates:** tsc ✅ · lint ✅ · build ✅
 
 ### B16 — Cola de Solicitudes y Detalle (2026-08-04)
 ✓ Tipos backend correctos: SolicitudListItem, SolicitudDetalle, CiudadanoDetalle, MotocicletaDetalle, MotivoDetalle, DocumentoItem, HistorialEstadoItem, PaginatedSolicitudesResponse, SolicitudesFiltros (ADR-020)

@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, FileText, ShieldCheck, Users, Settings, X, Menu } from 'lucide-react';
+import {
+  LayoutDashboard,
+  FileText,
+  ShieldCheck,
+  Users,
+  Settings,
+  X,
+  Menu,
+  Activity,
+} from 'lucide-react';
 import { SidebarItem } from './sidebar-item';
 import { PermissionGate } from './permission-gate';
 import { FUNC_ROUTES, SYSTEM_SHORT_NAME } from '@/lib/constants';
@@ -17,8 +26,9 @@ const NAV_ITEMS = [
 ] as const;
 
 const ADMIN_NAV_ITEMS = [
-  { href: '/funcionario/usuarios', label: 'Usuarios', icon: Users },
-  { href: '/funcionario/configuracion', label: 'Configuración', icon: Settings },
+  { href: FUNC_ROUTES.usuarios, label: 'Usuarios', icon: Users },
+  { href: FUNC_ROUTES.configuracion, label: 'Configuración', icon: Settings },
+  { href: FUNC_ROUTES.sistema, label: 'Sistema', icon: Activity },
 ] as const;
 
 export function Sidebar() {

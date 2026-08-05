@@ -18,6 +18,68 @@ Su objetivo es mantener la coherencia del desarrollo y evitar que se reevalúen 
 
 ---
 
+## ADR-023 — Portal Administrador bajo /funcionario/(panel)/ (no /admin/)
+**Fecha:** 2026-08-04
+**Bloque:** B18
+**Estado:** Aprobado
+
+### Contexto
+
+El PRD describe un "Portal Administrador" separado del Portal Funcionario. En la implementación, la pregunta es si crear un route group `/admin/(panel)/` independiente con su propio layout, middleware y AuthProvider, o reutilizar la infraestructura existente de `/funcionario/(panel)/`.
+
+### Decisión
+
+El panel admin vive bajo `/funcionario/(panel)/` junto con el panel funcionario. Los accesos específicos de administrador (usuarios, configuración, sistema) se protegen mediante `PermissionGate` con `requiredRole="administrador"`. El middleware, el JWT, el AuthProvider y los componentes de layout (Sidebar, HeaderFunc, PageContainer) son compartidos.
+
+### Justificación
+
+- Reutiliza todo el scaffolding de B15 sin duplicación.
+- El backend usa el mismo JWT y los mismos guards (JwtAuthGuard + RolesGuard) para ambos roles.
+- La diferenciación visual se logra con `ADMIN_NAV_ITEMS` en el Sidebar condicional por rol.
+- Crea una ruta `/admin/` separada implicaría duplicar: middleware, AuthProvider, layout, interceptores, componentes de UI — sin beneficio funcional.
+
+### Consecuencias
+
+- Las rutas admin son: `/funcionario/usuarios`, `/funcionario/configuracion`, `/funcionario/sistema`.
+- Un funcionario que intente acceder a estas rutas verá un `PermissionGate` de acceso denegado.
+- Si en el futuro se requiere un subdominio `admin.alcaldia.gov.co`, se puede crear un redirect en Next.js sin cambiar los componentes.
+
+---
+
+## ADR-022 — Endpoints GET /roles y GET /dependencias en UsuariosModule
+**Fecha:** 2026-08-04
+**Bloque:** B18
+**Estado:** Aprobado
+
+### Contexto
+
+El formulario de creación/edición de usuarios requiere los UUIDs de roles y dependencias para los campos `rolId` y `dependenciaId` del DTO. Sin endpoints de catálogo, el formulario no puede poblarse con selects y es literalmente inutilizable.
+
+El PRD no especifica explícitamente estos endpoints en la lista de APIs, pero son prerequisito funcional para CU-30 (crear usuario).
+
+### Decisión
+
+Se añadieron dos endpoints read-only dentro del `UsuariosModule`:
+
+- `GET /api/v1/roles` — devuelve `RolCatalogoDto[]` (id, nombre, descripcion)
+- `GET /api/v1/dependencias` — devuelve `DependenciaCatalogoDto[]` (id, nombre, codigo)
+
+Implementados en `CatalogosAdminController` usando `@InjectRepository` directo (sin capa hexagonal), dado que son lecturas simples sin lógica de dominio. Requieren rol `ADMINISTRADOR`.
+
+### Justificación
+
+- Son endpoints de catálogo (solo lectura, sin estado mutable).
+- La arquitectura hexagonal añadiría 4 archivos de overhead (use-case, port, repository-impl, service) para un `findAll()` simple.
+- Precedente: el `ConfiguracionInstitucionalModule` en Fase 2 también usa `@InjectRepository` para la lectura inicial del seed.
+
+### Consecuencias
+
+- El frontend puede poblar correctamente los selects de Rol y Dependencia.
+- Si en el futuro se necesita lógica (e.g., filtrar por módulo, permisos granulares), se migra al patrón hexagonal en ese momento.
+- Los endpoints requieren `@ApiBearerAuth` y el guard de rol — no son endpoints públicos.
+
+---
+
 ## ADR-021 — Patrón preview-step en modal de Corrección
 
 **Fecha:** 2026-08-04

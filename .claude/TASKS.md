@@ -360,29 +360,57 @@ Todas las páginas del Portal Ciudadano son funcionales: /, /solicitud, /estado,
 **Objetivo:** Control total del sistema desde la interfaz.
 **Semanas:** 7–8
 **Dependencia:** Fase 6 completada.
-**Estado:** ⬜ No iniciada
+**Estado:** 🔄 En progreso — B18 completado (fase-7 infraestructura + gestión usuarios + configuración + sistema)
 
-- [ ] Pantalla "Configuración Institucional" (CU-42 a CU-45):
-  - [ ] Vista de consulta con previsualización de escudo y logo (HU-44)
-  - [ ] Formulario de edición de datos textuales (HU-45)
-  - [ ] Carga/reemplazo del escudo con validación de formato y tamaño (HU-46)
-  - [ ] Carga/reemplazo del logo con opción de eliminar (HU-47)
-- [ ] Dashboard administrativo con KPIs globales
-- [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
-- [ ] CRUD de Roles
+### B18 — Panel Administración Fase 7 (✅ 2026-08-04)
+
+**Backend (catalogos admin):**
+- [x] `GET /roles` — catálogo de roles (ADR-022) ✅ 2026-08-04 (B18)
+- [x] `GET /dependencias` — catálogo de dependencias (ADR-022) ✅ 2026-08-04 (B18)
+- [x] `CatalogosAdminController` en UsuariosModule con `@InjectRepository` directo ✅ 2026-08-04 (B18)
+
+**Frontend — Tipos, schemas, servicios y hooks:**
+- [x] `types/admin.ts` — RolCatalog, DependenciaCatalog, ConfiguracionInstitucionalAdmin, UsuarioAdmin, UsuarioAdminDetalle, UsuarioCreado, UsuariosPaginados, ListarUsuariosQuery, HealthStatus ✅ 2026-08-04 (B18)
+- [x] `schemas/admin.schemas.ts` — configuracionSchema, crearUsuarioSchema, actualizarUsuarioSchema ✅ 2026-08-04 (B18)
+- [x] `services/admin.service.ts` — todos los endpoints admin + health ✅ 2026-08-04 (B18)
+- [x] `hooks/use-admin-configuracion.ts` — useConfiguracionAdmin, useActualizarConfiguracion ✅ 2026-08-04 (B18)
+- [x] `hooks/use-admin-usuarios.ts` — useUsuarios, useUsuarioDetalle, useCrearUsuario, useActualizarUsuario, useActivarUsuario, useEliminarUsuario, useRestaurarUsuario ✅ 2026-08-04 (B18)
+- [x] `hooks/use-admin-catalogs.ts` — useRoles, useDependencias ✅ 2026-08-04 (B18)
+- [x] `hooks/use-health.ts` — useHealth (refetch 30s, staleTime 0) ✅ 2026-08-04 (B18)
+- [x] `lib/api-client.ts` — apiPut, apiDelete helpers añadidos ✅ 2026-08-04 (B18)
+- [x] `lib/constants.ts` — FUNC_ROUTES ampliado con usuarios, usuariosNuevo, configuracion, sistema ✅ 2026-08-04 (B18)
+
+**Frontend — Componentes reutilizables:**
+- [x] `components/admin/usuario-rol-badge.tsx` — badge de rol + chip activo/inactivo ✅ 2026-08-04 (B18)
+- [x] `components/admin/health-indicator.tsx` — indicador de servicio con dot animado ✅ 2026-08-04 (B18)
+- [x] `components/funcionario/sidebar.tsx` — nav items Sistema añadido ✅ 2026-08-04 (B18)
+
+**Frontend — Módulos (views):**
+- [x] `modules/admin/configuracion-view.tsx` — PATCH ConfiguracionInstitucional, imágenes read-only ✅ 2026-08-04 (B18)
+- [x] `modules/admin/sistema-view.tsx` — HealthIndicators × 4, refetch 30s, alerta general ✅ 2026-08-04 (B18)
+- [x] `modules/admin/usuarios-view.tsx` — tabla paginada, búsqueda debounced, filtros rol/estado ✅ 2026-08-04 (B18)
+- [x] `modules/admin/usuario-detalle-view.tsx` — ficha + edición inline + activar/desactivar/eliminar/restaurar ✅ 2026-08-04 (B18)
+- [x] `modules/admin/nuevo-usuario-view.tsx` — formulario creación + dialog contraseña temporal ✅ 2026-08-04 (B18)
+
+**Frontend — Páginas:**
+- [x] `/funcionario/configuracion` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/sistema` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/usuarios` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/usuarios/nuevo` page ✅ 2026-08-04 (B18)
+- [x] `/funcionario/usuarios/[id]` page ✅ 2026-08-04 (B18)
+
+**Quality gates:** tsc ✅ · lint ✅ · build ✅
+
+**Pendiente (scope B19+):**
+- [ ] Dashboard administrativo con KPIs globales (solicitudes del día, permisos vigentes)
+- [ ] CRUD de Roles con roles de sólo lectura
 - [ ] CRUD de Dependencias
-- [ ] CRUD de Motivos (con activación/desactivación sin borrar)
-- [ ] Configuración del Sistema (Parámetros Operativos):
-  - [ ] Firma digital configurable (upload de imagen)
-  - [ ] Sello institucional (upload de imagen)
-  - [ ] Parámetros: días máximos permiso, plazos, color institucional
+- [ ] CRUD de Motivos (activación/desactivación sin borrar)
 - [ ] Vista de auditoría filtrable (usuario, acción, fecha, entidad)
 - [ ] Gestión de permisos: listar, revocar con motivo
-- [ ] Reportes:
-  - [ ] Solicitudes por fecha, estado, funcionario
-  - [ ] Motivos más frecuentes
-  - [ ] Permisos vigentes y vencidos
-  - [ ] Exportar: Excel, PDF, CSV
+- [ ] Configuración Institucional: upload de imágenes (logo/escudo) — requiere endpoint multipart
+- [ ] Reportes: solicitudes, motivos frecuentes, exportar CSV/PDF
+- [ ] Parámetros del sistema (días máximos permiso, plazos, color institucional)
 
 ---
 

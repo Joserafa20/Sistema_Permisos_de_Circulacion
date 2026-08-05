@@ -206,3 +206,17 @@ export async function apiPatch<T>(
   const response = await apiClient.patch<T>(path, body, config);
   return response.data;
 }
+
+export async function apiPut<T>(
+  path: string,
+  body?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.put<T>(path, body, config);
+  return response.data;
+}
+
+export async function apiDelete<T>(path: string, config?: AxiosRequestConfig): Promise<T> {
+  const response = await apiClient.delete<T>(path, config);
+  return response.data;
+}

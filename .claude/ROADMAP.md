@@ -204,17 +204,20 @@
 **Objetivo:** Control total del sistema desde la interfaz.  
 **Duración estimada:** Semanas 7–8  
 **Dependencia:** Fase 6 completada.
+**Estado:** 🔄 En progreso — B18 completado (2026-08-04)
 
-- [ ] Pantalla de Configuración Institucional (CU-42 a CU-45): consulta, edición, carga de escudo y logo
+- [x] Configuración Institucional — edición textos, imágenes read-only (B18) ✅ 2026-08-04
+- [x] Estado del Sistema — health indicators, refetch 30s (B18) ✅ 2026-08-04
+- [x] CRUD de Usuarios — lista, detalle, crear, editar, activar/desactivar, eliminar, restaurar (B18) ✅ 2026-08-04
 - [ ] Dashboard administrativo con KPIs globales
-- [ ] CRUD de Usuarios (crear funcionarios, activar/desactivar)
-- [ ] CRUD de Roles
+- [ ] CRUD de Roles (solo lectura por ahora)
 - [ ] CRUD de Dependencias
 - [ ] CRUD de Motivos (con activación/desactivación sin borrar)
 - [ ] Configuración del Sistema (Parámetros Operativos):
   - [ ] Firma digital configurable (upload de imagen)
   - [ ] Sello institucional (upload de imagen)
   - [ ] Parámetros: días máximos permiso, plazos, color institucional
+  - [ ] Upload logo/escudo institucional (requiere endpoint multipart — pendiente backend)
 - [ ] Vista de auditoría filtrable (usuario, acción, fecha, entidad)
 - [ ] Gestión de permisos: listar, revocar con motivo
 - [ ] Reportes:
@@ -275,7 +278,7 @@
 | Fase 4 | Permisos PDF/QR | 18 | 18 | ✅ Completada (B10) |
 | Fase 5 | Frontend Ciudadano | 33 | 33 | ✅ Completada (B14) |
 | Fase 6 | Frontend Funcionario | 42 | 42 | ✅ Completada (B17) |
-| Fase 7 | Panel Admin | 0 | 10 | ⬜ No iniciada |
+| Fase 7 | Panel Admin | 5 | 10 | 🔄 En progreso (B18) |
 | Fase 8 | Calidad y Producción | 0 | 15 | ⬜ No iniciada |
 
 **Duración total estimada:** 10 semanas para un equipo de 2–3 desarrolladores.

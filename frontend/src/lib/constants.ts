@@ -45,6 +45,11 @@ export const FUNC_ROUTES = {
   solicitudes: '/funcionario/solicitudes',
   permisos: '/funcionario/permisos',
   perfil: '/funcionario/perfil',
+  // Admin (rol administrador)
+  usuarios: '/funcionario/usuarios',
+  usuariosNuevo: '/funcionario/usuarios/nuevo',
+  configuracion: '/funcionario/configuracion',
+  sistema: '/funcionario/sistema',
 } as const;
 
 /** Keys de sessionStorage / localStorage para tokens del funcionario */
