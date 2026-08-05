@@ -1,0 +1,30 @@
+# CODEOWNERS — Sistema de Permisos de Circulación (Pico y Placa)
+# Documentación: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Propietario por defecto para todo el repositorio
+*                               @Joserafa20
+
+# Backend (NestJS — arquitectura hexagonal)
+/backend/                       @Joserafa20
+
+# Frontend (Next.js 15 + React 19)
+/frontend/                      @Joserafa20
+
+# Base de datos (migraciones TypeORM)
+/database/                      @Joserafa20
+
+# Infraestructura Docker y CI/CD
+/docker/                        @Joserafa20
+/.github/workflows/             @Joserafa20
+
+# Documentación funcional y técnica
+/docs/                          @Joserafa20
+
+# Contexto permanente del proyecto
+/.claude/                       @Joserafa20
+
+# Archivos de seguridad críticos
+SECURITY.md                     @Joserafa20
+SECURITY_AUDIT.md               @Joserafa20
+/docker/docker-compose.prod.yml @Joserafa20
+/docker/nginx/                  @Joserafa20

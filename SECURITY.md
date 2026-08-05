@@ -59,9 +59,13 @@
 - [x] Verificación QR pública (`GET /permisos/verificar/:codigo`) retorna solo datos mínimos
 - [x] PDF generado en servidor, descargado via signed URL temporal
 
-## Pendiente / Mejoras Futuras (POST-B20)
+## Implementado en B21+
 
-- [ ] MFA (TOTP) para administradores
+- [x] MFA (TOTP) para administradores (speakeasy, RFC 6238)
+- [x] Códigos de recuperación MFA (bcrypt-hashed, single-use)
+
+## Mejoras Futuras (POST-v1.0.0)
+
 - [ ] Rotación automática de JWT secret en producción
 - [ ] Integración con WAF (ej. Cloudflare) para DDoS avanzado
 - [ ] Escaneo de contenedores Docker (Trivy/Snyk) en CI
