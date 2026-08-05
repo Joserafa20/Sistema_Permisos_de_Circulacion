@@ -13,6 +13,8 @@ import type {
   SolicitudesFiltros,
   AccionSolicitudResponse,
   PermisoPdfUrl,
+  PaginatedPermisosResponse,
+  ListarPermisosFiltros,
 } from '@/types/funcionario';
 
 /* ── Auth ──────────────────────────────────────── */
@@ -157,6 +159,25 @@ export async function solicitarCorreccion(
   const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(
     `/solicitudes/${id}/correccion`,
     body,
+  );
+  return res.data;
+}
+
+/* ── Permisos ─────────────────────────────────── */
+
+export async function getPermisos(
+  filtros: ListarPermisosFiltros = {},
+): Promise<PaginatedPermisosResponse> {
+  const params = new URLSearchParams();
+  if (filtros.page) params.set('page', String(filtros.page));
+  if (filtros.limit) params.set('limit', String(filtros.limit));
+  if (filtros.estado) params.set('estado', filtros.estado);
+  if (filtros.placa) params.set('placa', filtros.placa);
+  if (filtros.documento) params.set('documento', filtros.documento);
+  if (filtros.fechaInicio) params.set('fechaInicio', filtros.fechaInicio);
+  if (filtros.fechaFin) params.set('fechaFin', filtros.fechaFin);
+  const res = await apiGet<ApiResponse<PaginatedPermisosResponse>>(
+    `/permisos?${params.toString()}`,
   );
   return res.data;
 }

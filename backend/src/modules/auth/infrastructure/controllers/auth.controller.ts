@@ -148,6 +148,8 @@ export class AuthController {
   @Post('restablecer-contrasena')
   @Public()
   @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 3600000 } })
   @ApiOperation({
     summary: 'Restablecer contraseña con token',
     description:

@@ -210,6 +210,38 @@ export interface PermisoPdfUrl {
   nombreArchivo: string;
 }
 
+export interface PermisoListItem {
+  id: string;
+  codigoPermiso: string;
+  estado: string;
+  ciudadano: { nombre: string; numeroDocumento: string };
+  motocicleta: { placa: string };
+  motivo: string;
+  fechaExpedicion: string;
+  fechaVencimiento: string;
+  funcionario: { nombre: string; apellido: string };
+}
+
+export interface PaginatedPermisosResponse {
+  items: PermisoListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface ListarPermisosFiltros {
+  page?: number;
+  limit?: number;
+  estado?: string;
+  placa?: string;
+  documento?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+}
+
 /* ═══════════════════════════════════════════
    Solicitudes — Filtros UI
 ═══════════════════════════════════════════ */

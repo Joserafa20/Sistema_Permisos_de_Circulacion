@@ -50,6 +50,10 @@ export const FUNC_ROUTES = {
   usuariosNuevo: '/funcionario/usuarios/nuevo',
   configuracion: '/funcionario/configuracion',
   sistema: '/funcionario/sistema',
+  auditoria: '/funcionario/auditoria',
+  motivos: '/funcionario/motivos',
+  dependencias: '/funcionario/dependencias',
+  reportes: '/funcionario/reportes',
 } as const;
 
 /** Keys de sessionStorage / localStorage para tokens del funcionario */

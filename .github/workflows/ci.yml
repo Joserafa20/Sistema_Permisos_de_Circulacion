@@ -40,6 +40,9 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Auditoría de seguridad (npm audit)
+        run: npm audit --audit-level=high
+
       - name: Type Check
         run: npx tsc --noEmit
 
@@ -97,6 +100,9 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Auditoría de seguridad (npm audit)
+        run: npm audit --audit-level=high
 
       - name: Type Check
         run: npm run type-check

@@ -98,6 +98,150 @@ export interface ListarUsuariosQuery {
   busqueda?: string;
 }
 
+/* ── Auditoría ────────────────────────────── */
+
+export type AccionAuditoria =
+  | 'LOGIN_EXITOSO'
+  | 'LOGIN_FALLIDO'
+  | 'LOGOUT'
+  | 'SOLICITUD_CREADA'
+  | 'SOLICITUD_EN_REVISION'
+  | 'SOLICITUD_PENDIENTE_CORRECCION'
+  | 'SOLICITUD_APROBADA'
+  | 'SOLICITUD_RECHAZADA'
+  | 'SOLICITUD_VENCIDA'
+  | 'PERMISO_GENERADO'
+  | 'PERMISO_REVOCADO'
+  | 'PERMISO_VENCIDO'
+  | 'PERMISO_QR_VERIFICADO'
+  | 'USUARIO_CREADO'
+  | 'USUARIO_ACTUALIZADO'
+  | 'USUARIO_DESACTIVADO'
+  | 'USUARIO_ACTIVADO'
+  | 'USUARIO_ELIMINADO'
+  | 'USUARIO_RESTAURADO'
+  | 'CONTRASENA_CAMBIADA'
+  | 'CONTRASENA_RESTABLECIDA'
+  | 'CONFIGURACION_ACTUALIZADA'
+  | 'DOCUMENTO_SUBIDO'
+  | 'DOCUMENTO_ELIMINADO'
+  | 'DOCUMENTO_DESCARGADO'
+  | 'REFRESH_TOKEN_USADO'
+  | 'REFRESH_TOKEN_REVOCADO';
+
+export interface AuditoriaUsuarioBrief {
+  id: string;
+  nombre: string;
+  apellido: string;
+  correo: string;
+}
+
+export interface AuditoriaItem {
+  id: string;
+  accion: AccionAuditoria;
+  entidad: string;
+  entidadId: string | null;
+  usuario: AuditoriaUsuarioBrief | null;
+  ipAddress: string | null;
+  createdAt: string;
+}
+
+export interface AuditoriaPaginada {
+  items: AuditoriaItem[];
+  pagination: PaginacionAdmin;
+}
+
+export interface ListarAuditoriaQuery {
+  page?: number;
+  limit?: number;
+  accion?: AccionAuditoria;
+  entidad?: string;
+  usuarioId?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+}
+
+/* ── Paginación genérica admin ─────────────── */
+
+export interface PaginacionAdmin {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+/* ── Motivos (admin CRUD) ──────────────────── */
+
+export interface MotivoAdmin {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  requiereSoporte: boolean;
+  activo: boolean;
+  orden: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface CrearMotivoBody {
+  nombre: string;
+  descripcion?: string;
+  requiereSoporte?: boolean;
+  orden?: number;
+}
+
+export interface ActualizarMotivoBody {
+  nombre?: string;
+  descripcion?: string;
+  requiereSoporte?: boolean;
+  orden?: number;
+}
+
+/* ── Dependencias (admin CRUD) ─────────────── */
+
+export interface DependenciaAdmin {
+  id: string;
+  nombre: string;
+  codigo: string;
+  descripcion: string | null;
+  activo: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface CrearDependenciaBody {
+  nombre: string;
+  codigo: string;
+  descripcion?: string;
+}
+
+export interface ActualizarDependenciaBody {
+  nombre?: string;
+  descripcion?: string;
+}
+
+/* ── Permisos (panel admin/funcionario list) ─ */
+
+export interface PermisoAdmin {
+  id: string;
+  codigoPermiso: string;
+  estado: string;
+  fechaExpedicion: string;
+  fechaVencimiento: string;
+  createdAt: string;
+}
+
+/* ── Reportes ──────────────────────────────── */
+
+export interface ReporteByEstado {
+  total: number;
+  byEstado: Record<string, number>;
+  fechaDesde?: string;
+  fechaHasta?: string;
+}
+
 /* ── Health / Sistema ─────────────────────── */
 
 export type HealthServiceStatus = 'up' | 'down';

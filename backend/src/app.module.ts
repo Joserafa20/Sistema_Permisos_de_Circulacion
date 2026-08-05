@@ -22,6 +22,9 @@ import { NotificacionesModule } from './modules/notificaciones/notificaciones.mo
 import { StorageModule } from './modules/storage/storage.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
+import { AuditoriaModule } from './modules/auditoria/auditoria.module';
+import { DependenciasModule } from './modules/dependencias/dependencias.module';
+import { ReportesModule } from './modules/reportes/reportes.module';
 
 @Module({
   imports: [
@@ -118,6 +121,9 @@ import { MetricsModule } from './modules/metrics/metrics.module';
     SolicitudesModule,
     PermisosModule,
     NotificacionesModule,
+    AuditoriaModule,
+    DependenciasModule,
+    ReportesModule,
   ],
   providers: [
     // ── Guards globales ────────────────────────────────────────────

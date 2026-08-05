@@ -11,6 +11,10 @@ import {
   X,
   Menu,
   Activity,
+  ClipboardList,
+  BookOpen,
+  Building2,
+  BarChart3,
 } from 'lucide-react';
 import { SidebarItem } from './sidebar-item';
 import { PermissionGate } from './permission-gate';
@@ -27,6 +31,10 @@ const NAV_ITEMS = [
 
 const ADMIN_NAV_ITEMS = [
   { href: FUNC_ROUTES.usuarios, label: 'Usuarios', icon: Users },
+  { href: FUNC_ROUTES.motivos, label: 'Motivos', icon: BookOpen },
+  { href: FUNC_ROUTES.dependencias, label: 'Dependencias', icon: Building2 },
+  { href: FUNC_ROUTES.reportes, label: 'Reportes', icon: BarChart3 },
+  { href: FUNC_ROUTES.auditoria, label: 'Auditoría', icon: ClipboardList },
   { href: FUNC_ROUTES.configuracion, label: 'Configuración', icon: Settings },
   { href: FUNC_ROUTES.sistema, label: 'Sistema', icon: Activity },
 ] as const;
