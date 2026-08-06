@@ -88,8 +88,7 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   const queryClient = useQueryClient();
   const { data: solicitud, isLoading, isError, refetch } = useSolicitudDetalle(solicitudId);
   const { toast } = useToast();
-  const { hasRole } = useAuth();
-  const isAdmin = hasRole('administrador');
+  const { hasRole: _hasRole } = useAuth();
   const [activeModal, setActiveModal] = useState<ModalAction>(null);
   const [correccionStep, setCorreccionStep] = useState<CorreccionStep>('form');
   const [wantsPdf, setWantsPdf] = useState(false);
