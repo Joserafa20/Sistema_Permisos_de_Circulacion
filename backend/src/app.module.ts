@@ -35,7 +35,7 @@ import { ReportesModule } from './modules/reportes/reportes.module';
       load: [configuration],
       validationSchema,
       validationOptions: {
-        allowUnknown: false,
+        allowUnknown: true,
         abortEarly: false,
       },
     }),
