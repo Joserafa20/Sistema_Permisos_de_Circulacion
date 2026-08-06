@@ -155,7 +155,6 @@ export class SolicitudesFuncionarioController {
 
   @Post(':id/aprobar')
   @HttpCode(HttpStatus.ACCEPTED)
-  @Roles(UserRole.ADMINISTRADOR)
   @ApiOperation({
     summary: 'Aprobar una solicitud (RN-15, RN-17, RN-01)',
     description:

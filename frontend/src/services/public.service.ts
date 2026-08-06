@@ -49,11 +49,18 @@ export interface CrearSolicitudPayload {
 export async function crearSolicitud(
   payload: CrearSolicitudPayload,
 ): Promise<SolicitudCreadaResponse> {
-  const response = await apiPost<ApiResponse<SolicitudCreadaResponse>>(
+  const response = await apiPost<ApiResponse<Record<string, unknown>>>(
     '/public/solicitudes',
     payload,
   );
-  return response.data;
+  const raw = response.data;
+  // Backend devuelve numeroRadicado; el tipo frontend usa radicado
+  return {
+    id: raw['id'] as string,
+    radicado: (raw['numeroRadicado'] ?? raw['radicado']) as string,
+    estado: raw['estado'] as SolicitudCreadaResponse['estado'],
+    message: (raw['message'] ?? '') as string,
+  };
 }
 
 /* ── GET /public/solicitudes/estado ──────────── */

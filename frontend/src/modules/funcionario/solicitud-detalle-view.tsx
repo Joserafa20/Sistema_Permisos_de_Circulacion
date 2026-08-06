@@ -316,16 +316,14 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                     <XCircle className="h-4 w-4 mr-1.5" aria-hidden="true" />
                     Rechazar
                   </Button>
-                  {isAdmin && (
-                    <Button
-                      size="sm"
-                      onClick={() => setActiveModal('aprobar')}
-                      aria-label="Emitir permiso"
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                      Emitir permiso
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    onClick={() => setActiveModal('aprobar')}
+                    aria-label="Emitir permiso"
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                    Emitir permiso
+                  </Button>
                 </>
               )}
             </div>

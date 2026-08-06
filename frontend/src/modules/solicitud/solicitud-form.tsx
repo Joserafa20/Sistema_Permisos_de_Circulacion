@@ -176,12 +176,21 @@ export function SolicitudForm() {
 
       const response = await crearSolicitud(payload);
 
-      if (files.length > 0) {
-        await adjuntarDocumentos(response.id, response.radicado, values.numeroDocumento, files);
-      }
-
+      // Mostrar modal con radicado inmediatamente; docs son secundarios
       clearDraft();
       setSolicitudCreada(response);
+
+      if (files.length > 0) {
+        try {
+          await adjuntarDocumentos(response.id, response.radicado, values.numeroDocumento, files);
+        } catch {
+          toast({
+            type: 'warning',
+            title: 'Solicitud creada',
+            message: 'Hubo un problema al adjuntar los documentos. Contáctenos con su radicado.',
+          });
+        }
+      }
     } catch (err) {
       if (err instanceof ApiError && err.code === 'SOLICITUD_ACTIVA') {
         toast({
