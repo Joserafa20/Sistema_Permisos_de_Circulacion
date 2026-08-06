@@ -17,7 +17,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev",
       "font-src 'self'",
       `connect-src 'self' ${_apiOrigin} https://www.google.com https://www.gstatic.com`,
       "media-src 'none'",
