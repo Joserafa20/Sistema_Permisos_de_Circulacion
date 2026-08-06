@@ -96,18 +96,18 @@ apiClient.interceptors.response.use(
     _isRefreshing = true;
 
     try {
-      const { data } = await axios.post<{ data: { access_token: string; refresh_token: string } }>(
+      const { data } = await axios.post<{ data: { accessToken: string; refreshToken: string } }>(
         `${API_URL}/auth/refresh`,
-        { refresh_token: _refreshToken },
+        { refreshToken: _refreshToken },
         { timeout: API_TIMEOUT_MS },
       );
 
-      const { access_token, refresh_token } = data.data;
-      setTokens(access_token, refresh_token);
-      _tokenUpdateCallback?.(access_token, refresh_token);
+      const { accessToken, refreshToken } = data.data;
+      setTokens(accessToken, refreshToken);
+      _tokenUpdateCallback?.(accessToken, refreshToken);
       processQueue(null, access_token);
 
-      originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
+      originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
       return apiClient(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);

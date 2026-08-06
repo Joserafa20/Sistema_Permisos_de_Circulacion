@@ -72,32 +72,31 @@ export async function loginFuncionario(payload: LoginPayload): Promise<LoginResp
 }
 
 export async function logoutFuncionario(refreshToken: string): Promise<void> {
-  await apiPost('/auth/logout', { refresh_token: refreshToken });
+  await apiPost('/auth/logout', { refreshToken });
 }
 
 export async function refreshFuncionario(refreshToken: string): Promise<RefreshResponse> {
   const res = await apiPost<
     ApiResponse<{ accessToken: string; refreshToken: string; expiresIn: number }>
   >('/auth/refresh', {
-    refresh_token: refreshToken,
+    refreshToken,
   });
   const d = res.data;
   return { access_token: d.accessToken, refresh_token: d.refreshToken, expires_in: d.expiresIn };
 }
 
 export async function getMePerfil(): Promise<UsuarioPerfil> {
-  const res =
-    await apiGet<
-      ApiResponse<{
-        id: string;
-        nombre: string;
-        apellido: string;
-        email: string;
-        rol: string;
-        dependencia: string | null;
-        activo: boolean;
-      }>
-    >('/auth/me');
+  const res = await apiGet<
+    ApiResponse<{
+      id: string;
+      nombre: string;
+      apellido: string;
+      email: string;
+      rol: string;
+      dependencia: string | null;
+      activo: boolean;
+    }>
+  >('/auth/me');
   return mapUsuario(res.data);
 }
 

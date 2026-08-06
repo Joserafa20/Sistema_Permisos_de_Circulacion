@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import {
   CrearPermisoParams,
   IPermisoRepository,
@@ -24,6 +24,7 @@ export class TypeOrmPermisoRepository implements IPermisoRepository {
   constructor(
     @InjectRepository(PermisoEntity)
     private readonly repo: Repository<PermisoEntity>,
+    @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
 
