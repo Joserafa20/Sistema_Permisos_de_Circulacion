@@ -31,8 +31,12 @@ export function useLogin() {
       }),
     onSuccess: (data, variables) => {
       login(data.access_token, data.refresh_token, data.user, variables.recordarme ?? false);
-      const next = searchParams.get('next');
-      router.replace(next ?? FUNC_ROUTES.dashboard);
+      if (data.contrasenaExpirada) {
+        router.replace(FUNC_ROUTES.cambiarContrasena);
+      } else {
+        const next = searchParams.get('next');
+        router.replace(next ?? FUNC_ROUTES.dashboard);
+      }
     },
   });
 }

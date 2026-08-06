@@ -68,7 +68,17 @@ export async function loginFuncionario(payload: LoginPayload): Promise<LoginResp
     expires_in: d.expiresIn,
     token_type: 'Bearer',
     user: mapUsuario(d.usuario),
+    contrasenaExpirada: d.usuario.contrasenaExpirada,
   };
+}
+
+export async function cambiarContrasena(payload: {
+  contrasenaActual: string;
+  nuevaContrasena: string;
+  confirmarContrasena: string;
+}): Promise<{ message: string }> {
+  const res = await apiPost<ApiResponse<{ message: string }>>('/auth/cambiar-contrasena', payload);
+  return res.data;
 }
 
 export async function logoutFuncionario(refreshToken: string): Promise<void> {

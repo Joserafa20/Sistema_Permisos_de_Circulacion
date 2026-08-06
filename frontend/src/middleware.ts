@@ -19,9 +19,10 @@ export function middleware(request: NextRequest) {
   const session = request.cookies.get(SESSION_COOKIE_NAME);
 
   const isLoginPage = pathname === '/funcionario/login';
+  const isCambiarContrasena = pathname === '/funcionario/cambiar-contrasena';
   const isFuncionarioRoute = pathname.startsWith('/funcionario');
 
-  if (!isLoginPage && isFuncionarioRoute) {
+  if (!isLoginPage && !isCambiarContrasena && isFuncionarioRoute) {
     if (!session?.value) {
       const loginUrl = new URL('/funcionario/login', request.url);
       loginUrl.searchParams.set('next', pathname);

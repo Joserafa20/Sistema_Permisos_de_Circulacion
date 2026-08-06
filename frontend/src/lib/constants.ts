@@ -54,6 +54,7 @@ export const FUNC_ROUTES = {
   motivos: '/funcionario/motivos',
   dependencias: '/funcionario/dependencias',
   reportes: '/funcionario/reportes',
+  cambiarContrasena: '/funcionario/cambiar-contrasena',
 } as const;
 
 /** Keys de sessionStorage / localStorage para tokens del funcionario */

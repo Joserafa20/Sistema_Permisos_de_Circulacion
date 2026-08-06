@@ -37,6 +37,7 @@ export interface LoginResponse {
   expires_in: number;
   token_type: 'Bearer';
   user: UsuarioPerfil;
+  contrasenaExpirada: boolean;
 }
 
 export interface RefreshResponse {
