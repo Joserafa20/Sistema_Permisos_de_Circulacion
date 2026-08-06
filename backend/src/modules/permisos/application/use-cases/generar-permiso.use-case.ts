@@ -11,9 +11,10 @@ import { CodigoPermisoService } from '../../infrastructure/services/codigo-permi
 import { PdfGeneratorService } from '../../infrastructure/services/pdf-generator.service';
 import { MinioStorageAdapter } from '../../infrastructure/services/minio-storage.adapter';
 import { AuditoriaService } from '../../../auditoria/application/auditoria.service';
+import { NotificacionesService } from '../../../notificaciones/notificaciones.service';
 import { SolicitudEntity } from '../../../solicitudes/infrastructure/persistence/solicitud.entity';
 import { ConfiguracionInstitucionalEntity } from '../../../configuracion-institucional/infrastructure/persistence/configuracion-institucional.entity';
-import { AccionAuditoria, EstadoPermiso } from '../../../../common/enums';
+import { AccionAuditoria, EstadoPermiso, TipoNotificacion } from '../../../../common/enums';
 import { NotFoundException } from '../../../../common/exceptions/not-found.exception';
 import { BusinessRuleException } from '../../../../common/exceptions/business-rule.exception';
 import { PermisoGeneradoDto } from '../dtos/permiso-list-item.dto';
@@ -36,6 +37,7 @@ export class GenerarPermisoUseCase {
     private readonly pdfGeneratorService: PdfGeneratorService,
     private readonly storageAdapter: MinioStorageAdapter,
     private readonly auditoriaService: AuditoriaService,
+    private readonly notificacionesService: NotificacionesService,
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService,
   ) {
@@ -212,6 +214,25 @@ export class GenerarPermisoUseCase {
       ipAddress,
       usuarioId: funcionarioId,
     });
+
+    // ── 12. Notificar al ciudadano con PDF adjunto (fire-and-forget — RN-76) ─
+    if (solicitud.ciudadano?.email) {
+      void this.notificacionesService.encolar({
+        tipo: TipoNotificacion.APROBADA,
+        destinatario: solicitud.ciudadano.email,
+        asunto: `Permiso de Circulación Aprobado — ${codigoPermiso}`,
+        solicitudId,
+        permisoId: permiso.id,
+        contexto: {
+          nombreCiudadano: `${solicitud.ciudadano.nombre} ${solicitud.ciudadano.apellido}`,
+          numeroRadicado: solicitud.numeroRadicado,
+          codigoPermiso,
+          fechaVencimiento: solicitud.fechaFin,
+          pdfBase64: pdfBuffer.toString('base64'),
+          pdfFilename: `Permiso_${codigoPermiso}.pdf`,
+        },
+      });
+    }
 
     return {
       id: permiso.id,

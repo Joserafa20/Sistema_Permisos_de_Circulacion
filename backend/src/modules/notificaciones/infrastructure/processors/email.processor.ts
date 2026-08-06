@@ -9,6 +9,7 @@ import { EstadoEnvioNotificacion } from '../../../../common/enums';
 import {
   IEmailProvider,
   EMAIL_PROVIDER,
+  type EmailAttachment,
 } from '../../../email/domain/ports/email-provider.interface';
 import { PlantillaEmailService } from '../../../email/infrastructure/services/plantilla-email.service';
 import { EMAIL_NOTIFICATIONS_QUEUE, EMAIL_NOTIFICATIONS_DLQ } from '../../../redis/redis.constants';
@@ -78,15 +79,23 @@ export class EmailProcessor extends WorkerHost {
     });
 
     try {
-      const html = await this.plantillaService.renderizar(
-        notificacion.tipo,
-        notificacion.contexto ?? {},
-      );
+      const contexto = notificacion.contexto ?? {};
+      const html = await this.plantillaService.renderizar(notificacion.tipo, contexto);
+
+      const attachments: EmailAttachment[] = [];
+      if (contexto['pdfBase64'] && contexto['pdfFilename']) {
+        attachments.push({
+          filename: contexto['pdfFilename'],
+          content: Buffer.from(contexto['pdfBase64'], 'base64'),
+          contentType: 'application/pdf',
+        });
+      }
 
       await this.emailProvider.enviar({
         to: notificacion.destinatario,
         subject: notificacion.asunto,
         html,
+        ...(attachments.length > 0 && { attachments }),
       });
 
       await this.notificacionRepo.update(notificacionId, {

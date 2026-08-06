@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { CheckCircle2 as CheckCircle2Icon, Copy as CopyIcon, Plus as PlusIcon } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -30,7 +31,6 @@ import { Paso2Motocicleta } from './components/paso2-motocicleta';
 import { Paso3Motivo } from './components/paso3-motivo';
 import { Paso4Documentos } from './components/paso4-documentos';
 import { Paso5Confirmacion } from './components/paso5-confirmacion';
-import { SuccessScreen } from './components/success-screen';
 
 const STEPS = [
   { id: 1, label: 'Datos personales' },
@@ -183,32 +183,100 @@ export function SolicitudForm() {
       clearDraft();
       setSolicitudCreada(response);
     } catch (err) {
-      const message = getErrorMessage(err);
-      toast({ type: 'error', title: 'Error al enviar la solicitud', message });
+      if (err instanceof ApiError && err.code === 'SOLICITUD_ACTIVA') {
+        toast({
+          type: 'warning',
+          title: 'Ya existe una solicitud activa con esta placa',
+          message: err.message,
+        });
+      } else {
+        const message = getErrorMessage(err);
+        toast({ type: 'error', title: 'Error al enviar la solicitud', message });
+      }
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  if (solicitudCreada) {
-    return (
-      <SuccessScreen
-        solicitud={solicitudCreada}
-        correo={form.getValues('correoElectronico')}
-        onNuevaSolicitud={() => {
-          setSolicitudCreada(null);
-          form.reset(DEFAULT_VALUES);
-          setFiles([]);
-          setStep(1);
-        }}
-      />
-    );
-  }
-
   const motivoNombre = motivos?.find((m) => m.id === form.watch('motivoId'))?.nombre;
+  const correoEnvio = form.watch('correoElectronico');
+
+  function handleNuevaSolicitud() {
+    setSolicitudCreada(null);
+    form.reset(DEFAULT_VALUES);
+    setFiles([]);
+    setStep(1);
+  }
 
   return (
     <div className="relative">
+      {/* ── Modal radicado ─────────────────────────────────── */}
+      {solicitudCreada && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-radicado-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, type: 'spring', stiffness: 200 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.35, type: 'spring', stiffness: 160 }}
+              className="flex justify-center mb-5"
+            >
+              <CheckCircle2Icon className="h-16 w-16 text-success-600" aria-hidden="true" />
+            </motion.div>
+
+            <h2 id="modal-radicado-title" className="text-2xl font-bold text-neutral-900 mb-2">
+              ¡Solicitud enviada exitosamente!
+            </h2>
+            <p className="text-sm text-neutral-500 mb-6">
+              Recibirá una confirmación en{' '}
+              <strong className="text-neutral-700">{correoEnvio}</strong> con los detalles de su
+              solicitud.
+            </p>
+
+            <div className="rounded-xl border-2 border-primary-200 bg-primary-50 p-5 mb-6">
+              <p className="text-xs uppercase tracking-widest text-primary-600 font-semibold mb-1">
+                Número de radicado
+              </p>
+              <p className="text-3xl font-mono font-bold text-primary-800 tracking-wider">
+                {solicitudCreada.radicado}
+              </p>
+              <p className="text-xs text-neutral-500 mt-2">
+                Guarde este número para consultar el estado de su solicitud.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="default"
+                className="w-full gap-2"
+                onClick={() => {
+                  navigator.clipboard
+                    .writeText(solicitudCreada.radicado)
+                    .then(() => toast({ type: 'success', title: '¡Radicado copiado!' }))
+                    .catch(() => {});
+                }}
+              >
+                <CopyIcon className="h-4 w-4" />
+                Copiar radicado
+              </Button>
+              <Button variant="outline" className="w-full gap-2" onClick={handleNuevaSolicitud}>
+                <PlusIcon className="h-4 w-4" />
+                Nueva solicitud
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {isSubmitting && <LoadingOverlay message="Enviando su solicitud..." />}
 
       {/* Draft banner */}
@@ -306,7 +374,7 @@ export function SolicitudForm() {
 function getErrorMessage(err: unknown): string {
   if (err instanceof ApiError) {
     if (err.isUnauthorized()) return 'Sesión expirada. Por favor recargue la página.';
-    if (err.isConflict()) return 'Ya existe una solicitud activa con estos datos.';
+    if (err.isConflict()) return err.message || 'Ya existe una solicitud activa con estos datos.';
     if (err.status === 400) return 'Los datos enviados son inválidos. Revise el formulario.';
     if (err.status === 422) return 'Los datos no pasaron la validación del servidor.';
     if (err.isServerError())

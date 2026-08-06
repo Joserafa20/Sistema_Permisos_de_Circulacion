@@ -44,6 +44,11 @@ export class SmtpEmailProvider implements IEmailProvider, OnModuleInit {
       to: params.to,
       subject: params.subject,
       html: params.html,
+      attachments: params.attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+      })),
     });
 
     this.logger.log(
