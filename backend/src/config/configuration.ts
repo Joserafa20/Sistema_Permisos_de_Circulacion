@@ -34,7 +34,7 @@ export default (): Record<string, unknown> => ({
     bucketDocs: process.env.STORAGE_BUCKET_DOCS ?? 'pyp-documentos',
     bucketPdfs: process.env.STORAGE_BUCKET_PDFS ?? 'pyp-permisos',
     bucketReports: process.env.STORAGE_BUCKET_REPORTS ?? 'pyp-reportes',
-    useSsl: process.env.STORAGE_USE_SSL === 'true',
+    useSsl: process.env.STORAGE_USE_SSL !== 'false',
   },
   mail: {
     host: process.env.MAIL_HOST,
