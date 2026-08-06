@@ -109,7 +109,7 @@ export const DEFAULT_VALUES: SolicitudFormValues = {
   modelo: '',
   anio: new Date().getFullYear(),
   color: '',
-  cilindraje: 0,
+  cilindraje: '' as unknown as number,
   tipoServicio: 'particular',
   motivoId: '',
   justificacion: '',
