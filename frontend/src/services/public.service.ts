@@ -83,12 +83,11 @@ export async function adjuntarDocumentos(
   documento: string,
   files: File[],
 ): Promise<void> {
-  const form = new FormData();
-  files.forEach((file) => form.append('files', file));
-
-  await apiPost(
-    `/public/solicitudes/${solicitudId}/documentos?radicado=${encodeURIComponent(radicado)}&documento=${encodeURIComponent(documento)}`,
-    form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
-  );
+  const url = `/public/solicitudes/${solicitudId}/documentos?radicado=${encodeURIComponent(radicado)}&documento=${encodeURIComponent(documento)}`;
+  for (const file of files) {
+    const form = new FormData();
+    form.append('archivo', file, file.name);
+    form.append('tipoDocumento', 'otro');
+    await apiPost(url, form);
+  }
 }
