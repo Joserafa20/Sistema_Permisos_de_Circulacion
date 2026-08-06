@@ -54,17 +54,9 @@ export const motocicletaSchema = z.object({
   }),
 });
 
-/* ── Paso 3 — Motivo y fechas (base, sin refine cross-field) ── */
+/* ── Paso 3 — Motivo ── */
 export const motivoBaseSchema = z.object({
   motivoId: z.string().min(1, 'Seleccione un motivo'),
-  fechaInicio: z
-    .string()
-    .min(1, 'Seleccione la fecha de inicio')
-    .refine((val) => !isNaN(Date.parse(val)), 'Fecha de inicio inválida'),
-  fechaFin: z
-    .string()
-    .min(1, 'Seleccione la fecha fin')
-    .refine((val) => !isNaN(Date.parse(val)), 'Fecha fin inválida'),
   justificacion: z.string().max(500, 'Máximo 500 caracteres').optional(),
 });
 
@@ -75,19 +67,11 @@ export const confirmacionSchema = z.object({
     .refine((v) => v === true, 'Debe aceptar la declaración jurada para continuar'),
 });
 
-/* ── Schema combinado (RHF) — refine cross-field al final ── */
+/* ── Schema combinado (RHF) ── */
 export const solicitudFormSchema = ciudadanoSchema
   .merge(motocicletaSchema)
   .merge(motivoBaseSchema)
-  .merge(confirmacionSchema)
-  .refine(
-    (data) =>
-      !data.fechaInicio || !data.fechaFin || new Date(data.fechaFin) >= new Date(data.fechaInicio),
-    {
-      message: 'La fecha fin debe ser igual o posterior a la fecha de inicio',
-      path: ['fechaFin'],
-    },
-  );
+  .merge(confirmacionSchema);
 
 export type SolicitudFormValues = z.infer<typeof solicitudFormSchema>;
 
@@ -105,7 +89,7 @@ export const PASO_FIELDS: Record<number, Array<keyof SolicitudFormValues>> = {
     'departamento',
   ],
   2: ['placa', 'marca', 'modelo', 'anio', 'color', 'cilindraje', 'tipoServicio'],
-  3: ['motivoId', 'fechaInicio', 'fechaFin'],
+  3: ['motivoId'],
   4: [],
   5: ['declaracionJurada'],
 };
@@ -128,8 +112,6 @@ export const DEFAULT_VALUES: SolicitudFormValues = {
   cilindraje: 0,
   tipoServicio: 'particular',
   motivoId: '',
-  fechaInicio: '',
-  fechaFin: '',
   justificacion: '',
   declaracionJurada: false,
 };

@@ -25,26 +25,25 @@ export interface CrearSolicitudPayload {
   ciudadano: {
     tipoDocumento: string;
     numeroDocumento: string;
-    nombres: string;
-    apellidos: string;
-    correoElectronico: string;
-    telefono: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    celular: string;
+    direccion?: string;
+    aceptaTratamientoDatos: boolean;
   };
   motocicleta: {
     placa: string;
-    marca: string;
-    modelo: string;
-    anio: number;
-    cilindraje: number;
-    color: string;
+    marca?: string;
+    linea?: string;
+    modelo?: number;
+    cilindraje?: number;
+    color?: string;
   };
-  solicitud: {
-    motivoId: string;
-    fechaInicio: string;
-    fechaFin: string;
-    declaracionJurada: boolean;
-    justificacion?: string;
-  };
+  motivoId: string;
+  declaracionJurada: boolean;
+  descripcionAdicional?: string;
+  recaptchaToken?: string;
 }
 
 export async function crearSolicitud(

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -86,6 +87,8 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   const queryClient = useQueryClient();
   const { data: solicitud, isLoading, isError, refetch } = useSolicitudDetalle(solicitudId);
   const { toast } = useToast();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('administrador');
   const [activeModal, setActiveModal] = useState<ModalAction>(null);
   const [correccionStep, setCorreccionStep] = useState<CorreccionStep>('form');
   const [wantsPdf, setWantsPdf] = useState(false);
@@ -278,14 +281,16 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                     <XCircle className="h-4 w-4 mr-1.5" aria-hidden="true" />
                     Rechazar
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setActiveModal('aprobar')}
-                    aria-label="Aprobar solicitud"
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                    Aprobar
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      size="sm"
+                      onClick={() => setActiveModal('aprobar')}
+                      aria-label="Emitir permiso"
+                    >
+                      <CheckCircle2 className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                      Emitir permiso
+                    </Button>
+                  )}
                 </>
               )}
             </div>
@@ -423,9 +428,9 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
       <ConfirmationModal
         open={activeModal === 'aprobar'}
         onClose={closeModal}
-        title="Aprobar solicitud"
-        description={`¿Está seguro de aprobar la solicitud ${solicitud?.numeroRadicado}? Se generará el permiso de circulación automáticamente.`}
-        confirmLabel="Aprobar"
+        title="Emitir permiso de circulación"
+        description={`¿Confirma la emisión del permiso para la solicitud ${solicitud?.numeroRadicado}? Se generará el permiso de circulación y se notificará al ciudadano.`}
+        confirmLabel="Emitir permiso"
         confirmVariant="primary"
         isConfirming={aprobarMut.isPending}
         onConfirm={handleAprobar}

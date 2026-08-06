@@ -32,7 +32,7 @@ export class CrearSolicitudUseCase {
     ipSolicitante: string | null,
   ): Promise<SolicitudCreadaDto> {
     // 1. Verificar reCAPTCHA (RN-55) — lanza BusinessRuleException si falla
-    const recaptchaScore = await this.recaptchaService.verificar(dto.recaptchaToken);
+    const recaptchaScore = await this.recaptchaService.verificar(dto.recaptchaToken ?? '');
 
     // 2. Validar motivo activo
     const motivo = await this.motivoBusquedaService.buscarPorId(dto.motivoId);
@@ -43,18 +43,19 @@ export class CrearSolicitudUseCase {
       );
     }
 
-    // 3. RN-01: fechaInicio >= hoy en COT
+    // 3. RN-01: fechaInicio >= hoy en COT; si no se envía, se usa la fecha actual
     const todayCOT = this.obtenerFechaCOT();
-    if (dto.fechaInicio < todayCOT) {
+    const fechaInicio = dto.fechaInicio ?? todayCOT;
+    if (fechaInicio < todayCOT) {
       throw new BusinessRuleException(
-        `La fecha de inicio (${dto.fechaInicio}) no puede ser anterior a hoy (${todayCOT})`,
+        `La fecha de inicio (${fechaInicio}) no puede ser anterior a hoy (${todayCOT})`,
         'FECHA_INICIO_PASADA',
       );
     }
 
     // 4. RN-02: calcular fechaFin según dias_max_permiso
     const diasMax = await this.configuracionSistemaService.obtenerDiasMaxPermiso();
-    const fechaFin = this.sumarDias(dto.fechaInicio, diasMax);
+    const fechaFin = this.sumarDias(fechaInicio, diasMax);
 
     // 5. RN-03 pre-check fuera de transacción (ruta rápida)
     const placa = dto.motocicleta.placa.trim().toUpperCase();
@@ -95,7 +96,7 @@ export class CrearSolicitudUseCase {
         numeroChasis: dto.motocicleta.numeroChasis,
       },
       motivoId: dto.motivoId,
-      fechaInicio: dto.fechaInicio,
+      fechaInicio: fechaInicio,
       fechaFin,
       descripcionAdicional: dto.descripcionAdicional ?? null,
       declaracionJurada: dto.declaracionJurada,
@@ -112,7 +113,7 @@ export class CrearSolicitudUseCase {
         numeroRadicado: resultado.numeroRadicado,
         placa,
         motivoId: dto.motivoId,
-        fechaInicio: dto.fechaInicio,
+        fechaInicio: fechaInicio,
         fechaFin,
       },
       ipAddress: ipSolicitante,
@@ -130,7 +131,7 @@ export class CrearSolicitudUseCase {
           nombreCiudadano: `${dto.ciudadano.nombre} ${dto.ciudadano.apellido}`,
           numeroRadicado: resultado.numeroRadicado,
           motivoNombre: motivo.nombre,
-          fechaInicio: dto.fechaInicio,
+          fechaInicio: fechaInicio,
           fechaFin,
         },
       });
@@ -140,7 +141,7 @@ export class CrearSolicitudUseCase {
       id: resultado.solicitudId,
       numeroRadicado: resultado.numeroRadicado,
       estado: EstadoSolicitud.RECIBIDA,
-      fechaInicio: dto.fechaInicio,
+      fechaInicio: fechaInicio,
       fechaFin,
       motivoNombre: motivo.nombre,
       createdAt: new Date().toISOString(),

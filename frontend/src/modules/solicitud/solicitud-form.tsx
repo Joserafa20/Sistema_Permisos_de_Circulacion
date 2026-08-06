@@ -151,26 +151,24 @@ export function SolicitudForm() {
         ciudadano: {
           tipoDocumento: values.tipoDocumento,
           numeroDocumento: values.numeroDocumento,
-          nombres: values.nombres,
-          apellidos: values.apellidos,
-          correoElectronico: values.correoElectronico,
-          telefono: values.telefono,
+          nombre: values.nombres,
+          apellido: values.apellidos,
+          email: values.correoElectronico,
+          celular: values.telefono,
+          direccion: values.direccion,
+          aceptaTratamientoDatos: true,
         },
         motocicleta: {
           placa: values.placa,
           marca: values.marca,
-          modelo: values.modelo,
-          anio: values.anio,
+          linea: values.modelo,
+          modelo: values.anio,
           cilindraje: values.cilindraje,
           color: values.color,
         },
-        solicitud: {
-          motivoId: values.motivoId,
-          fechaInicio: values.fechaInicio,
-          fechaFin: values.fechaFin,
-          declaracionJurada: values.declaracionJurada,
-          justificacion: values.justificacion || undefined,
-        },
+        motivoId: values.motivoId,
+        declaracionJurada: values.declaracionJurada,
+        descripcionAdicional: values.justificacion || undefined,
       };
       if (recaptchaToken) {
         (payload as unknown as Record<string, unknown>).recaptchaToken = recaptchaToken;

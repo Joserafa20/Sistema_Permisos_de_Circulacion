@@ -3,7 +3,6 @@
 import { useFormContext } from 'react-hook-form';
 import type { SolicitudFormValues } from '@/schemas/solicitud.schemas';
 import { Select } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,12 +30,10 @@ export function Paso3Motivo() {
     label: m.nombre,
   }));
 
-  const today = new Date().toISOString().split('T')[0];
-
   return (
     <fieldset className="space-y-5">
       <legend className="text-base font-semibold text-neutral-800 mb-4">
-        Motivo y vigencia del permiso
+        Motivo de la solicitud
       </legend>
 
       {isError && (
@@ -66,26 +63,10 @@ export function Paso3Motivo() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Input
-          id="fechaInicio"
-          label="Fecha de inicio"
-          required
-          type="date"
-          min={today}
-          error={em(errors.fechaInicio?.message)}
-          {...register('fechaInicio')}
-        />
-        <Input
-          id="fechaFin"
-          label="Fecha fin"
-          required
-          type="date"
-          min={watch('fechaInicio') || today}
-          error={em(errors.fechaFin?.message)}
-          {...register('fechaFin')}
-        />
-      </div>
+      <Alert variant="info" title="Vigencia del permiso">
+        Las fechas de vigencia del permiso son asignadas por el funcionario al momento de revisar su
+        solicitud, de acuerdo con la reglamentación vigente.
+      </Alert>
 
       <Textarea
         id="justificacion"

@@ -129,10 +129,10 @@ export class MotocicletaEnSolicitudDto {
 }
 
 export class CrearSolicitudDto {
-  @ApiProperty({ description: 'Token reCAPTCHA v3 del formulario' })
+  @ApiPropertyOptional({ description: 'Token reCAPTCHA v3 del formulario' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  recaptchaToken: string;
+  recaptchaToken?: string;
 
   @ApiProperty({ type: CiudadanoEnSolicitudDto })
   @ValidateNested()
@@ -149,9 +149,13 @@ export class CrearSolicitudDto {
   @IsNotEmpty()
   motivoId: string;
 
-  @ApiProperty({ description: 'Fecha de inicio del permiso (YYYY-MM-DD, COT)' })
+  @ApiPropertyOptional({
+    description:
+      'Fecha de inicio del permiso (YYYY-MM-DD, COT). Si se omite, se usa la fecha actual en COT.',
+  })
+  @IsOptional()
   @IsDateString()
-  fechaInicio: string;
+  fechaInicio?: string;
 
   @ApiPropertyOptional({ nullable: true })
   @IsOptional()
