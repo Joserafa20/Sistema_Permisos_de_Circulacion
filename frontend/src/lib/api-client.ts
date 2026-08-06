@@ -105,7 +105,7 @@ apiClient.interceptors.response.use(
       const { accessToken, refreshToken } = data.data;
       setTokens(accessToken, refreshToken);
       _tokenUpdateCallback?.(accessToken, refreshToken);
-      processQueue(null, access_token);
+      processQueue(null, accessToken);
 
       originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
       return apiClient(originalRequest);
