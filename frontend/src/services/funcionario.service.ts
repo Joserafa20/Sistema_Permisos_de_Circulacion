@@ -21,7 +21,7 @@ import type {
 
 export async function loginFuncionario(payload: LoginPayload): Promise<LoginResponse> {
   const res = await apiPost<ApiResponse<LoginResponse>>('/auth/login', {
-    correoElectronico: payload.correoElectronico,
+    email: payload.correoElectronico,
     contrasena: payload.contrasena,
   });
   return res.data;
