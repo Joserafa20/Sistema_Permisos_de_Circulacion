@@ -22,7 +22,7 @@ const securityHeaders = [
       `connect-src 'self' ${_apiOrigin} https://www.google.com https://www.gstatic.com`,
       "media-src 'none'",
       "object-src 'none'",
-      "frame-src 'none'",
+      "frame-src 'self' https://www.google.com https://recaptcha.google.com https://www.recaptcha.net",
       "base-uri 'self'",
       "form-action 'self'",
     ].join('; '),
