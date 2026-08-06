@@ -28,11 +28,12 @@ export class MinioStorageAdapter implements OnModuleInit {
       region: this.config.get<string>('storage.region') ?? 'auto',
     };
 
-    // R2 con SSL usa 443; MinIO JS defaultea a 9000 si no se especifica puerto
-    if (portCfg) {
-      clientOptions.port = portCfg;
+    // Con SSL siempre usar 443 (o el puerto custom si no es el default 9000 de MinIO).
+    // Si STORAGE_PORT=9000 está en env pero useSSL=true (R2/HTTPS), forzar 443.
+    if (useSSL) {
+      clientOptions.port = portCfg && portCfg !== 9000 ? portCfg : 443;
     } else {
-      clientOptions.port = useSSL ? 443 : 80;
+      clientOptions.port = portCfg ?? 9000;
     }
 
     this.client = new Client(clientOptions);
