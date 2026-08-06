@@ -208,8 +208,14 @@ export async function iniciarRevision(id: string): Promise<AccionSolicitudRespon
   return res.data;
 }
 
-export async function aprobarSolicitud(id: string): Promise<AccionSolicitudResponse> {
-  const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(`/solicitudes/${id}/aprobar`, {});
+export async function aprobarSolicitud(
+  id: string,
+  body: { fechaVencimiento: string; condicionesRestricciones?: string | null },
+): Promise<AccionSolicitudResponse> {
+  const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(
+    `/solicitudes/${id}/aprobar`,
+    body,
+  );
   return res.data;
 }
 

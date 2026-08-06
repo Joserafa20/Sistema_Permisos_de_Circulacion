@@ -29,6 +29,7 @@ import { ListarDocumentosUseCase } from '../../application/use-cases/listar-docu
 import { ObtenerUrlDocumentoUseCase } from '../../application/use-cases/obtener-url-documento.use-case';
 import { DocumentoUrlDto } from '../../application/dtos/documento-url.dto';
 import { AprobarSolicitudUseCase } from '../../application/use-cases/aprobar-solicitud.use-case';
+import { AprobarSolicitudDto } from '../../application/dtos/aprobar-solicitud.dto';
 import { RechazarSolicitudUseCase } from '../../application/use-cases/rechazar-solicitud.use-case';
 import { SolicitarCorreccionUseCase } from '../../application/use-cases/solicitar-correccion.use-case';
 import { IniciarRevisionUseCase } from '../../application/use-cases/iniciar-revision.use-case';
@@ -178,11 +179,18 @@ export class SolicitudesFuncionarioController {
   })
   aprobar(
     @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: AprobarSolicitudDto,
     @CurrentUser() user: AuthUser,
     @Req() req: Request,
   ): Promise<AccionSolicitudResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
-    return this.aprobarSolicitudUseCase.ejecutar(id, user.id, ipAddress);
+    return this.aprobarSolicitudUseCase.ejecutar(
+      id,
+      user.id,
+      ipAddress,
+      body.fechaVencimiento,
+      body.condicionesRestricciones,
+    );
   }
 
   @Post(':id/rechazar')

@@ -48,6 +48,11 @@ import type {
 import { useQueryClient } from '@tanstack/react-query';
 
 type ModalAction = 'aprobar' | 'rechazar' | 'correccion' | null;
+
+interface AprobarFormValues {
+  fechaVencimiento: string;
+  condicionesRestricciones: string;
+}
 type CorreccionStep = 'form' | 'preview';
 
 const ESTADOS_ACCIONABLES = ['en_revision', 'pendiente_correccion'];
@@ -120,6 +125,10 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   }, [permisoId, wantsPdf]);
 
   /* ── Forms ─────────────────────────────────── */
+  const aprobarForm = useForm<AprobarFormValues>({
+    defaultValues: { fechaVencimiento: '', condicionesRestricciones: '' },
+  });
+
   const rechazarForm = useForm<RechazarFormValues>({
     resolver: zodResolver(rechazarSchema),
     defaultValues: { motivo: '' },
@@ -141,9 +150,18 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   const correccionMotivo = correccionForm.watch('motivo');
 
   /* ── Helpers ───────────────────────────────── */
+  function openAprobarModal() {
+    aprobarForm.reset({
+      fechaVencimiento: solicitud?.fechaFin ?? '',
+      condicionesRestricciones: '',
+    });
+    setActiveModal('aprobar');
+  }
+
   function closeModal() {
     setActiveModal(null);
     setCorreccionStep('form');
+    aprobarForm.reset();
     rechazarForm.reset();
     correccionForm.reset();
     aprobarMut.reset();
@@ -169,24 +187,30 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   }
 
   /* ── Action handlers ────────────────────────── */
-  function handleAprobar() {
-    aprobarMut.mutate(undefined, {
-      onSuccess: () => {
-        toast({
-          type: 'success',
-          title: 'Permiso emitido',
-          message: 'El permiso fue generado. Haga clic en "Imprimir permiso" para imprimirlo.',
-        });
-        closeModal();
-        // Activar descarga del PDF para auto-imprimir tras aprobación
-        pendingPrintRef.current = true;
-        setWantsPdf(true);
+  function handleAprobar(values: AprobarFormValues) {
+    if (!values.fechaVencimiento) return;
+    aprobarMut.mutate(
+      {
+        fechaVencimiento: values.fechaVencimiento,
+        condicionesRestricciones: values.condicionesRestricciones || null,
       },
-      onError: (err: unknown) => {
-        const msg = getErrorMessage(err);
-        toast({ type: 'error', title: 'Error al aprobar', message: msg });
+      {
+        onSuccess: () => {
+          toast({
+            type: 'success',
+            title: 'Permiso emitido',
+            message: 'El permiso fue generado. Se abrirá el PDF para imprimir.',
+          });
+          closeModal();
+          pendingPrintRef.current = true;
+          setWantsPdf(true);
+        },
+        onError: (err: unknown) => {
+          const msg = getErrorMessage(err);
+          toast({ type: 'error', title: 'Error al aprobar', message: msg });
+        },
       },
-    });
+    );
   }
 
   function handleRechazar(values: RechazarFormValues) {
@@ -359,11 +383,7 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                     <XCircle className="h-4 w-4 mr-1.5" aria-hidden="true" />
                     Rechazar
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setActiveModal('aprobar')}
-                    aria-label="Emitir permiso"
-                  >
+                  <Button size="sm" onClick={openAprobarModal} aria-label="Emitir permiso">
                     <CheckCircle2 className="h-4 w-4 mr-1.5" aria-hidden="true" />
                     Emitir permiso
                   </Button>
@@ -505,17 +525,57 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
         open={activeModal === 'aprobar'}
         onClose={closeModal}
         title="Emitir permiso de circulación"
-        description={`¿Confirma la emisión del permiso para la solicitud ${solicitud?.numeroRadicado}? Se generará el permiso de circulación y se notificará al ciudadano.`}
+        description={`Solicitud ${solicitud?.numeroRadicado}. Complete los datos del permiso y confirme la emisión.`}
         confirmLabel="Emitir permiso"
         confirmVariant="primary"
         isConfirming={aprobarMut.isPending}
-        onConfirm={handleAprobar}
+        confirmDisabled={!aprobarForm.watch('fechaVencimiento')}
+        onConfirm={aprobarForm.handleSubmit(handleAprobar)}
+        maxWidth="max-w-lg"
       >
-        {aprobarMut.isError && (
-          <Alert variant="danger" icon={false}>
-            {getErrorMessage(aprobarMut.error)}
-          </Alert>
-        )}
+        <div className="space-y-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="fecha-vencimiento" className="text-sm font-medium text-neutral-700">
+              Válido hasta{' '}
+              <span className="text-danger-500" aria-hidden="true">
+                *
+              </span>
+            </label>
+            <input
+              id="fecha-vencimiento"
+              type="date"
+              min={new Date().toISOString().slice(0, 10)}
+              aria-required="true"
+              {...aprobarForm.register('fechaVencimiento', { required: true })}
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600"
+            />
+            {!aprobarForm.watch('fechaVencimiento') && (
+              <span className="text-xs text-danger-600">
+                Debe indicar la fecha de vencimiento del permiso.
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="condiciones" className="text-sm font-medium text-neutral-700">
+              Condiciones o restricciones{' '}
+              <span className="text-xs text-neutral-400 font-normal">(opcional)</span>
+            </label>
+            <textarea
+              id="condiciones"
+              rows={3}
+              placeholder="Ej: Válido solo en horario diurno. No aplica días festivos…"
+              {...aprobarForm.register('condicionesRestricciones')}
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-600 resize-none"
+            />
+          </div>
+
+          {aprobarMut.isError && (
+            <Alert variant="danger" icon={false}>
+              {getErrorMessage(aprobarMut.error)}
+            </Alert>
+          )}
+        </div>
       </ConfirmationModal>
 
       {/* ══ Modal Rechazar ══════════════════════════════════ */}

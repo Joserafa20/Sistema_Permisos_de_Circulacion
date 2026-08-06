@@ -39,6 +39,8 @@ export class AprobarSolicitudUseCase {
     solicitudId: string,
     usuarioId: string,
     ipAddress: string | null,
+    fechaVencimientoOverride?: string,
+    condicionesRestricciones?: string | null,
   ): Promise<AccionSolicitudResponseDto> {
     const solicitud = await this.solicitudBusquedaService.buscarPorId(solicitudId);
     if (!solicitud) {
@@ -111,7 +113,13 @@ export class AprobarSolicitudUseCase {
     // Si falla, revertir la solicitud a EN_REVISION para evitar estado APROBADA sin permiso.
     let permiso: Awaited<ReturnType<typeof this.generarPermisoUseCase.ejecutar>>;
     try {
-      permiso = await this.generarPermisoUseCase.ejecutar(solicitudId, usuarioId, ipAddress);
+      permiso = await this.generarPermisoUseCase.ejecutar(
+        solicitudId,
+        usuarioId,
+        ipAddress,
+        condicionesRestricciones ?? null,
+        fechaVencimientoOverride,
+      );
     } catch (err) {
       await this.solicitudRepo.cambiarEstado({
         id: solicitudId,

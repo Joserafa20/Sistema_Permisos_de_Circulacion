@@ -62,6 +62,7 @@ export class GenerarPermisoUseCase {
     funcionarioId: string,
     ipAddress: string | null,
     condicionesRestricciones: string | null = null,
+    fechaVencimientoOverride?: string,
   ): Promise<PermisoGeneradoDto> {
     // ── 1. Cargar solicitud con relaciones ────────────────────────────
     const solicitud = await this.dataSource.getRepository(SolicitudEntity).findOne({
@@ -152,11 +153,12 @@ export class GenerarPermisoUseCase {
 
     // ── 7. Generar PDF ────────────────────────────────────────────────
     const fechaExpedicion = new Date();
+    const fechaVencimientoFinal = fechaVencimientoOverride ?? solicitud.fechaFin;
 
     const pdfBuffer = await this.pdfGeneratorService.generar({
       codigoPermiso,
       fechaExpedicion,
-      fechaVencimiento: solicitud.fechaFin,
+      fechaVencimiento: fechaVencimientoFinal,
       snapshotCiudadano,
       snapshotMotocicleta,
       snapshotMotivo,
@@ -193,7 +195,7 @@ export class GenerarPermisoUseCase {
       codigoQr,
       storageKeyPdf,
       fechaExpedicion,
-      fechaVencimiento: solicitud.fechaFin,
+      fechaVencimiento: fechaVencimientoFinal,
       estado: EstadoPermiso.VIGENTE,
       snapshotCiudadano,
       snapshotMotocicleta,

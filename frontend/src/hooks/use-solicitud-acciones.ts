@@ -32,7 +32,8 @@ export function useIniciarRevision(solicitudId: string) {
 export function useAprobarSolicitud(solicitudId: string) {
   const invalidate = useInvalidateAllAfterAccion(solicitudId);
   return useMutation({
-    mutationFn: () => aprobarSolicitud(solicitudId),
+    mutationFn: (body: { fechaVencimiento: string; condicionesRestricciones?: string | null }) =>
+      aprobarSolicitud(solicitudId, body),
     onSuccess: invalidate,
   });
 }
