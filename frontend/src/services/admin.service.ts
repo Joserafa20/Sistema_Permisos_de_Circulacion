@@ -41,6 +41,21 @@ export async function actualizarConfiguracion(
   return res.data;
 }
 
+export async function subirImagenInstitucional(tipo: 'logo' | 'escudo', file: File): Promise<void> {
+  const form = new FormData();
+  form.append('file', file);
+  await apiPost(`/configuracion-institucional/${tipo}/imagen`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export async function getImagenInstitucionalUrl(tipo: 'logo' | 'escudo'): Promise<string | null> {
+  const res = await apiGet<ApiResponse<{ url: string | null }>>(
+    `/configuracion-institucional/${tipo}/imagen/url`,
+  );
+  return res.data?.url ?? null;
+}
+
 /* ── Usuarios ─────────────────────────────────── */
 
 export async function getUsuarios(query: ListarUsuariosQuery = {}): Promise<UsuariosPaginados> {

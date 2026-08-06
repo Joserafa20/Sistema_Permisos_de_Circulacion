@@ -55,4 +55,26 @@ export class TypeOrmConfiguracionInstitucionalRepository implements IConfiguraci
     const saved = await this.repo.save(existing);
     return ConfiguracionInstitucionalMapper.toDomain(saved);
   }
+
+  async updateImagen(
+    tipo: 'logo' | 'escudo',
+    storageKey: string,
+    hash: string,
+    updatedById: string,
+  ): Promise<ConfiguracionInstitucional> {
+    const existing = await this.repo.findOne({ where: {}, relations: ['updatedBy'] });
+    if (!existing) throw new Error('No existe configuración institucional');
+
+    if (tipo === 'logo') {
+      existing.logoStorageKey = storageKey;
+      existing.logoHash = hash;
+    } else {
+      existing.escudoStorageKey = storageKey;
+      existing.escudoHash = hash;
+    }
+    existing.updatedBy = { id: updatedById } as typeof existing.updatedBy;
+
+    const saved = await this.repo.save(existing);
+    return ConfiguracionInstitucionalMapper.toDomain(saved);
+  }
 }

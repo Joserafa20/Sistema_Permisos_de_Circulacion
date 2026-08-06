@@ -1,5 +1,17 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SWAGGER_BEARER_TOKEN } from '../../../../common/constants/swagger.constants';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
@@ -7,6 +19,7 @@ import { Roles, UserRole } from '../../../../common/decorators/roles.decorator';
 import { ObtenerConfiguracionInstitucionalUseCase } from '../../application/use-cases/obtener-configuracion-institucional/obtener-configuracion-institucional.use-case';
 import { ActualizarConfiguracionInstitucionalUseCase } from '../../application/use-cases/actualizar-configuracion-institucional/actualizar-configuracion-institucional.use-case';
 import { ObtenerConfiguracionPublicaUseCase } from '../../application/use-cases/obtener-configuracion-publica/obtener-configuracion-publica.use-case';
+import { SubirImagenInstitucionalUseCase } from '../../application/use-cases/subir-imagen-institucional/subir-imagen-institucional.use-case';
 import { ActualizarConfiguracionInstitucionalDto } from '../../application/use-cases/actualizar-configuracion-institucional/actualizar-configuracion-institucional.dto';
 import { ConfiguracionInstitucionalResponseDto } from '../../application/use-cases/obtener-configuracion-institucional/configuracion-institucional-response.dto';
 import { ConfiguracionPublicaResponseDto } from '../../application/use-cases/obtener-configuracion-publica/configuracion-publica-response.dto';
@@ -18,6 +31,7 @@ export class ConfiguracionInstitucionalController {
   constructor(
     private readonly obtenerUseCase: ObtenerConfiguracionInstitucionalUseCase,
     private readonly actualizarUseCase: ActualizarConfiguracionInstitucionalUseCase,
+    private readonly subirImagenUseCase: SubirImagenInstitucionalUseCase,
   ) {}
 
   @Get()
@@ -66,6 +80,37 @@ export class ConfiguracionInstitucionalController {
     @CurrentUser() user: AuthUser,
   ): Promise<ConfiguracionInstitucionalResponseDto> {
     return this.actualizarUseCase.execute({ ...dto, usuarioId: user.id });
+  }
+
+  @Post(':tipo/imagen')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.ADMINISTRADOR)
+  @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Subir logo o escudo institucional (tipo: logo | escudo)' })
+  @ApiResponse({ status: 200, description: 'Imagen subida correctamente' })
+  async subirImagen(
+    @Param('tipo') tipo: string,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: AuthUser,
+  ): Promise<{ message: string }> {
+    if (tipo !== 'logo' && tipo !== 'escudo') {
+      throw new Error('Tipo inválido. Use logo o escudo.');
+    }
+    await this.subirImagenUseCase.execute(tipo, file, user.id);
+    return { message: `${tipo} actualizado correctamente` };
+  }
+
+  @Get(':tipo/imagen/url')
+  @Roles(UserRole.ADMINISTRADOR, UserRole.FUNCIONARIO)
+  @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
+  @ApiOperation({ summary: 'Obtener URL firmada (TTL 5 min) para logo o escudo' })
+  @ApiResponse({ status: 200, description: 'URL firmada generada' })
+  async getImagenUrl(@Param('tipo') tipo: string): Promise<{ url: string | null }> {
+    if (tipo !== 'logo' && tipo !== 'escudo') return { url: null };
+    const url = await this.subirImagenUseCase.getSignedUrl(tipo);
+    return { url };
   }
 }
 

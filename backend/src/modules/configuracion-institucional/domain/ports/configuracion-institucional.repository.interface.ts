@@ -13,4 +13,10 @@ export interface IConfiguracionInstitucionalRepository {
       updatedById: string | null;
     },
   ): Promise<ConfiguracionInstitucional>;
+  updateImagen(
+    tipo: 'logo' | 'escudo',
+    storageKey: string,
+    hash: string,
+    updatedById: string,
+  ): Promise<ConfiguracionInstitucional>;
 }

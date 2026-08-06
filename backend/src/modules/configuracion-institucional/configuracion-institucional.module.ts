@@ -6,6 +6,7 @@ import { CONFIGURACION_INSTITUCIONAL_REPOSITORY_TOKEN } from './domain/ports/con
 import { ObtenerConfiguracionInstitucionalUseCase } from './application/use-cases/obtener-configuracion-institucional/obtener-configuracion-institucional.use-case';
 import { ActualizarConfiguracionInstitucionalUseCase } from './application/use-cases/actualizar-configuracion-institucional/actualizar-configuracion-institucional.use-case';
 import { ObtenerConfiguracionPublicaUseCase } from './application/use-cases/obtener-configuracion-publica/obtener-configuracion-publica.use-case';
+import { SubirImagenInstitucionalUseCase } from './application/use-cases/subir-imagen-institucional/subir-imagen-institucional.use-case';
 import {
   ConfiguracionInstitucionalController,
   ConfiguracionInstitucionalPublicController,
@@ -19,6 +20,7 @@ import { ConfiguracionInstitucionalSeeder } from './infrastructure/persistence/c
     ObtenerConfiguracionInstitucionalUseCase,
     ActualizarConfiguracionInstitucionalUseCase,
     ObtenerConfiguracionPublicaUseCase,
+    SubirImagenInstitucionalUseCase,
     ConfiguracionInstitucionalSeeder,
     {
       provide: CONFIGURACION_INSTITUCIONAL_REPOSITORY_TOKEN,

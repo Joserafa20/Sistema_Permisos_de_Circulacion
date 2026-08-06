@@ -1,10 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Settings, ImageIcon, Save, RefreshCw } from 'lucide-react';
-import { useConfiguracionAdmin, useActualizarConfiguracion } from '@/hooks/use-admin-configuracion';
+import { Settings, ImageIcon, Save, RefreshCw, Upload, CheckCircle2 } from 'lucide-react';
+import {
+  useConfiguracionAdmin,
+  useActualizarConfiguracion,
+  useSubirImagen,
+  useImagenUrl,
+} from '@/hooks/use-admin-configuracion';
 import { useToast } from '@/providers/toast-provider';
 import { PageContainer } from '@/components/funcionario/page-container';
 import { HeaderFunc } from '@/components/funcionario/header-func';
@@ -39,6 +44,112 @@ function Input({
           {error}
         </span>
       )}
+    </div>
+  );
+}
+
+function ImagenUploadCard({
+  tipo,
+  label,
+  tieneImagen,
+}: {
+  tipo: 'logo' | 'escudo';
+  label: string;
+  tieneImagen: boolean;
+}) {
+  const { toast } = useToast();
+  const subirMut = useSubirImagen();
+  const { data: url } = useImagenUrl(tipo, tieneImagen);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    setPendingFile(file);
+  }
+
+  function handleUpload() {
+    if (!pendingFile) return;
+    subirMut.mutate(
+      { tipo, file: pendingFile },
+      {
+        onSuccess: () => {
+          toast({ type: 'success', title: `${label} actualizado correctamente` });
+          setPendingFile(null);
+          setPreview(null);
+          if (inputRef.current) inputRef.current.value = '';
+        },
+        onError: (err) => {
+          const msg = err instanceof Error ? err.message : 'Error al subir la imagen';
+          toast({ type: 'error', title: 'Error al subir imagen', message: msg });
+        },
+      },
+    );
+  }
+
+  const imgSrc = preview ?? url ?? null;
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+      <div className="flex items-center gap-3">
+        <div
+          className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${tieneImagen || preview ? 'bg-success-100' : 'bg-neutral-100'}`}
+        >
+          {tieneImagen || preview ? (
+            <CheckCircle2 className="h-5 w-5 text-success-600" aria-hidden="true" />
+          ) : (
+            <ImageIcon className="h-5 w-5 text-neutral-400" aria-hidden="true" />
+          )}
+        </div>
+        <div>
+          <p className="text-sm font-medium text-neutral-800">{label}</p>
+          <p
+            className={`text-xs font-medium ${tieneImagen || preview ? 'text-success-700' : 'text-neutral-500'}`}
+          >
+            {preview ? 'Lista para subir' : tieneImagen ? 'Configurada' : 'No configurada'}
+          </p>
+        </div>
+      </div>
+
+      {imgSrc && (
+        <div className="flex justify-center rounded-lg border border-neutral-200 bg-white p-2 h-24">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imgSrc} alt={label} className="h-full object-contain" />
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          className="hidden"
+          onChange={handleFileChange}
+          aria-label={`Seleccionar ${label}`}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
+        >
+          <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+          Seleccionar
+        </button>
+        {pendingFile && (
+          <button
+            type="button"
+            onClick={handleUpload}
+            disabled={subirMut.isPending}
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-xs font-medium text-white hover:bg-primary-700 disabled:opacity-60 transition-colors"
+          >
+            {subirMut.isPending ? 'Subiendo…' : 'Guardar imagen'}
+          </button>
+        )}
+      </div>
+      <p className="text-xs text-neutral-400">PNG, JPEG, WEBP o SVG · máx. 2 MB</p>
     </div>
   );
 }
@@ -236,54 +347,24 @@ export function ConfiguracionView() {
               </div>
             </section>
 
-            {/* Imágenes — informativo */}
+            {/* Imágenes institucionales */}
             <section>
               <h2 className="text-sm font-semibold text-neutral-700 flex items-center gap-2 mb-4">
                 <ImageIcon className="h-4 w-4 text-neutral-400" aria-hidden="true" />
                 Imágenes institucionales
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-                  <div
-                    className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${config?.tieneLogo ? 'bg-success-100' : 'bg-neutral-100'}`}
-                  >
-                    <ImageIcon
-                      className={`h-5 w-5 ${config?.tieneLogo ? 'text-success-600' : 'text-neutral-400'}`}
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-800">Logo institucional</p>
-                    <p
-                      className={`text-xs font-medium ${config?.tieneLogo ? 'text-success-700' : 'text-neutral-500'}`}
-                    >
-                      {config?.tieneLogo ? 'Configurado' : 'No configurado'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-                  <div
-                    className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${config?.tieneEscudo ? 'bg-success-100' : 'bg-neutral-100'}`}
-                  >
-                    <ImageIcon
-                      className={`h-5 w-5 ${config?.tieneEscudo ? 'text-success-600' : 'text-neutral-400'}`}
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-800">Escudo municipal</p>
-                    <p
-                      className={`text-xs font-medium ${config?.tieneEscudo ? 'text-success-700' : 'text-neutral-500'}`}
-                    >
-                      {config?.tieneEscudo ? 'Configurado' : 'No configurado'}
-                    </p>
-                  </div>
-                </div>
+                <ImagenUploadCard
+                  tipo="logo"
+                  label="Logo institucional"
+                  tieneImagen={config?.tieneLogo ?? false}
+                />
+                <ImagenUploadCard
+                  tipo="escudo"
+                  label="Escudo municipal"
+                  tieneImagen={config?.tieneEscudo ?? false}
+                />
               </div>
-              <Alert variant="info" className="mt-4">
-                La carga de imágenes (logo y escudo) se realiza mediante API directa. Contacte al
-                equipo técnico para actualizar estas imágenes.
-              </Alert>
             </section>
 
             {updateMut.isError && (
