@@ -336,6 +336,7 @@ export class TypeOrmSolicitudRepository implements ISolicitudRepository {
       .leftJoinAndSelect('historial.usuario', 'historialUsuario')
       .leftJoinAndSelect('historialUsuario.rol', 'historialUsuarioRol')
       .leftJoinAndSelect('s.documentos', 'documentos')
+      .leftJoinAndSelect('s.permiso', 'permiso')
       .where('s.deletedAt IS NULL')
       .andWhere(
         Object.entries(where)

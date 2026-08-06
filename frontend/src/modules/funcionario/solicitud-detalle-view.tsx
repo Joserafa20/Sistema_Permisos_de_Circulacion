@@ -101,15 +101,23 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   const correccionMut = useSolicitarCorreccion(solicitudId);
 
   /* ── PDF permiso ──────────────────────────── */
-  const { data: pdfData, isFetching: pdfLoading } = usePermisoPdf(solicitud?.permiso?.id, wantsPdf);
+  const permisoId = solicitud?.permiso?.id;
+  const { data: pdfData, isFetching: pdfLoading } = usePermisoPdf(permisoId, wantsPdf);
 
-  // Auto-abrir PDF en nueva pestaña para imprimir tras aprobación
+  // Auto-abrir PDF en nueva pestaña cuando llega la URL tras aprobación
   useEffect(() => {
     if (pendingPrintRef.current && pdfData?.url) {
       pendingPrintRef.current = false;
       window.open(pdfData.url, '_blank', 'noopener,noreferrer');
     }
   }, [pdfData]);
+
+  // Cuando el permiso llega tras el refetch y hay pending print, activar la carga del PDF
+  useEffect(() => {
+    if (pendingPrintRef.current && permisoId && !wantsPdf) {
+      setWantsPdf(true);
+    }
+  }, [permisoId, wantsPdf]);
 
   /* ── Forms ─────────────────────────────────── */
   const rechazarForm = useForm<RechazarFormValues>({

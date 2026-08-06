@@ -48,6 +48,7 @@ export class SolicitudDomainEntity {
   // ─── Relaciones cargadas bajo demanda ─────────────────────────────────────
   historial?: HistorialEstadoDomainEntity[];
   documentos?: DocumentoDomainEntity[];
+  permiso?: { id: string; codigoPermiso: string } | null;
 
   /** Computed: tiempo desde creación ("2 horas", "3 días"). Solo en listados. */
   tiempoEspera?: string;

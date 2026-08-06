@@ -116,6 +116,11 @@ export class SolicitudMapper {
     if (opts.withDocumentos && Array.isArray(entity.documentos)) {
       domain.documentos = entity.documentos.map(documentoToDomain);
     }
+    if (entity.permiso !== undefined) {
+      domain.permiso = entity.permiso
+        ? { id: entity.permiso.id, codigoPermiso: entity.permiso.codigoPermiso }
+        : null;
+    }
 
     return domain;
   }
@@ -206,7 +211,7 @@ export class SolicitudMapper {
       declaracionJurada: domain.declaracionJurada,
       documentos: documentoDtos,
       historial: historialDtos,
-      permiso: null,
+      permiso: domain.permiso ?? null,
       createdAt: domain.createdAt.toISOString(),
       updatedAt: domain.updatedAt?.toISOString() ?? null,
     };

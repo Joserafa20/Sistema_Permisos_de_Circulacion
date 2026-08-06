@@ -58,8 +58,13 @@ export class SolicitudDetalleDto {
   @ApiPropertyOptional({
     nullable: true,
     description: 'Presente solo si la solicitud fue aprobada',
+    type: 'object',
+    properties: {
+      id: { type: 'string', format: 'uuid' },
+      codigoPermiso: { type: 'string' },
+    },
   })
-  permiso: null;
+  permiso: { id: string; codigoPermiso: string } | null;
   @ApiProperty() createdAt: string;
   @ApiPropertyOptional({ nullable: true }) updatedAt: string | null;
 }
