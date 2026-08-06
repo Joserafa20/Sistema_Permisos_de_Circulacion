@@ -44,8 +44,16 @@ export async function actualizarConfiguracion(
 export async function subirImagenInstitucional(tipo: 'logo' | 'escudo', file: File): Promise<void> {
   const form = new FormData();
   form.append('file', file);
-  // No fijar Content-Type: el navegador lo agrega automáticamente con el boundary correcto
-  await apiPost(`/configuracion-institucional/${tipo}/imagen`, form);
+  // Eliminar Content-Type del header de la instancia Axios para que el navegador
+  // lo genere automáticamente con el boundary correcto (multipart/form-data; boundary=...)
+  await apiPost(`/configuracion-institucional/${tipo}/imagen`, form, {
+    transformRequest: [
+      (data: FormData, headers: Record<string, string>) => {
+        delete headers['Content-Type'];
+        return data;
+      },
+    ],
+  });
 }
 
 export async function getImagenInstitucionalUrl(tipo: 'logo' | 'escudo'): Promise<string | null> {
