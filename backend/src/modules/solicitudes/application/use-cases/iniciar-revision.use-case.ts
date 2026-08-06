@@ -30,12 +30,15 @@ export class IniciarRevisionUseCase {
       );
     }
 
-    await this.solicitudRepo.cambiarEstado(
-      solicitudId,
-      EstadoSolicitud.EN_REVISION,
+    await this.solicitudRepo.cambiarEstado({
+      id: solicitudId,
+      estadoNuevo: EstadoSolicitud.EN_REVISION,
+      estadosPermitidos: [EstadoSolicitud.RECIBIDA],
+      motivo: 'Revisión iniciada por funcionario',
+      camposCorreccion: null,
       usuarioId,
-      'Revisión iniciada por funcionario',
-    );
+      ipAddress: null,
+    });
 
     void this.auditoriaService.registrar({
       accion: AccionAuditoria.EDITAR,
