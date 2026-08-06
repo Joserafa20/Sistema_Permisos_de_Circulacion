@@ -19,12 +19,56 @@ import type {
 
 /* ── Auth ──────────────────────────────────────── */
 
+// El backend devuelve campos en camelCase con nombres distintos al tipo UsuarioPerfil.
+// Este mapper convierte la respuesta del backend al contrato del frontend.
+function mapUsuario(u: {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  rol: string;
+  dependencia?: string | null;
+  activo?: boolean;
+}): UsuarioPerfil {
+  return {
+    id: u.id,
+    nombres: u.nombre,
+    apellidos: u.apellido,
+    correoElectronico: u.email,
+    activo: u.activo ?? true,
+    rol: { id: u.rol, nombre: u.rol, slug: u.rol as UsuarioPerfil['rol']['slug'] },
+    dependencia: u.dependencia ? { id: u.dependencia, nombre: '' } : undefined,
+  };
+}
+
 export async function loginFuncionario(payload: LoginPayload): Promise<LoginResponse> {
-  const res = await apiPost<ApiResponse<LoginResponse>>('/auth/login', {
+  const res = await apiPost<
+    ApiResponse<{
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+      usuario: {
+        id: string;
+        nombre: string;
+        apellido: string;
+        email: string;
+        rol: string;
+        dependencia: string | null;
+        contrasenaExpirada: boolean;
+      };
+    }>
+  >('/auth/login', {
     email: payload.correoElectronico,
     contrasena: payload.contrasena,
   });
-  return res.data;
+  const d = res.data;
+  return {
+    access_token: d.accessToken,
+    refresh_token: d.refreshToken,
+    expires_in: d.expiresIn,
+    token_type: 'Bearer',
+    user: mapUsuario(d.usuario),
+  };
 }
 
 export async function logoutFuncionario(refreshToken: string): Promise<void> {
@@ -32,15 +76,29 @@ export async function logoutFuncionario(refreshToken: string): Promise<void> {
 }
 
 export async function refreshFuncionario(refreshToken: string): Promise<RefreshResponse> {
-  const res = await apiPost<ApiResponse<RefreshResponse>>('/auth/refresh', {
+  const res = await apiPost<
+    ApiResponse<{ accessToken: string; refreshToken: string; expiresIn: number }>
+  >('/auth/refresh', {
     refresh_token: refreshToken,
   });
-  return res.data;
+  const d = res.data;
+  return { access_token: d.accessToken, refresh_token: d.refreshToken, expires_in: d.expiresIn };
 }
 
 export async function getMePerfil(): Promise<UsuarioPerfil> {
-  const res = await apiGet<ApiResponse<UsuarioPerfil>>('/auth/me');
-  return res.data;
+  const res =
+    await apiGet<
+      ApiResponse<{
+        id: string;
+        nombre: string;
+        apellido: string;
+        email: string;
+        rol: string;
+        dependencia: string | null;
+        activo: boolean;
+      }>
+    >('/auth/me');
+  return mapUsuario(res.data);
 }
 
 /* ── Dashboard ─────────────────────────────────── */
