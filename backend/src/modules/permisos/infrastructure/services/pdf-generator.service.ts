@@ -104,7 +104,7 @@ export class PdfGeneratorService {
         .fontSize(10)
         .fillColor('#555555')
         .text(`N° ${data.codigoPermiso}`, mg, y, { width: cW, align: 'center' });
-      y += 6;
+      y += 18;
       doc
         .moveTo(mg, y)
         .lineTo(mg + cW, y)

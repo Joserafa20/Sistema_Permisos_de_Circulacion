@@ -25,7 +25,7 @@ import type {
 
 @Injectable()
 export class GenerarPermisoUseCase {
-  private readonly publicUrl: string;
+  private readonly frontendUrl: string;
   private readonly bucketInstitucional: string;
 
   constructor(
@@ -39,7 +39,7 @@ export class GenerarPermisoUseCase {
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService,
   ) {
-    this.publicUrl = this.configService.get<string>('app.publicUrl') ?? 'http://localhost:3001';
+    this.frontendUrl = this.configService.get<string>('app.frontendUrl') ?? 'http://localhost:3000';
     this.bucketInstitucional =
       this.configService.get<string>('storage.bucketDocs') ?? 'pyp-documentos';
   }
@@ -102,7 +102,7 @@ export class GenerarPermisoUseCase {
     // ── 3. UUID y código QR ───────────────────────────────────────────
     const permisoId = crypto.randomUUID();
     const codigoQr = this.qrCodeService.generarCodigoOpaco(permisoId);
-    const verificationUrl = `${this.publicUrl}/api/v1/public/verificar/${codigoQr}`;
+    const verificationUrl = `${this.frontendUrl}/verificar?codigo=${codigoQr}`;
     const qrImageBuffer = await this.qrCodeService.generarImagenBuffer(verificationUrl);
 
     // ── 4. Consecutivo permiso (RN-07) ────────────────────────────────

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,7 +43,20 @@ function getErrorMessage(err: unknown): string {
   return 'Ocurrió un error inesperado. Intente nuevamente.';
 }
 
+/** Extrae solo el hash SHA256 de un código QR que puede ser URL o hash directo. */
+function extraerCodigo(raw: string): string {
+  try {
+    const url = new URL(raw);
+    const param = url.searchParams.get('codigo');
+    if (param) return param.trim();
+  } catch {
+    // No es URL — usar como está
+  }
+  return raw.trim();
+}
+
 export function VerificarForm() {
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<Mode>('idle');
   const [codigoActivo, setCodigoActivo] = useState('');
 
@@ -50,6 +64,15 @@ export function VerificarForm() {
     resolver: zodResolver(verificarCodigoSchema),
     defaultValues: { codigo: '' },
   });
+
+  // Auto-verificar cuando llega por URL (QR escanea → abre /verificar?codigo=...)
+  useEffect(() => {
+    const codigo = searchParams.get('codigo');
+    if (codigo && !codigoActivo) {
+      setCodigoActivo(codigo.trim());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data, isLoading, isError, error } = useVerificarPermiso({
     codigo: codigoActivo,
@@ -67,7 +90,7 @@ export function VerificarForm() {
   }
 
   function onQrScan(code: string) {
-    setCodigoActivo(code.trim());
+    setCodigoActivo(extraerCodigo(code));
     setMode('idle');
   }
 
