@@ -17,9 +17,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace(`${FUNC_ROUTES.login}?next=${encodeURIComponent(window.location.pathname)}`);
+      window.location.replace(
+        `${FUNC_ROUTES.login}?next=${encodeURIComponent(window.location.pathname)}`,
+      );
     }
-  }, [status, router]);
+  }, [status]);
 
   if (status === 'loading') {
     return (

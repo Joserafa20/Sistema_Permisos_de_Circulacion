@@ -90,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const stored = getStoredRefreshToken();
     if (!stored) {
+      clearSessionCookie();
       setStatus('unauthenticated');
       return;
     }
