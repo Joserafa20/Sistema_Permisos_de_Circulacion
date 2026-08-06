@@ -109,13 +109,22 @@ export interface VerificacionQR {
   estado?: EstadoPermiso;
   estadoDescripcion?: string;
   codigoPermiso?: string;
+  // Titular
   nombreTitular?: string;
+  tipoDocumento?: string;
+  numeroDocumento?: string;
+  // Motocicleta
   placaMoto?: string;
   marcaMoto?: string;
-  modeloMoto?: string;
+  lineaMoto?: string;
+  modeloMoto?: number;
+  colorMoto?: string;
+  // Permiso
   motivo?: string;
+  condicionesRestricciones?: string | null;
   fechaInicio?: string;
   fechaFin?: string;
+  funcionarioAutorizo?: string;
   municipio?: string;
   validadoEn: string;
 }

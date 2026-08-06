@@ -77,10 +77,40 @@ export async function getEstadoSolicitud(
 
 /* ── GET /public/verificar/{codigo} ──────────── */
 export async function verificarPermiso(codigoQR: string): Promise<VerificacionQR> {
-  const response = await apiGet<ApiResponse<VerificacionQR>>(
+  // El backend retorna VerificarQrResponseDto — mapeamos al tipo frontend
+  const response = await apiGet<ApiResponse<Record<string, unknown>>>(
     `/public/verificar/${encodeURIComponent(codigoQR)}`,
   );
-  return response.data;
+  const d = response.data;
+  const resultado = d.resultado as string | undefined;
+  const encontrado = resultado !== 'no_encontrado' && !!resultado;
+
+  const estadoMap: Record<string, 'vigente' | 'vencido' | 'revocado'> = {
+    vigente: 'vigente',
+    vencido: 'vencido',
+    revocado: 'revocado',
+  };
+
+  return {
+    encontrado,
+    estado: resultado ? estadoMap[resultado] : undefined,
+    estadoDescripcion: d.mensaje as string | undefined,
+    codigoPermiso: d.codigoPermiso as string | undefined,
+    nombreTitular: d.titular as string | undefined,
+    tipoDocumento: d.tipoDocumento as string | undefined,
+    numeroDocumento: d.numeroDocumento as string | undefined,
+    placaMoto: d.placa as string | undefined,
+    marcaMoto: d.marca as string | undefined,
+    lineaMoto: d.linea as string | undefined,
+    modeloMoto: d.modelo as number | undefined,
+    colorMoto: d.color as string | undefined,
+    motivo: d.motivo as string | undefined,
+    condicionesRestricciones: d.condicionesRestricciones as string | null | undefined,
+    fechaInicio: d.fechaExpedicion as string | undefined,
+    fechaFin: d.fechaVencimiento as string | undefined,
+    funcionarioAutorizo: d.funcionarioAutorizo as string | undefined,
+    validadoEn: new Date().toISOString(),
+  };
 }
 
 /* ── POST /public/solicitudes/{id}/documentos ── */

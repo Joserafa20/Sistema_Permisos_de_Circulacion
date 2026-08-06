@@ -1,8 +1,15 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  User,
+  Bike,
+  FileText,
+  AlertTriangle,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { VerificacionQR, EstadoPermiso } from '@/types';
@@ -27,7 +34,7 @@ const ESTADO_DISPLAY: Record<
     border: 'border-success-300',
     Icon: CheckCircle2,
     badgeVariant: 'success',
-    descripcion: 'Este permiso es válido para la fecha y hora actuales.',
+    descripcion: 'Este permiso es auténtico y válido a la fecha actual.',
   },
   vencido: {
     label: 'Permiso Vencido',
@@ -49,12 +56,34 @@ const ESTADO_DISPLAY: Record<
   },
 };
 
-function InfoRow({ label, value }: { label: string; value?: string }) {
-  if (!value) return null;
+function Row({ label, value }: { label: string; value?: string | number | null }) {
+  if (value === undefined || value === null || value === '') return null;
   return (
-    <div className="flex flex-col sm:flex-row sm:gap-3 py-2 border-b border-neutral-100 last:border-0">
-      <dt className="text-sm font-medium text-neutral-500 sm:w-40 shrink-0">{label}</dt>
-      <dd className="text-sm text-neutral-800">{value}</dd>
+    <div className="flex flex-col sm:flex-row sm:gap-3 py-2.5 border-b border-neutral-100 last:border-0">
+      <dt className="text-xs font-semibold text-neutral-500 uppercase tracking-wide sm:w-44 shrink-0 pt-0.5">
+        {label}
+      </dt>
+      <dd className="text-sm font-medium text-neutral-900 mt-0.5 sm:mt-0">{String(value)}</dd>
+    </div>
+  );
+}
+
+function Section({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 bg-neutral-50 border-b border-neutral-200">
+        <Icon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
+        <h3 className="text-sm font-semibold text-neutral-700">{title}</h3>
+      </div>
+      <dl className="px-4">{children}</dl>
     </div>
   );
 }
@@ -91,6 +120,10 @@ export function PermisoResultado({ data, onNueva }: PermisoResultadoProps) {
   const conf = ESTADO_DISPLAY[data.estado];
   const { Icon } = conf;
 
+  const motoDesc = [data.marcaMoto, data.lineaMoto, data.modeloMoto ? `(${data.modeloMoto})` : null]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -123,33 +156,49 @@ export function PermisoResultado({ data, onNueva }: PermisoResultadoProps) {
         )}
       </div>
 
-      {/* Detalles */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Información del permiso</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl>
-            <InfoRow label="Titular" value={data.nombreTitular} />
-            <InfoRow label="Placa" value={data.placaMoto} />
-            <InfoRow
-              label="Motocicleta"
-              value={[data.marcaMoto, data.modeloMoto].filter(Boolean).join(' ') || undefined}
-            />
-            <InfoRow label="Motivo" value={data.motivo} />
-            <InfoRow label="Municipio" value={data.municipio} />
-            <InfoRow
-              label="Vigencia desde"
-              value={data.fechaInicio ? formatDateLong(data.fechaInicio) : undefined}
-            />
-            <InfoRow
-              label="Vigencia hasta"
-              value={data.fechaFin ? formatDateLong(data.fechaFin) : undefined}
-            />
-            <InfoRow label="Validado en" value={formatDateLong(data.validadoEn)} />
-          </dl>
-        </CardContent>
-      </Card>
+      {/* Datos del titular */}
+      {data.nombreTitular && (
+        <Section icon={User} title="Datos del titular">
+          <Row label="Nombre completo" value={data.nombreTitular} />
+          <Row label="Tipo de documento" value={data.tipoDocumento} />
+          <Row label="Número de documento" value={data.numeroDocumento} />
+        </Section>
+      )}
+
+      {/* Datos de la motocicleta */}
+      {data.placaMoto && (
+        <Section icon={Bike} title="Datos de la motocicleta">
+          <Row label="Placa" value={data.placaMoto} />
+          {motoDesc && <Row label="Marca / Línea / Año" value={motoDesc} />}
+          <Row label="Color" value={data.colorMoto} />
+        </Section>
+      )}
+
+      {/* Datos del permiso */}
+      <Section icon={FileText} title="Datos del permiso">
+        <Row label="Motivo" value={data.motivo} />
+        <Row
+          label="Válido desde"
+          value={data.fechaInicio ? formatDateLong(data.fechaInicio) : undefined}
+        />
+        <Row
+          label="Válido hasta"
+          value={data.fechaFin ? formatDateLong(data.fechaFin) : undefined}
+        />
+        <Row label="Funcionario autorizó" value={data.funcionarioAutorizo} />
+        <Row label="Verificado el" value={formatDateLong(data.validadoEn)} />
+      </Section>
+
+      {/* Condiciones o restricciones */}
+      {data.condicionesRestricciones && (
+        <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800 mb-1">Condiciones y restricciones</p>
+            <p className="text-sm text-amber-700">{data.condicionesRestricciones}</p>
+          </div>
+        </div>
+      )}
 
       <Button variant="outline" className="w-full" onClick={onNueva}>
         Verificar otro permiso
