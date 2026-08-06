@@ -1,9 +1,10 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from 'minio';
 
 @Injectable()
 export class MinioStorageAdapter implements OnModuleInit {
+  private readonly logger = new Logger(MinioStorageAdapter.name);
   private client: Client;
   readonly bucketPdfs: string;
   readonly bucketDocs: string;
@@ -12,24 +13,43 @@ export class MinioStorageAdapter implements OnModuleInit {
     this.bucketPdfs = this.config.get<string>('storage.bucketPdfs') ?? 'pyp-permisos';
     this.bucketDocs = this.config.get<string>('storage.bucketDocs') ?? 'pyp-documentos';
 
-    this.client = new Client({
-      endPoint: this.config.get<string>('storage.endpoint') ?? 'localhost',
-      port: this.config.get<number>('storage.port') ?? 9000,
+    const endpoint = this.config.get<string>('storage.endpoint') ?? 'localhost';
+    const useSSL = this.config.get<boolean>('storage.useSsl') ?? false;
+
+    // Cloudflare R2 usa puerto 443 implícito cuando useSSL=true y no se pasa port
+    const portCfg = this.config.get<number>('storage.port');
+
+    const clientOptions: ConstructorParameters<typeof Client>[0] = {
+      endPoint: endpoint,
       accessKey: this.config.get<string>('storage.accessKey') ?? '',
       secretKey: this.config.get<string>('storage.secretKey') ?? '',
-      useSSL: this.config.get<boolean>('storage.useSsl') ?? false,
-    });
+      useSSL,
+      // R2 requiere pathStyle=false (virtual-hosted) y region 'auto'
+      region: this.config.get<string>('storage.region') ?? 'auto',
+    };
+
+    // Solo incluir port si está explícitamente configurado (R2 no lo necesita)
+    if (portCfg) clientOptions.port = portCfg;
+
+    this.client = new Client(clientOptions);
   }
 
   async onModuleInit(): Promise<void> {
-    await this.ensureBucket(this.bucketPdfs);
-    await this.ensureBucket(this.bucketDocs);
+    // En R2 los buckets se crean desde el dashboard de Cloudflare; solo verificamos existencia
+    await this.ensureBucket(this.bucketPdfs).catch((e: unknown) =>
+      this.logger.warn(`bucket ${this.bucketPdfs}: ${String(e)}`),
+    );
+    await this.ensureBucket(this.bucketDocs).catch((e: unknown) =>
+      this.logger.warn(`bucket ${this.bucketDocs}: ${String(e)}`),
+    );
   }
 
   private async ensureBucket(bucket: string): Promise<void> {
     const exists = await this.client.bucketExists(bucket);
     if (!exists) {
-      await this.client.makeBucket(bucket, 'us-east-1');
+      // Intenta crear el bucket; en R2 puede fallar si no tiene permisos — no es fatal
+      await this.client.makeBucket(bucket, 'auto');
+      this.logger.log(`Bucket creado: ${bucket}`);
     }
   }
 

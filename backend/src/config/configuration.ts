@@ -27,9 +27,10 @@ export default (): Record<string, unknown> => ({
   },
   storage: {
     endpoint: process.env.STORAGE_ENDPOINT ?? 'localhost',
-    port: parseInt(process.env.STORAGE_PORT ?? '9000', 10),
+    port: process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT, 10) : undefined,
     accessKey: process.env.STORAGE_ACCESS_KEY,
     secretKey: process.env.STORAGE_SECRET_KEY,
+    region: process.env.STORAGE_REGION ?? 'auto',
     bucketDocs: process.env.STORAGE_BUCKET_DOCS ?? 'pyp-documentos',
     bucketPdfs: process.env.STORAGE_BUCKET_PDFS ?? 'pyp-permisos',
     bucketReports: process.env.STORAGE_BUCKET_REPORTS ?? 'pyp-reportes',
