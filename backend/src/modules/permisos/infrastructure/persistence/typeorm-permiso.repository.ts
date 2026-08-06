@@ -13,9 +13,9 @@ import { PermisoMapper } from './permiso.mapper';
 import { EstadoPermiso } from '../../../../common/enums';
 
 const SORT_FIELD_MAP: Record<string, string> = {
-  fechaExpedicion: 'p.fecha_expedicion',
-  fechaVencimiento: 'p.fecha_vencimiento',
-  codigoPermiso: 'p.codigo_permiso',
+  fechaExpedicion: 'p.fechaExpedicion',
+  fechaVencimiento: 'p.fechaVencimiento',
+  codigoPermiso: 'p.codigoPermiso',
   estado: 'p.estado',
 };
 
@@ -90,10 +90,10 @@ export class TypeOrmPermisoRepository implements IPermisoRepository {
       qb.andWhere('p.estado = :estado', { estado });
     }
     if (query.fechaInicio) {
-      qb.andWhere('p.fecha_expedicion >= :fechaInicio', { fechaInicio: query.fechaInicio });
+      qb.andWhere('p.fechaExpedicion >= :fechaInicio', { fechaInicio: query.fechaInicio });
     }
     if (query.fechaFin) {
-      qb.andWhere('p.fecha_expedicion <= :fechaFin', { fechaFin: query.fechaFin });
+      qb.andWhere('p.fechaExpedicion <= :fechaFin', { fechaFin: query.fechaFin });
     }
     if (placa) {
       qb.andWhere('UPPER(m.placa) LIKE UPPER(:placa)', { placa: `%${placa}%` });
