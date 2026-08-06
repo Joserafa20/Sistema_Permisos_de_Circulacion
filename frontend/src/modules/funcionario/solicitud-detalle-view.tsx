@@ -21,6 +21,7 @@ import {
 import Link from 'next/link';
 import { useSolicitudDetalle, SOLICITUD_DETALLE_KEY } from '@/hooks/use-solicitud-detalle';
 import {
+  useIniciarRevision,
   useAprobarSolicitud,
   useRechazarSolicitud,
   useSolicitarCorreccion,
@@ -94,6 +95,7 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   const [wantsPdf, setWantsPdf] = useState(false);
 
   /* ── Mutations ─────────────────────────────── */
+  const iniciarRevisionMut = useIniciarRevision(solicitudId);
   const aprobarMut = useAprobarSolicitud(solicitudId);
   const rechazarMut = useRechazarSolicitud(solicitudId);
   const correccionMut = useSolicitarCorreccion(solicitudId);
@@ -255,6 +257,39 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                 <Printer className="h-4 w-4 mr-1.5" aria-hidden="true" />
                 Imprimir
               </Button>
+
+              {solicitud.estado === 'recibida' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    iniciarRevisionMut.mutate(undefined, {
+                      onSuccess: () =>
+                        toast({
+                          type: 'success',
+                          title: 'Revisión iniciada',
+                          message: 'La solicitud está en revisión.',
+                        }),
+                      onError: () =>
+                        toast({
+                          type: 'error',
+                          title: 'Error',
+                          message: 'No se pudo iniciar la revisión.',
+                        }),
+                    })
+                  }
+                  disabled={iniciarRevisionMut.isPending}
+                  aria-label="Tomar en revisión"
+                  className="text-blue-700 border-blue-300 hover:bg-blue-50"
+                >
+                  {iniciarRevisionMut.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-1.5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                  )}
+                  Tomar en revisión
+                </Button>
+              )}
 
               {ESTADOS_ACCIONABLES.includes(solicitud.estado) && (
                 <>

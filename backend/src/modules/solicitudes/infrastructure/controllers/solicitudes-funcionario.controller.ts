@@ -31,6 +31,7 @@ import { DocumentoUrlDto } from '../../application/dtos/documento-url.dto';
 import { AprobarSolicitudUseCase } from '../../application/use-cases/aprobar-solicitud.use-case';
 import { RechazarSolicitudUseCase } from '../../application/use-cases/rechazar-solicitud.use-case';
 import { SolicitarCorreccionUseCase } from '../../application/use-cases/solicitar-correccion.use-case';
+import { IniciarRevisionUseCase } from '../../application/use-cases/iniciar-revision.use-case';
 import { AuthUser } from '../../../../modules/auth/infrastructure/strategies/jwt.strategy';
 
 @ApiTags('solicitudes')
@@ -47,6 +48,7 @@ export class SolicitudesFuncionarioController {
     private readonly rechazarSolicitudUseCase: RechazarSolicitudUseCase,
     private readonly solicitarCorreccionUseCase: SolicitarCorreccionUseCase,
     private readonly obtenerUrlDocumentoUseCase: ObtenerUrlDocumentoUseCase,
+    private readonly iniciarRevisionUseCase: IniciarRevisionUseCase,
   ) {}
 
   @Get()
@@ -136,6 +138,19 @@ export class SolicitudesFuncionarioController {
   ): Promise<DocumentoUrlDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
     return this.obtenerUrlDocumentoUseCase.ejecutar(solicitudId, docId, user.id, ipAddress);
+  }
+
+  @Post(':id/iniciar-revision')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar revisión de una solicitud (RECIBIDA → EN_REVISION)' })
+  @ApiResponse({ status: 200, type: AccionSolicitudResponseDto })
+  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiResponse({ status: 422, description: 'Estado inválido para iniciar revisión' })
+  iniciarRevision(
+    @Param('id', ParseUUIDPipe) solicitudId: string,
+    @CurrentUser() user: AuthUser,
+  ): Promise<AccionSolicitudResponseDto> {
+    return this.iniciarRevisionUseCase.ejecutar(solicitudId, user.id);
   }
 
   @Post(':id/aprobar')

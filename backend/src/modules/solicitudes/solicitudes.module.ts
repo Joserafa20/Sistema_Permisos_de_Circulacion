@@ -28,6 +28,7 @@ import { ConsultarEstadoPublicoUseCase } from './application/use-cases/consultar
 import { AprobarSolicitudUseCase } from './application/use-cases/aprobar-solicitud.use-case';
 import { RechazarSolicitudUseCase } from './application/use-cases/rechazar-solicitud.use-case';
 import { SolicitarCorreccionUseCase } from './application/use-cases/solicitar-correccion.use-case';
+import { IniciarRevisionUseCase } from './application/use-cases/iniciar-revision.use-case';
 import { AdjuntarDocumentoUseCase } from './application/use-cases/adjuntar-documento.use-case';
 import { ObtenerUrlDocumentoUseCase } from './application/use-cases/obtener-url-documento.use-case';
 import { VencerSolicitudesJob } from './infrastructure/jobs/vencer-solicitudes.job';
@@ -77,6 +78,7 @@ import { VencerSolicitudesJob } from './infrastructure/jobs/vencer-solicitudes.j
     AprobarSolicitudUseCase,
     RechazarSolicitudUseCase,
     SolicitarCorreccionUseCase,
+    IniciarRevisionUseCase,
     AdjuntarDocumentoUseCase,
     ObtenerUrlDocumentoUseCase,
     VencerSolicitudesJob,

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/auth-context';
 import {
+  iniciarRevision,
   aprobarSolicitud,
   rechazarSolicitud,
   solicitarCorreccion,
@@ -18,6 +19,14 @@ function useInvalidateAllAfterAccion(solicitudId: string) {
     queryClient.invalidateQueries({ queryKey: DASHBOARD_STATS_KEY });
     queryClient.invalidateQueries({ queryKey: ACTIVIDAD_KEY });
   };
+}
+
+export function useIniciarRevision(solicitudId: string) {
+  const invalidate = useInvalidateAllAfterAccion(solicitudId);
+  return useMutation({
+    mutationFn: () => iniciarRevision(solicitudId),
+    onSuccess: invalidate,
+  });
 }
 
 export function useAprobarSolicitud(solicitudId: string) {

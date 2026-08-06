@@ -200,6 +200,14 @@ export async function getDocumentoUrl(solicitudId: string, docId: string): Promi
 
 /* ── Acciones de solicitud ─────────────────────── */
 
+export async function iniciarRevision(id: string): Promise<AccionSolicitudResponse> {
+  const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(
+    `/solicitudes/${id}/iniciar-revision`,
+    {},
+  );
+  return res.data;
+}
+
 export async function aprobarSolicitud(id: string): Promise<AccionSolicitudResponse> {
   const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(`/solicitudes/${id}/aprobar`, {});
   return res.data;
