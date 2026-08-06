@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SWAGGER_BEARER_TOKEN } from '../../../../common/constants/swagger.constants';
 import { Public } from '../../../../common/decorators/public.decorator';
@@ -86,7 +87,7 @@ export class ConfiguracionInstitucionalController {
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMINISTRADOR)
   @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Subir logo o escudo institucional (tipo: logo | escudo)' })
   @ApiResponse({ status: 200, description: 'Imagen subida correctamente' })
