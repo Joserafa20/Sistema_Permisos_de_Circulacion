@@ -80,8 +80,10 @@ export function Paso5Confirmacion({ files, motivoNombre }: Paso5ConfirmacionProp
         <SectionTitle>Solicitud</SectionTitle>
         <dl>
           <SummaryRow label="Motivo" value={motivoNombre ?? values.motivoId} />
-          <SummaryRow label="Fecha inicio" value={values.fechaInicio} />
-          <SummaryRow label="Fecha fin" value={values.fechaFin} />
+          <SummaryRow
+            label="Vigencia"
+            value="Asignada por el funcionario al revisar la solicitud"
+          />
           {values.justificacion && (
             <SummaryRow label="Justificación" value={values.justificacion} />
           )}
