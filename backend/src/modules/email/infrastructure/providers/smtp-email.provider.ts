@@ -21,18 +21,32 @@ export class SmtpEmailProvider implements IEmailProvider, OnModuleInit {
   constructor(private readonly config: ConfigService) {}
 
   onModuleInit(): void {
+    const host = this.config.get<string>('mail.host');
+    const port = this.config.get<number>('mail.port') ?? 587;
+    const user = this.config.get<string>('mail.user');
+    const pass = this.config.get<string>('mail.pass');
+
+    this.logger.log(`SMTP configurado: host=${host} port=${port} user=${user}`);
+
     this.transporter = nodemailer.createTransport({
-      host: this.config.get<string>('mail.host'),
-      port: this.config.get<number>('mail.port') ?? 587,
-      secure: (this.config.get<number>('mail.port') ?? 587) === 465,
-      auth: {
-        user: this.config.get<string>('mail.user'),
-        pass: this.config.get<string>('mail.pass'),
-      },
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
       pool: true,
       maxConnections: 5,
       maxMessages: 100,
     });
+
+    // Verificar conexión SMTP al arrancar
+    this.transporter.verify().then(
+      () => this.logger.log('Conexión SMTP verificada correctamente'),
+      (err: Error) =>
+        this.logger.error(
+          { error: err.message },
+          'SMTP no disponible al arrancar — los emails no se enviarán hasta que se corrija',
+        ),
+    );
   }
 
   async enviar(params: SendEmailParams): Promise<void> {

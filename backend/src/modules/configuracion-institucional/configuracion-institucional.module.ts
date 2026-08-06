@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 import { ConfiguracionInstitucionalEntity } from './infrastructure/persistence/configuracion-institucional.entity';
 import { TypeOrmConfiguracionInstitucionalRepository } from './infrastructure/persistence/typeorm-configuracion-institucional.repository';
 import { CONFIGURACION_INSTITUCIONAL_REPOSITORY_TOKEN } from './domain/ports/configuracion-institucional.repository.interface';
@@ -14,7 +15,7 @@ import {
 import { ConfiguracionInstitucionalSeeder } from './infrastructure/persistence/configuracion-institucional.seeder';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ConfiguracionInstitucionalEntity])],
+  imports: [TypeOrmModule.forFeature([ConfiguracionInstitucionalEntity]), NotificacionesModule],
   controllers: [ConfiguracionInstitucionalController, ConfiguracionInstitucionalPublicController],
   providers: [
     ObtenerConfiguracionInstitucionalUseCase,

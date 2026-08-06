@@ -10,6 +10,8 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { NotificacionesService } from '../../../notificaciones/notificaciones.service';
+import { TipoNotificacion } from '../../../../common/enums';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -33,6 +35,7 @@ export class ConfiguracionInstitucionalController {
     private readonly obtenerUseCase: ObtenerConfiguracionInstitucionalUseCase,
     private readonly actualizarUseCase: ActualizarConfiguracionInstitucionalUseCase,
     private readonly subirImagenUseCase: SubirImagenInstitucionalUseCase,
+    private readonly notificacionesService: NotificacionesService,
   ) {}
 
   @Get()
@@ -112,6 +115,32 @@ export class ConfiguracionInstitucionalController {
     if (tipo !== 'logo' && tipo !== 'escudo') return { url: null };
     const url = await this.subirImagenUseCase.getSignedUrl(tipo);
     return { url };
+  }
+
+  @Post('test-email')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.ADMINISTRADOR)
+  @ApiBearerAuth(SWAGGER_BEARER_TOKEN)
+  @ApiOperation({
+    summary: 'Enviar email de prueba (solo Administrador)',
+    description:
+      'Encola un email de prueba para verificar que el sistema de correo funciona correctamente.',
+  })
+  @ApiResponse({ status: 200, description: 'Email de prueba encolado' })
+  async testEmail(@Body() body: { destinatario: string }): Promise<{ message: string }> {
+    await this.notificacionesService.encolar({
+      tipo: TipoNotificacion.SOLICITUD_RECIBIDA,
+      destinatario: body.destinatario,
+      asunto: 'Prueba de configuración de correo — Sistema Pico y Placa',
+      contexto: {
+        nombreCiudadano: 'Administrador del Sistema',
+        numeroRadicado: 'TEST-000001',
+        motivoNombre: 'Prueba de sistema',
+        fechaInicio: new Date().toISOString().slice(0, 10),
+        fechaFin: new Date().toISOString().slice(0, 10),
+      },
+    });
+    return { message: `Email de prueba encolado para ${body.destinatario}` };
   }
 }
 

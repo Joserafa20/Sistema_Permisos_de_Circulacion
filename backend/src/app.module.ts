@@ -21,7 +21,9 @@ import { SolicitudesModule } from './modules/solicitudes/solicitudes.module';
 import { PermisosModule } from './modules/permisos/permisos.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 import { StorageModule } from './modules/storage/storage.module';
+import Redis from 'ioredis';
 import { RedisModule } from './modules/redis/redis.module';
+import { REDIS_CLIENT } from './modules/redis/redis.constants';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { AuditoriaModule } from './modules/auditoria/auditoria.module';
 import { DependenciasModule } from './modules/dependencias/dependencias.module';
@@ -99,20 +101,9 @@ import { ReportesModule } from './modules/reportes/reportes.module';
     // ── Redis global + BullMQ root ─────────────────────────────────
     RedisModule,
     BullModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const url = config.get<string>('redis.url');
-        if (url) {
-          return { connection: { url } };
-        }
-        return {
-          connection: {
-            host: config.get<string>('redis.host') ?? 'localhost',
-            port: config.get<number>('redis.port') ?? 6379,
-            password: config.get<string>('redis.password') || undefined,
-          },
-        };
-      },
+      imports: [RedisModule],
+      inject: [REDIS_CLIENT],
+      useFactory: (redis: Redis) => ({ connection: redis }),
     }),
 
     // ── Módulos funcionales ────────────────────────────────────────
