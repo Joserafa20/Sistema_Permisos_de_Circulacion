@@ -30,7 +30,7 @@ export class IniciarRevisionUseCase {
       );
     }
 
-    const actualizada = await this.solicitudRepo.cambiarEstado(
+    await this.solicitudRepo.cambiarEstado(
       solicitudId,
       EstadoSolicitud.EN_REVISION,
       usuarioId,
@@ -38,7 +38,7 @@ export class IniciarRevisionUseCase {
     );
 
     void this.auditoriaService.registrar({
-      accion: AccionAuditoria.ACTUALIZAR,
+      accion: AccionAuditoria.EDITAR,
       entidad: 'solicitud',
       entidadId: solicitudId,
       datosNuevos: { estado: EstadoSolicitud.EN_REVISION },
@@ -47,10 +47,10 @@ export class IniciarRevisionUseCase {
     });
 
     return {
-      id: actualizada.id,
-      numeroRadicado: actualizada.numeroRadicado,
-      estado: actualizada.estado,
-      updatedAt: actualizada.updatedAt?.toISOString() ?? new Date().toISOString(),
+      solicitudId,
+      numeroRadicado: solicitud.numeroRadicado,
+      estado: EstadoSolicitud.EN_REVISION,
+      mensaje: 'Revisión iniciada correctamente.',
     };
   }
 }
