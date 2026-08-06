@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { FUNC_ROUTES } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,7 +12,6 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { status, hasRole } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
