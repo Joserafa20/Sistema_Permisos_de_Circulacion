@@ -100,13 +100,19 @@ import { ReportesModule } from './modules/reportes/reportes.module';
     RedisModule,
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('redis.host') ?? 'localhost',
-          port: config.get<number>('redis.port') ?? 6379,
-          password: config.get<string>('redis.password') || undefined,
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        const url = config.get<string>('redis.url');
+        if (url) {
+          return { connection: { url } };
+        }
+        return {
+          connection: {
+            host: config.get<string>('redis.host') ?? 'localhost',
+            port: config.get<number>('redis.port') ?? 6379,
+            password: config.get<string>('redis.password') || undefined,
+          },
+        };
+      },
     }),
 
     // ── Módulos funcionales ────────────────────────────────────────

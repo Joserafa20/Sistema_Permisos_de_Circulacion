@@ -17,11 +17,17 @@ const redisProvider: Provider = {
   provide: REDIS_CLIENT,
   inject: [ConfigService],
   useFactory: (config: ConfigService): Redis => {
+    const url = config.get<string>('redis.url');
+
+    if (url) {
+      return new Redis(url, { connectTimeout: 5000, maxRetriesPerRequest: 3 });
+    }
+
     const host = config.get<string>('redis.host') ?? 'localhost';
     const port = config.get<number>('redis.port') ?? 6379;
     const password = config.get<string>('redis.password') || undefined;
 
-    return new Redis({ host, port, password, lazyConnect: false, maxRetriesPerRequest: null });
+    return new Redis({ host, port, password, connectTimeout: 5000, maxRetriesPerRequest: 3 });
   },
 };
 
