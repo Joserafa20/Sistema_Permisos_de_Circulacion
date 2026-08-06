@@ -154,10 +154,17 @@ export function SolicitudesTable({
             items.map((s) => (
               <tr
                 key={s.id}
-                className="border-b border-neutral-100 hover:bg-primary-50/30 transition-colors"
+                className="border-b border-neutral-100 hover:bg-primary-50/30 transition-colors cursor-pointer"
+                onClick={() => (window.location.href = `/funcionario/solicitudes/${s.id}`)}
               >
-                <td className="px-4 py-3 font-mono text-xs text-primary-700 font-medium whitespace-nowrap">
-                  {s.numeroRadicado}
+                <td className="px-4 py-3 font-mono text-xs font-medium whitespace-nowrap">
+                  <Link
+                    href={`/funcionario/solicitudes/${s.id}`}
+                    className="text-primary-700 hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {s.numeroRadicado}
+                  </Link>
                 </td>
                 <td className="px-4 py-3">
                   <p className="font-medium text-neutral-800 truncate max-w-[200px]">
