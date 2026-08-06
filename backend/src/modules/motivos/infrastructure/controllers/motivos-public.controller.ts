@@ -13,7 +13,6 @@ export class MotivosPublicController {
   @ApiOperation({ summary: 'Listar motivos activos (público, sin autenticación)' })
   @ApiResponse({ status: 200, description: 'Lista de motivos activos' })
   async listarActivos() {
-    const motivos = await this.motivoBusquedaService.listarActivos();
-    return { data: motivos };
+    return this.motivoBusquedaService.listarActivos();
   }
 }
