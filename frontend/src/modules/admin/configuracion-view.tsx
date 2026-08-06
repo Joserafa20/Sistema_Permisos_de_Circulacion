@@ -254,7 +254,7 @@ export function ConfiguracionView() {
         {!isLoading && !isError && (
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-8"
+            className="space-y-8 max-w-3xl"
             aria-label="Formulario de configuración institucional"
             noValidate
           >
