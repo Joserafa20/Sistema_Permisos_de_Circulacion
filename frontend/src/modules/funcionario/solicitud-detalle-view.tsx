@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -92,6 +92,7 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   const [activeModal, setActiveModal] = useState<ModalAction>(null);
   const [correccionStep, setCorreccionStep] = useState<CorreccionStep>('form');
   const [wantsPdf, setWantsPdf] = useState(false);
+  const pendingPrintRef = useRef(false);
 
   /* ── Mutations ─────────────────────────────── */
   const iniciarRevisionMut = useIniciarRevision(solicitudId);
@@ -101,6 +102,14 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
 
   /* ── PDF permiso ──────────────────────────── */
   const { data: pdfData, isFetching: pdfLoading } = usePermisoPdf(solicitud?.permiso?.id, wantsPdf);
+
+  // Auto-abrir PDF en nueva pestaña para imprimir tras aprobación
+  useEffect(() => {
+    if (pendingPrintRef.current && pdfData?.url) {
+      pendingPrintRef.current = false;
+      window.open(pdfData.url, '_blank', 'noopener,noreferrer');
+    }
+  }, [pdfData]);
 
   /* ── Forms ─────────────────────────────────── */
   const rechazarForm = useForm<RechazarFormValues>({
@@ -157,10 +166,13 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
       onSuccess: () => {
         toast({
           type: 'success',
-          title: 'Solicitud aprobada',
-          message: 'Se generó el permiso de circulación.',
+          title: 'Permiso emitido',
+          message: 'El permiso fue generado. Haga clic en "Imprimir permiso" para imprimirlo.',
         });
         closeModal();
+        // Activar descarga del PDF para auto-imprimir tras aprobación
+        pendingPrintRef.current = true;
+        setWantsPdf(true);
       },
       onError: (err: unknown) => {
         const msg = getErrorMessage(err);
@@ -247,15 +259,39 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
             <div className="flex items-center gap-2 flex-wrap">
               <SolicitudStatusBadge estado={solicitud.estado} />
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.print()}
-                aria-label="Imprimir solicitud"
-              >
-                <Printer className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                Imprimir
-              </Button>
+              {solicitud.permiso?.id ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (pdfData?.url) {
+                      window.open(pdfData.url, '_blank', 'noopener,noreferrer');
+                    } else {
+                      setWantsPdf(true);
+                    }
+                  }}
+                  disabled={pdfLoading}
+                  aria-label="Imprimir permiso de circulación"
+                  aria-busy={pdfLoading}
+                >
+                  {pdfLoading ? (
+                    <Loader2 className="h-4 w-4 mr-1.5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Printer className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                  )}
+                  {pdfLoading ? 'Cargando PDF…' : 'Imprimir permiso'}
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.print()}
+                  aria-label="Imprimir página"
+                >
+                  <Printer className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                  Imprimir
+                </Button>
+              )}
 
               {solicitud.estado === 'recibida' && (
                 <Button
