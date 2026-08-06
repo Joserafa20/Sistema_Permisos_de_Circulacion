@@ -15,7 +15,7 @@ WORKDIR /app
 COPY package-lock.json package.json ./
 RUN npm ci
 COPY . .
-RUN npm run build && echo "=== DIST CONTENTS ===" && ls -la /app/dist/ || echo "=== DIST IS EMPTY OR MISSING ==="
+RUN npm run build
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 3: development — hot reload; código fuente montado como volumen
