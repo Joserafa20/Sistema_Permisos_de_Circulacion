@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 
+// Extraer solo el origen (scheme+host+port) de la URL del API para la CSP.
+// CSP connect-src requiere el origen sin path para cubrir todos los endpoints.
+const _apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+const _apiOrigin = (() => { try { return new URL(_apiUrl).origin; } catch { return _apiUrl; } })();
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -14,7 +19,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
-      `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1'} https://www.google.com https://www.gstatic.com`,
+      `connect-src 'self' ${_apiOrigin} https://www.google.com https://www.gstatic.com`,
       "media-src 'none'",
       "object-src 'none'",
       "frame-src 'none'",
