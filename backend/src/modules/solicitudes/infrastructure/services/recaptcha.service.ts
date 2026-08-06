@@ -23,6 +23,13 @@ export class RecaptchaService {
       return 1.0;
     }
 
+    if (!token) {
+      this.logger.warn(
+        'reCAPTCHA token vacío — validación omitida (NEXT_PUBLIC_RECAPTCHA_SITE_KEY sin configurar en cliente)',
+      );
+      return 1.0;
+    }
+
     const score = await this.llamarSiteverify(secretKey, token);
     const minScore = this.configService.get<number>('recaptcha.minScore') ?? 0.5;
 
