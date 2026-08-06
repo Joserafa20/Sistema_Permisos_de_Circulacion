@@ -117,7 +117,7 @@ function FileUploader({
         disabled={disabled}
         onChange={handleChange}
         tabIndex={-1}
-        aria-hidden="true"
+        aria-label={label}
       />
 
       {/* File list */}
