@@ -28,14 +28,18 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 // DataSource (mismo config que migraciones)
 // ─────────────────────────────────────────────────────────────────────────────
 
+const _host = process.env.DB_HOST ?? 'localhost';
+const _isRemote = !_host.includes('localhost') && !_host.includes('127.0.0.1');
+
 const AppDataSource = new DataSource({
   type: 'postgres',
-  host: process.env.DB_HOST ?? 'localhost',
+  host: _host,
   port: parseInt(process.env.DB_PORT ?? '5432', 10),
   database: process.env.DB_NAME ?? 'pyp_db',
   username: process.env.DB_USER ?? 'pyp_user',
   password: process.env.DB_PASSWORD ?? '',
   schema: process.env.DB_SCHEMA ?? 'public',
+  ssl: _isRemote ? { rejectUnauthorized: false } : false,
   synchronize: false,
   logging: false,
   entities: [],
