@@ -8,7 +8,10 @@ import {
   Post,
   Req,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request } from 'express';
@@ -50,11 +53,14 @@ import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { AuthUser } from '../strategies/jwt.strategy';
 import { RefreshUser } from '../strategies/jwt-refresh.strategy';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly configService: ConfigService,
     private readonly loginUseCase: LoginUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly logoutAllUseCase: LogoutAllUseCase,
@@ -293,5 +299,23 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Perfil obtenido', type: MeResponseDto })
   async me(@CurrentUser() user: AuthUser): Promise<MeResponseDto> {
     return this.meUseCase.execute(user.id);
+  }
+
+  // ── Desbloqueo de emergencia ────────────────────────────────────────────────
+
+  @Post('desbloquear')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Desbloqueo de emergencia por secret' })
+  async desbloquear(@Body() body: { email: string; secret: string }): Promise<{ ok: boolean }> {
+    const expected = this.configService.get<string>('ADMIN_UNLOCK_SECRET');
+    if (!expected || body.secret !== expected) {
+      throw new UnauthorizedException('Secret inválido');
+    }
+    await this.dataSource.query(
+      `UPDATE usuarios SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE email = $1`,
+      [body.email],
+    );
+    return { ok: true };
   }
 }
