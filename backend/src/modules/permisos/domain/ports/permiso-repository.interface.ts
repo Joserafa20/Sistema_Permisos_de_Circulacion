@@ -55,4 +55,6 @@ export interface IPermisoRepository {
     condicionesRestricciones: string | null,
   ): Promise<PermisoDomainEntity>;
   marcarVencidos(fechaHoy: string): Promise<string[]>;
+  /** Elimina permanentemente el permiso y su solicitud asociada (hard delete). */
+  eliminar(id: string): Promise<{ solicitudId: string }>;
 }

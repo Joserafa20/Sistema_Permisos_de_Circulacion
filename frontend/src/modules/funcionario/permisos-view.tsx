@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { ShieldCheck, Search, X } from 'lucide-react';
-import { usePermisos } from '@/hooks/use-permisos';
+import { ShieldCheck, Search, X, Trash2, AlertTriangle } from 'lucide-react';
+import { usePermisos, useEliminarPermiso } from '@/hooks/use-permisos';
+import { useAuth } from '@/contexts/auth-context';
 import { PageContainer } from '@/components/funcionario/page-container';
 import { HeaderFunc } from '@/components/funcionario/header-func';
 import { Pagination } from '@/components/funcionario/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
-import type { ListarPermisosFiltros } from '@/types/funcionario';
+import type { ListarPermisosFiltros, PermisoListItem } from '@/types/funcionario';
 
 const LIMIT = 20;
 
@@ -35,11 +37,72 @@ function EstadoBadge({ estado }: { estado: string }) {
   );
 }
 
+function ConfirmDeleteModal({
+  permiso,
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  permiso: PermisoListItem;
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-neutral-900">
+              Eliminar permiso permanentemente
+            </h2>
+            <p className="text-sm text-neutral-500 mt-1">Esta acción no se puede deshacer.</p>
+          </div>
+        </div>
+
+        <div className="rounded-lg bg-neutral-50 border border-neutral-200 p-3 text-sm space-y-1">
+          <p>
+            <span className="text-neutral-500">Código:</span>{' '}
+            <span className="font-mono font-medium">{permiso.codigoPermiso}</span>
+          </p>
+          <p>
+            <span className="text-neutral-500">Ciudadano:</span> {permiso.ciudadano.nombre}
+          </p>
+          <p>
+            <span className="text-neutral-500">Placa:</span> {permiso.motocicleta.placa}
+          </p>
+        </div>
+
+        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          Se eliminarán el permiso y la solicitud asociada. No quedará ningún registro en la base de
+          datos.
+        </p>
+
+        <div className="flex gap-3 pt-1">
+          <Button variant="outline" className="flex-1" onClick={onCancel} disabled={loading}>
+            Cancelar
+          </Button>
+          <Button variant="danger" className="flex-1" onClick={onConfirm} disabled={loading}>
+            {loading ? 'Eliminando…' : 'Sí, eliminar'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PermisosView() {
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('administrador');
+
   const [page, setPage] = useState(1);
   const [placa, setPlaca] = useState('');
   const [debouncedPlaca, setDebouncedPlaca] = useState('');
   const [estado, setEstado] = useState('');
+  const [toDelete, setToDelete] = useState<PermisoListItem | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const filtros: ListarPermisosFiltros = {
@@ -50,6 +113,7 @@ export function PermisosView() {
   };
 
   const { data, isLoading, isError, refetch, isFetching } = usePermisos(filtros);
+  const eliminarMut = useEliminarPermiso();
   const items = data?.items ?? [];
 
   const handlePlaca = useCallback((val: string) => {
@@ -60,6 +124,15 @@ export function PermisosView() {
       setPage(1);
     }, 400);
   }, []);
+
+  function handleConfirmDelete() {
+    if (!toDelete) return;
+    eliminarMut.mutate(toDelete.id, {
+      onSuccess: () => setToDelete(null),
+    });
+  }
+
+  const colSpan = isAdmin ? 8 : 7;
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -121,6 +194,9 @@ export function PermisosView() {
         }
       >
         {isError && <Alert variant="danger">No se pudo cargar la lista de permisos.</Alert>}
+        {eliminarMut.isError && (
+          <Alert variant="danger">No se pudo eliminar el permiso. Intente nuevamente.</Alert>
+        )}
 
         <div className="overflow-x-auto rounded-lg border border-neutral-200">
           <table className="min-w-full divide-y divide-neutral-200 text-sm">
@@ -133,13 +209,14 @@ export function PermisosView() {
                 <th className="px-4 py-3 text-left font-medium text-neutral-500">Estado</th>
                 <th className="px-4 py-3 text-left font-medium text-neutral-500">Expedición</th>
                 <th className="px-4 py-3 text-left font-medium text-neutral-500">Vencimiento</th>
+                {isAdmin && <th className="px-4 py-3" />}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-neutral-100">
               {isLoading
                 ? Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i}>
-                      {Array.from({ length: 7 }).map((__, j) => (
+                      {Array.from({ length: colSpan }).map((__, j) => (
                         <td key={j} className="px-4 py-3">
                           <Skeleton className="h-4 w-full" />
                         </td>
@@ -172,11 +249,23 @@ export function PermisosView() {
                       <td className="px-4 py-3 text-neutral-600 whitespace-nowrap">
                         {formatDate(p.fechaVencimiento)}
                       </td>
+                      {isAdmin && (
+                        <td className="px-3 py-3 text-right">
+                          <button
+                            type="button"
+                            title="Eliminar permiso permanentemente"
+                            onClick={() => setToDelete(p)}
+                            className="p-1.5 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
               {!isLoading && items.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-neutral-400">
+                  <td colSpan={colSpan} className="px-4 py-8 text-center text-neutral-400">
                     <ShieldCheck className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     Sin permisos para los filtros seleccionados.
                   </td>
@@ -198,6 +287,18 @@ export function PermisosView() {
           </div>
         )}
       </PageContainer>
+
+      {toDelete && (
+        <ConfirmDeleteModal
+          permiso={toDelete}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => {
+            setToDelete(null);
+            eliminarMut.reset();
+          }}
+          loading={eliminarMut.isPending}
+        />
+      )}
     </div>
   );
 }

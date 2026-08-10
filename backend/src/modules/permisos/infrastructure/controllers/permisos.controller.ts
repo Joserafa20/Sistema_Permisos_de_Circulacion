@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -29,6 +31,10 @@ import { ObtenerPermisoPorIdUseCase } from '../../application/use-cases/obtener-
 import { ObtenerPdfPermisoUseCase } from '../../application/use-cases/obtener-pdf-permiso.use-case';
 import { RevocarPermisoUseCase } from '../../application/use-cases/revocar-permiso.use-case';
 import { ActualizarCondicionesPermisoUseCase } from '../../application/use-cases/actualizar-condiciones-permiso.use-case';
+import {
+  EliminarPermisoUseCase,
+  EliminarPermisoResponseDto,
+} from '../../application/use-cases/eliminar-permiso.use-case';
 import { AuthUser } from '../../../../modules/auth/infrastructure/strategies/jwt.strategy';
 
 @ApiTags('permisos')
@@ -42,6 +48,7 @@ export class PermisosController {
     private readonly obtenerPdfPermisoUseCase: ObtenerPdfPermisoUseCase,
     private readonly revocarPermisoUseCase: RevocarPermisoUseCase,
     private readonly actualizarCondicionesPermisoUseCase: ActualizarCondicionesPermisoUseCase,
+    private readonly eliminarPermisoUseCase: EliminarPermisoUseCase,
   ) {}
 
   @Get()
@@ -119,6 +126,28 @@ export class PermisosController {
   ): Promise<RevocarPermisoResponseDto> {
     const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
     return this.revocarPermisoUseCase.ejecutar(id, dto, user.id, ipAddress);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.ADMINISTRADOR)
+  @ApiOperation({
+    summary: 'Eliminar permanentemente un permiso y su solicitud',
+    description:
+      'Hard delete: elimina el permiso y la solicitud asociada de la base de datos. ' +
+      'Solo disponible para administradores. Acción irreversible.',
+  })
+  @ApiResponse({ status: 200, description: 'Permiso eliminado' })
+  @ApiResponse({ status: 404, description: 'Permiso no encontrado' })
+  eliminar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
+    @Req() req: Request,
+  ): Promise<EliminarPermisoResponseDto> {
+    const ipAddress = (req.ip ??
+      (req as unknown as { socket?: { remoteAddress?: string } }).socket?.remoteAddress ??
+      null) as string | null;
+    return this.eliminarPermisoUseCase.ejecutar(id, user.id, ipAddress);
   }
 
   @Patch(':id/condiciones')

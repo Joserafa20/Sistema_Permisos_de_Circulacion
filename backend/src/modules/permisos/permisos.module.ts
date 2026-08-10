@@ -19,6 +19,7 @@ import { ListarPermisosUseCase } from './application/use-cases/listar-permisos.u
 import { ObtenerPdfPermisoUseCase } from './application/use-cases/obtener-pdf-permiso.use-case';
 import { RevocarPermisoUseCase } from './application/use-cases/revocar-permiso.use-case';
 import { ActualizarCondicionesPermisoUseCase } from './application/use-cases/actualizar-condiciones-permiso.use-case';
+import { EliminarPermisoUseCase } from './application/use-cases/eliminar-permiso.use-case';
 import { VerificarQrUseCase } from './application/use-cases/verificar-qr.use-case';
 import { PermisosController } from './infrastructure/controllers/permisos.controller';
 import { PermisosPublicController } from './infrastructure/controllers/permisos-public.controller';
@@ -54,6 +55,7 @@ import { VencerPermisosJob } from './infrastructure/jobs/vencer-permisos.job';
     ObtenerPdfPermisoUseCase,
     RevocarPermisoUseCase,
     ActualizarCondicionesPermisoUseCase,
+    EliminarPermisoUseCase,
     VerificarQrUseCase,
     VencerPermisosJob,
   ],

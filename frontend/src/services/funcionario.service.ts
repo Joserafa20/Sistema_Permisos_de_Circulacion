@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from '@/lib/api-client';
+import { apiGet, apiPost, apiDelete } from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
 import type {
   LoginPayload,
@@ -288,6 +288,11 @@ export async function getPermisos(
   const res = await apiGet<ApiResponse<PaginatedPermisosResponse>>(
     `/permisos?${params.toString()}`,
   );
+  return res.data;
+}
+
+export async function eliminarPermiso(id: string): Promise<{ mensaje: string }> {
+  const res = await apiDelete<ApiResponse<{ mensaje: string }>>(`/permisos/${id}`);
   return res.data;
 }
 

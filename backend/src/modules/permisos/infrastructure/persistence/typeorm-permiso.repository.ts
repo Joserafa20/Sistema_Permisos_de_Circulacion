@@ -179,6 +179,23 @@ export class TypeOrmPermisoRepository implements IPermisoRepository {
     return ids;
   }
 
+  async eliminar(id: string): Promise<{ solicitudId: string }> {
+    const entity = await this.repo.findOne({ where: { id }, relations: ['solicitud'] });
+    if (!entity) throw new Error('Permiso no encontrado');
+
+    const solicitudId = entity.solicitud.id;
+
+    await this.dataSource.transaction(async (manager) => {
+      // Eliminar en orden para respetar FK: historial → documentos → permiso → solicitud
+      await manager.query(`DELETE FROM historial_estados WHERE solicitud_id = $1`, [solicitudId]);
+      await manager.query(`DELETE FROM documentos WHERE solicitud_id = $1`, [solicitudId]);
+      await manager.query(`DELETE FROM permisos WHERE id = $1`, [id]);
+      await manager.query(`DELETE FROM solicitudes WHERE id = $1`, [solicitudId]);
+    });
+
+    return { solicitudId };
+  }
+
   /** Retorna true si ya existe un permiso vigente con ese solicitud_id. */
   async existePorSolicitudId(solicitudId: string): Promise<boolean> {
     const count = await this.repo.count({
