@@ -210,7 +210,10 @@ export async function getReporteSolicitudes(
   const params = new URLSearchParams();
   if (fechaDesde) params.set('fechaDesde', fechaDesde);
   if (fechaHasta) params.set('fechaHasta', fechaHasta);
-  return apiGet<ReporteByEstado>(`/reportes/solicitudes?${params.toString()}`);
+  const res = await apiGet<ApiResponse<ReporteByEstado>>(
+    `/reportes/solicitudes?${params.toString()}`,
+  );
+  return res.data;
 }
 
 export async function getReportePermisos(
@@ -220,7 +223,8 @@ export async function getReportePermisos(
   const params = new URLSearchParams();
   if (fechaDesde) params.set('fechaDesde', fechaDesde);
   if (fechaHasta) params.set('fechaHasta', fechaHasta);
-  return apiGet<ReporteByEstado>(`/reportes/permisos?${params.toString()}`);
+  const res = await apiGet<ApiResponse<ReporteByEstado>>(`/reportes/permisos?${params.toString()}`);
+  return res.data;
 }
 
 /* ── Health / Sistema ─────────────────────── */
