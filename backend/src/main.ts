@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { DataSource } from 'typeorm';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import { AppModule } from './app.module';
 import { SWAGGER_BEARER_TOKEN } from './common/constants/swagger.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -142,6 +144,16 @@ async function bootstrap(): Promise<void> {
         operationsSorter: 'alpha',
       },
     });
+  }
+
+  // ── Migraciones automáticas de enum ─────────────────────────────
+  try {
+    const dataSource = app.get<DataSource>(getDataSourceToken());
+    await dataSource.query(
+      `ALTER TYPE estado_solicitud ADD VALUE IF NOT EXISTS 'pendiente_aprobacion' AFTER 'pendiente_correccion'`,
+    );
+  } catch {
+    // No falla el arranque si la migración ya fue aplicada o el tipo no existe
   }
 
   // ── Arranque ─────────────────────────────────────────────────────
