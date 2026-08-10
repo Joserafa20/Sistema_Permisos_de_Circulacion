@@ -76,8 +76,11 @@ export async function getUsuarios(query: ListarUsuariosQuery = {}): Promise<Usua
   if (query.activo !== undefined) params.set('activo', String(query.activo));
   if (query.busqueda) params.set('busqueda', query.busqueda);
 
-  const res = await apiGet<ApiResponse<UsuariosPaginados>>(`/usuarios?${params.toString()}`);
-  return res.data;
+  // El interceptor aplana {items, pagination} → {data: items[], pagination, ...}
+  const res = await apiGet<{ data: UsuarioAdmin[]; pagination: UsuariosPaginados['pagination'] }>(
+    `/usuarios?${params.toString()}`,
+  );
+  return { items: res.data, pagination: res.pagination };
 }
 
 export async function getUsuario(id: string): Promise<UsuarioAdminDetalle> {
@@ -154,51 +157,62 @@ export async function getAuditoria(query: ListarAuditoriaQuery = {}): Promise<Au
   if (query.usuarioId) params.set('usuarioId', query.usuarioId);
   if (query.fechaDesde) params.set('fechaDesde', query.fechaDesde);
   if (query.fechaHasta) params.set('fechaHasta', query.fechaHasta);
-  return apiGet<AuditoriaPaginada>(`/auditoria?${params.toString()}`);
+  // El interceptor aplana {items, pagination} → {data: items[], pagination, ...}
+  const res = await apiGet<{
+    data: AuditoriaPaginada['items'];
+    pagination: AuditoriaPaginada['pagination'];
+  }>(`/auditoria?${params.toString()}`);
+  return { items: res.data, pagination: res.pagination };
 }
 
 /* ── Motivos Admin ───────────────────────────── */
 
 export async function getMotivosAdmin(): Promise<MotivoAdmin[]> {
-  const res = await apiGet<{ items: MotivoAdmin[] }>('/motivos');
-  return res.items;
+  const res = await apiGet<ApiResponse<{ items: MotivoAdmin[] }>>('/motivos');
+  return res.data.items;
 }
 
 export async function crearMotivo(body: CrearMotivoBody): Promise<MotivoAdmin> {
-  return apiPost<MotivoAdmin>('/motivos', body);
+  const res = await apiPost<ApiResponse<MotivoAdmin>>('/motivos', body);
+  return res.data;
 }
 
 export async function actualizarMotivo(
   id: string,
   body: ActualizarMotivoBody,
 ): Promise<MotivoAdmin> {
-  return apiPatch<MotivoAdmin>(`/motivos/${id}`, body);
+  const res = await apiPatch<ApiResponse<MotivoAdmin>>(`/motivos/${id}`, body);
+  return res.data;
 }
 
 export async function toggleActivoMotivo(id: string): Promise<MotivoAdmin> {
-  return apiPatch<MotivoAdmin>(`/motivos/${id}/toggle-activo`);
+  const res = await apiPatch<ApiResponse<MotivoAdmin>>(`/motivos/${id}/toggle-activo`);
+  return res.data;
 }
 
 /* ── Dependencias Admin ──────────────────────── */
 
 export async function getDependenciasAdmin(): Promise<DependenciaAdmin[]> {
-  const res = await apiGet<{ items: DependenciaAdmin[] }>('/dependencias');
-  return res.items;
+  const res = await apiGet<ApiResponse<{ items: DependenciaAdmin[] }>>('/dependencias');
+  return res.data.items;
 }
 
 export async function crearDependencia(body: CrearDependenciaBody): Promise<DependenciaAdmin> {
-  return apiPost<DependenciaAdmin>('/dependencias', body);
+  const res = await apiPost<ApiResponse<DependenciaAdmin>>('/dependencias', body);
+  return res.data;
 }
 
 export async function actualizarDependencia(
   id: string,
   body: ActualizarDependenciaBody,
 ): Promise<DependenciaAdmin> {
-  return apiPatch<DependenciaAdmin>(`/dependencias/${id}`, body);
+  const res = await apiPatch<ApiResponse<DependenciaAdmin>>(`/dependencias/${id}`, body);
+  return res.data;
 }
 
 export async function toggleActivoDependencia(id: string): Promise<DependenciaAdmin> {
-  return apiPatch<DependenciaAdmin>(`/dependencias/${id}/toggle-activo`);
+  const res = await apiPatch<ApiResponse<DependenciaAdmin>>(`/dependencias/${id}/toggle-activo`);
+  return res.data;
 }
 
 /* ── Reportes ────────────────────────────────── */
