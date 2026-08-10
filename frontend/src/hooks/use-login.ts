@@ -10,7 +10,7 @@ export function getLoginErrorMessage(err: unknown): string {
   if (err instanceof ApiError) {
     if (err.status === 401) return 'Correo o contraseña incorrectos.';
     if (err.status === 403) return 'Su cuenta está desactivada. Contacte al administrador.';
-    if (err.isRateLimit()) return 'Demasiados intentos. Espere 15 minutos e intente nuevamente.';
+    if (err.isRateLimit()) return 'Demasiados intentos. Espere 5 minutos e intente nuevamente.';
     if (err.isServerError()) return 'Error del servidor. Intente nuevamente en unos minutos.';
     if (err.status === 0 || err.message === 'Network Error')
       return 'No se pudo conectar con el servidor. Verifique su conexión.';
