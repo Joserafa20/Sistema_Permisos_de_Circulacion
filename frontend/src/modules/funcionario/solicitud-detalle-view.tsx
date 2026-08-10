@@ -18,6 +18,8 @@ import {
   Download,
   Loader2,
   SendHorizonal,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSolicitudDetalle, SOLICITUD_DETALLE_KEY } from '@/hooks/use-solicitud-detalle';
@@ -410,7 +412,13 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                   <Button
                     size="sm"
                     onClick={() => setActiveModal('enviarAprobacion')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={solicitud.documentos.length === 0}
+                    title={
+                      solicitud.documentos.length === 0
+                        ? 'No se puede enviar sin documentos adjuntos'
+                        : undefined
+                    }
+                    className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <SendHorizonal className="h-4 w-4 mr-1.5" aria-hidden="true" />
                     Enviar al administrador
@@ -508,19 +516,49 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                 ]}
               />
 
-              {solicitud.documentos.length > 0 && (
-                <section aria-label="Documentos adjuntos">
-                  <h2 className="text-sm font-semibold text-neutral-700 mb-3 flex items-center gap-2">
+              {/* Documentos — siempre visible para verificación del funcionario */}
+              <section
+                aria-label="Documentos adjuntos"
+                className="rounded-xl border border-neutral-200 bg-white p-5 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-neutral-700 flex items-center gap-2">
                     <FileText className="h-4 w-4 text-neutral-400" aria-hidden="true" />
-                    Documentos adjuntos ({solicitud.documentos.length})
+                    Documentos adjuntos
                   </h2>
+                  {solicitud.documentos.length > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success-700 bg-success-50 border border-success-200 rounded-full px-2.5 py-0.5">
+                      <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                      {solicitud.documentos.length} documento
+                      {solicitud.documentos.length !== 1 ? 's' : ''} adjunto
+                      {solicitud.documentos.length !== 1 ? 's' : ''}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-danger-700 bg-danger-50 border border-danger-200 rounded-full px-2.5 py-0.5">
+                      <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                      Sin documentos
+                    </span>
+                  )}
+                </div>
+
+                {solicitud.documentos.length === 0 ? (
+                  <div className="rounded-lg bg-danger-50 border border-danger-200 p-4">
+                    <p className="text-sm text-danger-800 font-medium">
+                      El ciudadano no adjuntó ningún documento.
+                    </p>
+                    <p className="text-xs text-danger-600 mt-1">
+                      No es posible enviar esta solicitud al administrador sin documentos. Puede
+                      solicitar corrección o rechazarla.
+                    </p>
+                  </div>
+                ) : (
                   <div className="space-y-3">
                     {solicitud.documentos.map((doc) => (
                       <DocumentoViewer key={doc.id} solicitudId={solicitudId} documento={doc} />
                     ))}
                   </div>
-                </section>
-              )}
+                )}
+              </section>
             </div>
 
             <div className="space-y-6">
