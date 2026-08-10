@@ -9,6 +9,7 @@ import {
   ShieldAlert,
   Clock,
   ArrowRight,
+  ClipboardCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
@@ -19,6 +20,7 @@ import {
   ACTIVIDAD_KEY,
 } from '@/hooks/use-dashboard';
 import { useAuth } from '@/contexts/auth-context';
+import { FUNC_ROUTES } from '@/lib/constants';
 import { PageContainer } from '@/components/funcionario/page-container';
 import { StatCard } from '@/components/funcionario/stat-card';
 import { DashboardCard } from '@/components/funcionario/dashboard-card';
@@ -27,7 +29,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert } from '@/components/ui/alert';
-import { FUNC_ROUTES } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
 
 const ESTADO_BADGE: Record<
@@ -36,14 +37,16 @@ const ESTADO_BADGE: Record<
 > = {
   recibida: { label: 'Recibida', variant: 'info' },
   en_revision: { label: 'En revisión', variant: 'warning' },
+  pendiente_correccion: { label: 'Corrección', variant: 'warning' },
+  pendiente_aprobacion: { label: 'Pendiente aprobación', variant: 'info' },
   aprobada: { label: 'Aprobada', variant: 'success' },
   rechazada: { label: 'Rechazada', variant: 'danger' },
-  pendiente_correccion: { label: 'Corrección', variant: 'warning' },
   vencida: { label: 'Vencida', variant: 'neutral' },
 };
 
 export function DashboardView() {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
+  const isAdmin = hasRole('administrador');
   const queryClient = useQueryClient();
   const { data: stats, isLoading: statsLoading, isError: statsError } = useDashboardStats();
   const { data: actividad, isLoading: actLoading } = useActividadReciente();
@@ -108,6 +111,15 @@ export function DashboardView() {
               color="red"
               loading={statsLoading}
             />
+            {isAdmin && (
+              <StatCard
+                label="Pendientes de aprobación"
+                value={stats?.solicitudesPendientesAprobacion}
+                icon={ClipboardCheck}
+                color="blue"
+                loading={statsLoading}
+              />
+            )}
           </div>
         </section>
 
@@ -215,6 +227,13 @@ export function DashboardView() {
                 label="Cola de solicitudes"
                 description="Gestionar solicitudes pendientes"
               />
+              {isAdmin && (
+                <QuickLink
+                  href={`${FUNC_ROUTES.solicitudes}?estado=pendiente_aprobacion`}
+                  label="Cola de aprobación"
+                  description="Solicitudes listas para emitir permiso"
+                />
+              )}
               <QuickLink
                 href={FUNC_ROUTES.permisos}
                 label="Permisos emitidos"

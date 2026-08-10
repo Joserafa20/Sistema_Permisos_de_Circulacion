@@ -62,7 +62,13 @@ export interface Motivo {
 ════════════════════════════════════════════ */
 
 export type EstadoSolicitud =
-  'recibida' | 'en_revision' | 'aprobada' | 'rechazada' | 'pendiente_correccion' | 'vencida';
+  | 'recibida'
+  | 'en_revision'
+  | 'pendiente_correccion'
+  | 'pendiente_aprobacion'
+  | 'aprobada'
+  | 'rechazada'
+  | 'vencida';
 
 export interface HistorialEstadoItem {
   estado: EstadoSolicitud;

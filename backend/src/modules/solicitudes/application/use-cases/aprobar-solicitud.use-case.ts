@@ -22,6 +22,7 @@ function todayCOT(): string {
 const ESTADOS_APROBABLES: EstadoSolicitud[] = [
   EstadoSolicitud.EN_REVISION,
   EstadoSolicitud.PENDIENTE_CORRECCION,
+  EstadoSolicitud.PENDIENTE_APROBACION,
 ];
 
 @Injectable()

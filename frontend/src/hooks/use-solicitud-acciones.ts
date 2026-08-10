@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/auth-context';
 import {
   iniciarRevision,
   aprobarSolicitud,
+  enviarAprobacion,
   rechazarSolicitud,
   solicitarCorreccion,
   getPermisoPdfUrl,
@@ -34,6 +35,14 @@ export function useAprobarSolicitud(solicitudId: string) {
   return useMutation({
     mutationFn: (body: { fechaVencimiento: string; condicionesRestricciones?: string | null }) =>
       aprobarSolicitud(solicitudId, body),
+    onSuccess: invalidate,
+  });
+}
+
+export function useEnviarAprobacion(solicitudId: string) {
+  const invalidate = useInvalidateAllAfterAccion(solicitudId);
+  return useMutation({
+    mutationFn: (observaciones?: string) => enviarAprobacion(solicitudId, observaciones),
     onSuccess: invalidate,
   });
 }

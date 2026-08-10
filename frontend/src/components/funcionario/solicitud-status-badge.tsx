@@ -12,6 +12,7 @@ const ESTADO_CONFIG: Record<EstadoSolicitud, Config> = {
   aprobada: { label: 'Aprobada', variant: 'success' },
   rechazada: { label: 'Rechazada', variant: 'danger' },
   pendiente_correccion: { label: 'Corrección pendiente', variant: 'warning' },
+  pendiente_aprobacion: { label: 'Pendiente aprobación', variant: 'info' },
   vencida: { label: 'Vencida', variant: 'neutral' },
 };
 

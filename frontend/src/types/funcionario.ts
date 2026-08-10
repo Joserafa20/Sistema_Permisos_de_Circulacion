@@ -51,6 +51,7 @@ export interface RefreshResponse {
 export interface DashboardStats {
   solicitudesPendientes: number;
   solicitudesEnCorreccion: number;
+  solicitudesPendientesAprobacion: number;
   aprobadasHoy: number;
   rechazadasHoy: number;
   permisosActivos: number;
@@ -66,7 +67,13 @@ export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 ═══════════════════════════════════════════ */
 
 export type EstadoSolicitud =
-  'recibida' | 'en_revision' | 'aprobada' | 'rechazada' | 'pendiente_correccion' | 'vencida';
+  | 'recibida'
+  | 'en_revision'
+  | 'pendiente_correccion'
+  | 'pendiente_aprobacion'
+  | 'aprobada'
+  | 'rechazada'
+  | 'vencida';
 
 export interface CiudadanoResumen {
   nombre: string;

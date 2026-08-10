@@ -29,6 +29,7 @@ import { AprobarSolicitudUseCase } from './application/use-cases/aprobar-solicit
 import { RechazarSolicitudUseCase } from './application/use-cases/rechazar-solicitud.use-case';
 import { SolicitarCorreccionUseCase } from './application/use-cases/solicitar-correccion.use-case';
 import { IniciarRevisionUseCase } from './application/use-cases/iniciar-revision.use-case';
+import { EnviarAprobacionUseCase } from './application/use-cases/enviar-aprobacion.use-case';
 import { AdjuntarDocumentoUseCase } from './application/use-cases/adjuntar-documento.use-case';
 import { ObtenerUrlDocumentoUseCase } from './application/use-cases/obtener-url-documento.use-case';
 import { VencerSolicitudesJob } from './infrastructure/jobs/vencer-solicitudes.job';
@@ -79,6 +80,7 @@ import { VencerSolicitudesJob } from './infrastructure/jobs/vencer-solicitudes.j
     RechazarSolicitudUseCase,
     SolicitarCorreccionUseCase,
     IniciarRevisionUseCase,
+    EnviarAprobacionUseCase,
     AdjuntarDocumentoUseCase,
     ObtenerUrlDocumentoUseCase,
     VencerSolicitudesJob,

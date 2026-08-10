@@ -17,12 +17,14 @@ import {
   RefreshCw,
   Download,
   Loader2,
+  SendHorizonal,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSolicitudDetalle, SOLICITUD_DETALLE_KEY } from '@/hooks/use-solicitud-detalle';
 import {
   useIniciarRevision,
   useAprobarSolicitud,
+  useEnviarAprobacion,
   useRechazarSolicitud,
   useSolicitarCorreccion,
   usePermisoPdf,
@@ -47,7 +49,7 @@ import type {
 } from '@/schemas/solicitudes-acciones.schemas';
 import { useQueryClient } from '@tanstack/react-query';
 
-type ModalAction = 'aprobar' | 'rechazar' | 'correccion' | null;
+type ModalAction = 'aprobar' | 'rechazar' | 'correccion' | 'enviarAprobacion' | null;
 
 interface AprobarFormValues {
   fechaVencimiento: string;
@@ -55,7 +57,10 @@ interface AprobarFormValues {
 }
 type CorreccionStep = 'form' | 'preview';
 
-const ESTADOS_ACCIONABLES = ['en_revision', 'pendiente_correccion'];
+// Estados en que el funcionario puede actuar (corregir/rechazar/enviar a admin)
+const ESTADOS_REVISION_FUNC = ['en_revision', 'pendiente_correccion'];
+// Estados en que el admin puede aprobar
+const ESTADOS_APROBABLES_ADMIN = ['pendiente_aprobacion', 'en_revision', 'pendiente_correccion'];
 
 const CAMPOS_OPCIONES = [
   { value: 'nombre_ciudadano', label: 'Nombre del ciudadano' },
@@ -93,7 +98,8 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   const queryClient = useQueryClient();
   const { data: solicitud, isLoading, isError, refetch } = useSolicitudDetalle(solicitudId);
   const { toast } = useToast();
-  const { hasRole: _hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('administrador');
   const [activeModal, setActiveModal] = useState<ModalAction>(null);
   const [correccionStep, setCorreccionStep] = useState<CorreccionStep>('form');
   const [wantsPdf, setWantsPdf] = useState(false);
@@ -102,6 +108,7 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   /* ── Mutations ─────────────────────────────── */
   const iniciarRevisionMut = useIniciarRevision(solicitudId);
   const aprobarMut = useAprobarSolicitud(solicitudId);
+  const enviarAprobacionMut = useEnviarAprobacion(solicitudId);
   const rechazarMut = useRechazarSolicitud(solicitudId);
   const correccionMut = useSolicitarCorreccion(solicitudId);
 
@@ -165,6 +172,7 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
     rechazarForm.reset();
     correccionForm.reset();
     aprobarMut.reset();
+    enviarAprobacionMut.reset();
     rechazarMut.reset();
     correccionMut.reset();
   }
@@ -187,6 +195,23 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   }
 
   /* ── Action handlers ────────────────────────── */
+  function handleEnviarAprobacion(observaciones: string) {
+    enviarAprobacionMut.mutate(observaciones || undefined, {
+      onSuccess: () => {
+        toast({
+          type: 'success',
+          title: 'Enviado al administrador',
+          message: 'La solicitud fue enviada para aprobación del administrador.',
+        });
+        closeModal();
+      },
+      onError: (err: unknown) => {
+        const msg = getErrorMessage(err);
+        toast({ type: 'error', title: 'Error', message: msg });
+      },
+    });
+  }
+
   function handleAprobar(values: AprobarFormValues) {
     if (!values.fechaVencimiento) return;
     aprobarMut.mutate(
@@ -358,7 +383,8 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                 </Button>
               )}
 
-              {ESTADOS_ACCIONABLES.includes(solicitud.estado) && (
+              {/* Funcionario: puede corregir, rechazar y enviar al admin */}
+              {!isAdmin && ESTADOS_REVISION_FUNC.includes(solicitud.estado) && (
                 <>
                   <Button
                     variant="outline"
@@ -367,7 +393,6 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                       setActiveModal('correccion');
                       setCorreccionStep('form');
                     }}
-                    aria-label="Solicitar corrección"
                     className="text-amber-700 border-amber-300 hover:bg-amber-50"
                   >
                     <Wrench className="h-4 w-4 mr-1.5" aria-hidden="true" />
@@ -377,13 +402,47 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                     variant="outline"
                     size="sm"
                     onClick={() => setActiveModal('rechazar')}
-                    aria-label="Rechazar solicitud"
                     className="text-danger-700 border-danger-300 hover:bg-danger-50"
                   >
                     <XCircle className="h-4 w-4 mr-1.5" aria-hidden="true" />
                     Rechazar
                   </Button>
-                  <Button size="sm" onClick={openAprobarModal} aria-label="Emitir permiso">
+                  <Button
+                    size="sm"
+                    onClick={() => setActiveModal('enviarAprobacion')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <SendHorizonal className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                    Enviar al administrador
+                  </Button>
+                </>
+              )}
+
+              {/* Admin: puede corregir, rechazar y aprobar (emitir permiso) */}
+              {isAdmin && ESTADOS_APROBABLES_ADMIN.includes(solicitud.estado) && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setActiveModal('correccion');
+                      setCorreccionStep('form');
+                    }}
+                    className="text-amber-700 border-amber-300 hover:bg-amber-50"
+                  >
+                    <Wrench className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                    Corrección
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveModal('rechazar')}
+                    className="text-danger-700 border-danger-300 hover:bg-danger-50"
+                  >
+                    <XCircle className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                    Rechazar
+                  </Button>
+                  <Button size="sm" onClick={openAprobarModal}>
                     <CheckCircle2 className="h-4 w-4 mr-1.5" aria-hidden="true" />
                     Emitir permiso
                   </Button>
@@ -519,6 +578,47 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
           </div>
         </PageContainer>
       )}
+
+      {/* ══ Modal Enviar a aprobación ═══════════════════════ */}
+      <ConfirmationModal
+        open={activeModal === 'enviarAprobacion'}
+        onClose={closeModal}
+        title="Enviar al administrador para aprobación"
+        description={`La solicitud ${solicitud?.numeroRadicado} será enviada al administrador para su aprobación final y emisión del permiso.`}
+        confirmLabel={enviarAprobacionMut.isPending ? 'Enviando…' : 'Confirmar envío'}
+        confirmVariant="primary"
+        isConfirming={enviarAprobacionMut.isPending}
+        onConfirm={() => {
+          const obs = (document.getElementById('obs-aprobacion') as HTMLTextAreaElement)?.value;
+          handleEnviarAprobacion(obs ?? '');
+        }}
+      >
+        <div className="space-y-4">
+          <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+            <p className="text-sm text-blue-800">
+              Al confirmar, la solicitud quedará en estado <strong>Pendiente de aprobación</strong>{' '}
+              y el administrador podrá revisarla y emitir el permiso.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="obs-aprobacion" className="text-sm font-medium text-neutral-700">
+              Observaciones para el administrador{' '}
+              <span className="text-xs text-neutral-400 font-normal">(opcional)</span>
+            </label>
+            <textarea
+              id="obs-aprobacion"
+              rows={3}
+              placeholder="Agregue cualquier observación relevante para el proceso de aprobación…"
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+            />
+          </div>
+          {enviarAprobacionMut.isError && (
+            <Alert variant="danger" icon={false}>
+              {getErrorMessage(enviarAprobacionMut.error)}
+            </Alert>
+          )}
+        </div>
+      </ConfirmationModal>
 
       {/* ══ Modal Aprobar ══════════════════════════════════ */}
       <ConfirmationModal

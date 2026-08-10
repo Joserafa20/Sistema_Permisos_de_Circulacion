@@ -34,6 +34,7 @@ const ESTADO_CONFIG: Record<
   aprobada: { label: 'Aprobada', variant: 'success', Icon: CheckCircle2 },
   rechazada: { label: 'Rechazada', variant: 'danger', Icon: XCircle },
   pendiente_correccion: { label: 'Corrección requerida', variant: 'warning', Icon: AlertCircle },
+  pendiente_aprobacion: { label: 'Pendiente de aprobación', variant: 'warning', Icon: Clock },
   vencida: { label: 'Vencida', variant: 'neutral', Icon: XCircle },
 };
 

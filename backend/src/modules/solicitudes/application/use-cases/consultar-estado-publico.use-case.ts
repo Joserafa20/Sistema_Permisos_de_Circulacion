@@ -9,6 +9,8 @@ const ESTADO_DESCRIPCION: Record<EstadoSolicitud, string> = {
   [EstadoSolicitud.EN_REVISION]: 'Su solicitud está siendo revisada por un funcionario.',
   [EstadoSolicitud.PENDIENTE_CORRECCION]:
     'Se han solicitado correcciones a su solicitud. Revise los detalles para proceder.',
+  [EstadoSolicitud.PENDIENTE_APROBACION]:
+    'Su solicitud fue revisada por el funcionario y está pendiente de aprobación del administrador.',
   [EstadoSolicitud.APROBADA]:
     'Su solicitud fue aprobada. Puede descargar su permiso de circulación.',
   [EstadoSolicitud.RECHAZADA]:

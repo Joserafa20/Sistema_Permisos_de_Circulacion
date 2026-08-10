@@ -133,19 +133,28 @@ async function countPermisos(params: Record<string, string>): Promise<number> {
 export async function getDashboardStats(): Promise<DashboardStats> {
   const hoy = todayCO();
 
-  const [pendientes, enCorreccion, aprobadasHoy, rechazadasHoy, activos, vencidos] =
-    await Promise.all([
-      countSolicitudes({ estado: 'recibida' }),
-      countSolicitudes({ estado: 'pendiente_correccion' }),
-      countSolicitudes({ estado: 'aprobada', fechaInicio: hoy }),
-      countSolicitudes({ estado: 'rechazada', fechaInicio: hoy }),
-      countPermisos({ estado: 'vigente' }),
-      countPermisos({ estado: 'vencido' }),
-    ]);
+  const [
+    pendientes,
+    enCorreccion,
+    pendientesAprobacion,
+    aprobadasHoy,
+    rechazadasHoy,
+    activos,
+    vencidos,
+  ] = await Promise.all([
+    countSolicitudes({ estado: 'recibida' }),
+    countSolicitudes({ estado: 'pendiente_correccion' }),
+    countSolicitudes({ estado: 'pendiente_aprobacion' }),
+    countSolicitudes({ estado: 'aprobada', fechaInicio: hoy }),
+    countSolicitudes({ estado: 'rechazada', fechaInicio: hoy }),
+    countPermisos({ estado: 'vigente' }),
+    countPermisos({ estado: 'vencido' }),
+  ]);
 
   return {
     solicitudesPendientes: pendientes,
     solicitudesEnCorreccion: enCorreccion,
+    solicitudesPendientesAprobacion: pendientesAprobacion,
     aprobadasHoy,
     rechazadasHoy,
     permisosActivos: activos,
@@ -215,6 +224,17 @@ export async function aprobarSolicitud(
   const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(
     `/solicitudes/${id}/aprobar`,
     body,
+  );
+  return res.data;
+}
+
+export async function enviarAprobacion(
+  id: string,
+  observaciones?: string,
+): Promise<AccionSolicitudResponse> {
+  const res = await apiPost<ApiResponse<AccionSolicitudResponse>>(
+    `/solicitudes/${id}/enviar-aprobacion`,
+    { observaciones },
   );
   return res.data;
 }

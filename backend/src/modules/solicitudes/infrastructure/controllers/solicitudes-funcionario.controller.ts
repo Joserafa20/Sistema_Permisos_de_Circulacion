@@ -33,6 +33,7 @@ import { AprobarSolicitudDto } from '../../application/dtos/aprobar-solicitud.dt
 import { RechazarSolicitudUseCase } from '../../application/use-cases/rechazar-solicitud.use-case';
 import { SolicitarCorreccionUseCase } from '../../application/use-cases/solicitar-correccion.use-case';
 import { IniciarRevisionUseCase } from '../../application/use-cases/iniciar-revision.use-case';
+import { EnviarAprobacionUseCase } from '../../application/use-cases/enviar-aprobacion.use-case';
 import { AuthUser } from '../../../../modules/auth/infrastructure/strategies/jwt.strategy';
 
 @ApiTags('solicitudes')
@@ -50,6 +51,7 @@ export class SolicitudesFuncionarioController {
     private readonly solicitarCorreccionUseCase: SolicitarCorreccionUseCase,
     private readonly obtenerUrlDocumentoUseCase: ObtenerUrlDocumentoUseCase,
     private readonly iniciarRevisionUseCase: IniciarRevisionUseCase,
+    private readonly enviarAprobacionUseCase: EnviarAprobacionUseCase,
   ) {}
 
   @Get()
@@ -154,8 +156,31 @@ export class SolicitudesFuncionarioController {
     return this.iniciarRevisionUseCase.ejecutar(solicitudId, user.id);
   }
 
+  @Post(':id/enviar-aprobacion')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.FUNCIONARIO, UserRole.ADMINISTRADOR)
+  @ApiOperation({
+    summary: 'Enviar solicitud a aprobación del administrador (EN_REVISION → PENDIENTE_APROBACION)',
+    description:
+      'El funcionario concluye su revisión y envía la solicitud al administrador para aprobación final. ' +
+      'Opcionalmente puede agregar observaciones.',
+  })
+  @ApiResponse({ status: 200, type: AccionSolicitudResponseDto })
+  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiResponse({ status: 422, description: 'Estado inválido para enviar a aprobación' })
+  enviarAprobacion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { observaciones?: string },
+    @CurrentUser() user: AuthUser,
+    @Req() req: Request,
+  ): Promise<AccionSolicitudResponseDto> {
+    const ipAddress = (req.ip ?? req.socket?.remoteAddress ?? null) as string | null;
+    return this.enviarAprobacionUseCase.ejecutar(id, user.id, ipAddress, body.observaciones);
+  }
+
   @Post(':id/aprobar')
   @HttpCode(HttpStatus.ACCEPTED)
+  @Roles(UserRole.ADMINISTRADOR)
   @ApiOperation({
     summary: 'Aprobar una solicitud (RN-15, RN-17, RN-01)',
     description:
