@@ -23,7 +23,7 @@ const DEFAULT_FILTROS: SolicitudesFiltros = {
 };
 
 function parseFiltrosFromUrl(params: URLSearchParams): SolicitudesFiltros {
-  const estadosRaw = params.get('estados');
+  const estadosRaw = params.get('estados') ?? params.get('estado');
   return {
     estados: estadosRaw
       ? (estadosRaw.split(',').filter(Boolean) as EstadoSolicitud[])

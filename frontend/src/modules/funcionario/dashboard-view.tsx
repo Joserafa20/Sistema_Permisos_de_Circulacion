@@ -89,6 +89,7 @@ export function DashboardView() {
               icon={FileText}
               color="blue"
               loading={statsLoading}
+              href={`${FUNC_ROUTES.solicitudes}?estado=recibida`}
             />
             <StatCard
               label="En corrección"
@@ -96,6 +97,7 @@ export function DashboardView() {
               icon={Wrench}
               color="amber"
               loading={statsLoading}
+              href={`${FUNC_ROUTES.solicitudes}?estado=pendiente_correccion`}
             />
             <StatCard
               label="Aprobadas hoy"
@@ -103,6 +105,7 @@ export function DashboardView() {
               icon={CheckCircle2}
               color="green"
               loading={statsLoading}
+              href={`${FUNC_ROUTES.solicitudes}?estado=aprobada`}
             />
             <StatCard
               label="Rechazadas hoy"
@@ -110,6 +113,7 @@ export function DashboardView() {
               icon={XCircle}
               color="red"
               loading={statsLoading}
+              href={`${FUNC_ROUTES.solicitudes}?estado=rechazada`}
             />
             {isAdmin && (
               <StatCard
@@ -118,6 +122,7 @@ export function DashboardView() {
                 icon={ClipboardCheck}
                 color="blue"
                 loading={statsLoading}
+                href={`${FUNC_ROUTES.solicitudes}?estado=pendiente_aprobacion`}
               />
             )}
           </div>
@@ -134,6 +139,7 @@ export function DashboardView() {
               icon={ShieldCheck}
               color="green"
               loading={statsLoading}
+              href={`${FUNC_ROUTES.permisos}?estado=vigente`}
             />
             <StatCard
               label="Permisos vencidos"
@@ -141,6 +147,7 @@ export function DashboardView() {
               icon={ShieldAlert}
               color="neutral"
               loading={statsLoading}
+              href={`${FUNC_ROUTES.permisos}?estado=vencido`}
             />
           </div>
         </section>

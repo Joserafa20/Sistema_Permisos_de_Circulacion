@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LucideIcon } from 'lucide-react';
@@ -62,6 +63,7 @@ export function StatCard({
   icon: Icon,
   color = 'blue',
   loading = false,
+  href,
 }: StatCardProps) {
   const c = COLOR_MAP[color];
 
@@ -75,16 +77,8 @@ export function StatCard({
     );
   }
 
-  return (
-    <div
-      className={cn(
-        'rounded-xl border p-5 flex flex-col gap-2 transition-shadow hover:shadow-md',
-        c.bg,
-        c.border,
-      )}
-      role="region"
-      aria-label={label}
-    >
+  const inner = (
+    <>
       <div className={cn('h-10 w-10 rounded-lg flex items-center justify-center', c.icon)}>
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
@@ -92,6 +86,28 @@ export function StatCard({
         {value?.toLocaleString('es-CO') ?? '—'}
       </p>
       <p className={cn('text-sm font-medium', c.label)}>{label}</p>
+    </>
+  );
+
+  const baseClass = cn(
+    'rounded-xl border p-5 flex flex-col gap-2 transition-all',
+    c.bg,
+    c.border,
+    href &&
+      'hover:shadow-md hover:scale-[1.02] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600',
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={baseClass} aria-label={label}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={baseClass} role="region" aria-label={label}>
+      {inner}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ShieldCheck, Search, X, Trash2, AlertTriangle } from 'lucide-react';
 import { usePermisos, useEliminarPermiso } from '@/hooks/use-permisos';
 import { useAuth } from '@/contexts/auth-context';
@@ -94,14 +95,15 @@ function ConfirmDeleteModal({
   );
 }
 
-export function PermisosView() {
+function PermisosContent() {
   const { hasRole } = useAuth();
   const isAdmin = hasRole('administrador');
+  const searchParams = useSearchParams();
 
   const [page, setPage] = useState(1);
   const [placa, setPlaca] = useState('');
   const [debouncedPlaca, setDebouncedPlaca] = useState('');
-  const [estado, setEstado] = useState('');
+  const [estado, setEstado] = useState(() => searchParams.get('estado') ?? '');
   const [toDelete, setToDelete] = useState<PermisoListItem | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -305,5 +307,13 @@ export function PermisosView() {
         />
       )}
     </div>
+  );
+}
+
+export function PermisosView() {
+  return (
+    <Suspense>
+      <PermisosContent />
+    </Suspense>
   );
 }
