@@ -176,10 +176,6 @@ export function SolicitudForm() {
 
       const response = await crearSolicitud(payload);
 
-      // Mostrar modal con radicado inmediatamente; docs son secundarios
-      clearDraft();
-      setSolicitudCreada(response);
-
       if (files.length > 0) {
         try {
           await adjuntarDocumentos(response.id, response.radicado, values.numeroDocumento, files);
@@ -191,6 +187,10 @@ export function SolicitudForm() {
           });
         }
       }
+
+      // Mostrar modal con radicado solo después de que los documentos se hayan subido
+      clearDraft();
+      setSolicitudCreada(response);
     } catch (err) {
       if (err instanceof ApiError && err.code === 'SOLICITUD_ACTIVA') {
         toast({
