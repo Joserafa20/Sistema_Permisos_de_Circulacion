@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { ShieldCheck, Search, X, Trash2, AlertTriangle } from 'lucide-react';
 import { usePermisos, useEliminarPermiso } from '@/hooks/use-permisos';
 import { useAuth } from '@/contexts/auth-context';
@@ -116,6 +116,13 @@ export function PermisosView() {
   const eliminarMut = useEliminarPermiso();
   const items = data?.items ?? [];
 
+  useEffect(() => {
+    if (eliminarMut.isSuccess) {
+      setToDelete(null);
+      eliminarMut.reset();
+    }
+  }, [eliminarMut.isSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handlePlaca = useCallback((val: string) => {
     setPlaca(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -127,9 +134,7 @@ export function PermisosView() {
 
   function handleConfirmDelete() {
     if (!toDelete) return;
-    eliminarMut.mutate(toDelete.id, {
-      onSuccess: () => setToDelete(null),
-    });
+    eliminarMut.mutate(toDelete.id);
   }
 
   const colSpan = isAdmin ? 8 : 7;
