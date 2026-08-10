@@ -130,6 +130,14 @@ async function countPermisos(params: Record<string, string>): Promise<number> {
   return res.data?.pagination?.total ?? 0;
 }
 
+async function safeCount(fn: () => Promise<number>): Promise<number> {
+  try {
+    return await fn();
+  } catch {
+    return 0;
+  }
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   const hoy = todayCO();
 
@@ -142,13 +150,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     activos,
     vencidos,
   ] = await Promise.all([
-    countSolicitudes({ estado: 'recibida' }),
-    countSolicitudes({ estado: 'pendiente_correccion' }),
-    countSolicitudes({ estado: 'pendiente_aprobacion' }),
-    countSolicitudes({ estado: 'aprobada', fechaInicio: hoy }),
-    countSolicitudes({ estado: 'rechazada', fechaInicio: hoy }),
-    countPermisos({ estado: 'vigente' }),
-    countPermisos({ estado: 'vencido' }),
+    safeCount(() => countSolicitudes({ estado: 'recibida' })),
+    safeCount(() => countSolicitudes({ estado: 'pendiente_correccion' })),
+    safeCount(() => countSolicitudes({ estado: 'pendiente_aprobacion' })),
+    safeCount(() => countSolicitudes({ estado: 'aprobada', fechaInicio: hoy })),
+    safeCount(() => countSolicitudes({ estado: 'rechazada', fechaInicio: hoy })),
+    safeCount(() => countPermisos({ estado: 'vigente' })),
+    safeCount(() => countPermisos({ estado: 'vencido' })),
   ]);
 
   return {
