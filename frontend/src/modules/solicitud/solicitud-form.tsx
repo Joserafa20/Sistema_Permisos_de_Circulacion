@@ -179,11 +179,17 @@ export function SolicitudForm() {
       if (files.length > 0) {
         try {
           await adjuntarDocumentos(response.id, response.radicado, values.numeroDocumento, files);
-        } catch {
+        } catch (docErr) {
+          const docMsg =
+            docErr instanceof ApiError
+              ? docErr.message
+              : docErr instanceof Error
+                ? docErr.message
+                : 'Error desconocido';
           toast({
-            type: 'warning',
-            title: 'Solicitud creada',
-            message: 'Hubo un problema al adjuntar los documentos. Contáctenos con su radicado.',
+            type: 'error',
+            title: 'Error al adjuntar documentos',
+            message: `${docMsg} — Radicado: ${response.radicado}`,
           });
         }
       }
