@@ -19,6 +19,11 @@ const TRANSICIONES_PERMITIDAS: Partial<Record<EstadoSolicitud, EstadoSolicitud[]
     EstadoSolicitud.RECHAZADA,
     EstadoSolicitud.VENCIDA,
   ],
+  [EstadoSolicitud.PENDIENTE_APROBACION]: [
+    EstadoSolicitud.APROBADA,
+    EstadoSolicitud.RECHAZADA,
+    EstadoSolicitud.VENCIDA,
+  ],
   // aprobada, rechazada, vencida son estados terminales — sin transiciones
 };
 
