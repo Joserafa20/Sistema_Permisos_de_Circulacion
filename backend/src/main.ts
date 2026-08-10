@@ -55,8 +55,21 @@ async function bootstrap(): Promise<void> {
   );
 
   // ── CORS ─────────────────────────────────────────────────────────
+  const allowedOrigins = [frontendUrl, 'http://localhost:3000', 'http://localhost:3001'].filter(
+    Boolean,
+  );
+
   app.enableCors({
-    origin: frontendUrl,
+    origin: (origin, callback) => {
+      // Permitir peticiones sin origin (Postman, mobile, SSR)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // En desarrollo, permitir cualquier localhost
+      if (nodeEnv !== 'production' && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS: origin no permitido: ${origin}`));
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
