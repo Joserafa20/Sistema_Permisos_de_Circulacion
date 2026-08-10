@@ -104,15 +104,7 @@ export class AdjuntarDocumentoUseCase {
     const ext = this.extensionDesdeMime(mimeType);
     const storageKey = `${solicitudId}/${Date.now()}-${hashSha256.slice(0, 8)}.${ext}`;
 
-    // Subir a MinIO (bucket de documentos del ciudadano)
-    await this.storageAdapter.upload(
-      this.storageAdapter.bucketDocs,
-      storageKey,
-      archivoBuffer,
-      mimeType,
-    );
-
-    // Persistir metadatos del documento
+    // Persistir metadatos primero para que el documento sea visible aunque MinIO falle
     const entidad = this.documentoRepo.create({
       tipoDocumento,
       nombreOriginal,
@@ -126,6 +118,19 @@ export class AdjuntarDocumentoUseCase {
     });
 
     const saved = await this.documentoRepo.save(entidad);
+
+    // Subir a MinIO — si falla, revertir el registro de BD
+    try {
+      await this.storageAdapter.upload(
+        this.storageAdapter.bucketDocs,
+        storageKey,
+        archivoBuffer,
+        mimeType,
+      );
+    } catch (uploadError) {
+      await this.documentoRepo.delete(saved.id);
+      throw uploadError;
+    }
 
     void this.auditoriaService.registrar({
       accion: AccionAuditoria.ADJUNTAR_DOCUMENTO,

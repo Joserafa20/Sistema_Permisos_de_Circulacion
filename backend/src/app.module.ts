@@ -77,6 +77,10 @@ import { ReportesModule } from './modules/reportes/reportes.module';
         migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
         synchronize: false,
         logging: config.get<string>('app.nodeEnv') === 'development',
+        ssl:
+          config.get<string>('app.nodeEnv') === 'production'
+            ? { rejectUnauthorized: false }
+            : false,
         extra: {
           max: 10,
           min: 2,
