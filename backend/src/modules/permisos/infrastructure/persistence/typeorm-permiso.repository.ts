@@ -186,7 +186,10 @@ export class TypeOrmPermisoRepository implements IPermisoRepository {
     const solicitudId = entity.solicitud.id;
 
     await this.dataSource.transaction(async (manager) => {
-      // Eliminar en orden para respetar FK: historial → documentos → permiso → solicitud
+      // Respetar FKs: dependientes primero, luego las entidades principales
+      await manager.query(`DELETE FROM qr_validaciones WHERE permiso_id = $1`, [id]);
+      await manager.query(`DELETE FROM notificaciones WHERE permiso_id = $1`, [id]);
+      await manager.query(`DELETE FROM notificaciones WHERE solicitud_id = $1`, [solicitudId]);
       await manager.query(`DELETE FROM historial_estados WHERE solicitud_id = $1`, [solicitudId]);
       await manager.query(`DELETE FROM documentos WHERE solicitud_id = $1`, [solicitudId]);
       await manager.query(`DELETE FROM permisos WHERE id = $1`, [id]);
