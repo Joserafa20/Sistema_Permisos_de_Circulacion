@@ -15,7 +15,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Equals } from 'class-validator';
-import { TipoDocumentoIdentidad } from '../../../../common/enums';
+import { TipoDocumentoIdentidad, TipoVehiculo } from '../../../../common/enums';
 
 export class CiudadanoEnSolicitudDto {
   @ApiProperty({ enum: TipoDocumentoIdentidad })
@@ -76,12 +76,11 @@ export class CiudadanoEnSolicitudDto {
 }
 
 export class MotocicletaEnSolicitudDto {
-  @ApiProperty({ description: 'Placa colombiana: AAA000 o AAA00A (mayúsculas)' })
+  @ApiProperty({ description: 'Placa colombiana: AAA00A (moto) o AAA000 (motocarro)' })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[A-Z]{3}[0-9]{2}[A-Z0-9]$/, {
-    message:
-      'placa debe tener el formato colombiano: tres letras, dos dígitos y una letra o dígito (ej. ABC123)',
+  @Matches(/^[A-Z]{3}[0-9]{2}[A-Z0-9]$|^[A-Z]{3}[0-9]{3}$/, {
+    message: 'placa debe tener formato moto (AAA00A) o motocarro (AAA000)',
   })
   placa: string;
 
@@ -133,6 +132,10 @@ export class CrearSolicitudDto {
   @IsOptional()
   @IsString()
   recaptchaToken?: string;
+
+  @ApiProperty({ enum: TipoVehiculo, default: TipoVehiculo.MOTO })
+  @IsEnum(TipoVehiculo)
+  tipoVehiculo: TipoVehiculo;
 
   @ApiProperty({ type: CiudadanoEnSolicitudDto })
   @ValidateNested()

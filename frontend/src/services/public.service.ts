@@ -40,6 +40,7 @@ export interface CrearSolicitudPayload {
     cilindraje?: number;
     color?: string;
   };
+  tipoVehiculo: 'moto' | 'motocarro';
   motivoId: string;
   declaracionJurada: boolean;
   descripcionAdicional?: string;

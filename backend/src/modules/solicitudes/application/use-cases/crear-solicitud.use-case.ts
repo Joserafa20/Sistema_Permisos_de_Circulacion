@@ -95,6 +95,7 @@ export class CrearSolicitudUseCase {
         numeroMotor: dto.motocicleta.numeroMotor,
         numeroChasis: dto.motocicleta.numeroChasis,
       },
+      tipoVehiculo: dto.tipoVehiculo,
       motivoId: dto.motivoId,
       fechaInicio: fechaInicio,
       fechaFin,

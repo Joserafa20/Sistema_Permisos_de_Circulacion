@@ -31,12 +31,15 @@ export const ciudadanoSchema = z.object({
 
 /* ── Paso 2 — Motocicleta ─────────────────────────────── */
 export const motocicletaSchema = z.object({
+  tipoVehiculo: z.enum(['moto', 'motocarro'], {
+    required_error: 'Seleccione el tipo de vehículo',
+  }),
   placa: z
     .string()
     .toUpperCase()
     .regex(
-      /^[A-Z]{3}\d{2}[A-Z]$/,
-      'Placa colombiana: formato ABC12D (3 letras, 2 números, 1 letra)',
+      /^[A-Z]{3}\d{2}[A-Z]$|^[A-Z]{3}\d{3}$/,
+      'Placa inválida. Moto: ABC12D — Motocarro: ABC123',
     ),
   marca: z.string().min(2, 'Ingrese la marca').max(50, 'Máximo 50 caracteres'),
   modelo: z.string().min(2, 'Ingrese el modelo').max(100, 'Máximo 100 caracteres'),
@@ -88,7 +91,7 @@ export const PASO_FIELDS: Record<number, Array<keyof SolicitudFormValues>> = {
     'municipio',
     'departamento',
   ],
-  2: ['placa', 'marca', 'modelo', 'anio', 'color', 'cilindraje', 'tipoServicio'],
+  2: ['tipoVehiculo', 'placa', 'marca', 'modelo', 'anio', 'color', 'cilindraje', 'tipoServicio'],
   3: ['motivoId'],
   4: [],
   5: ['declaracionJurada'],
@@ -104,6 +107,7 @@ export const DEFAULT_VALUES: SolicitudFormValues = {
   direccion: '',
   municipio: '',
   departamento: '',
+  tipoVehiculo: 'moto',
   placa: '',
   marca: '',
   modelo: '',

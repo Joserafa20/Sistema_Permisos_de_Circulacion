@@ -166,6 +166,7 @@ export function SolicitudForm() {
           ...(values.cilindraje && values.cilindraje > 0 && { cilindraje: values.cilindraje }),
           ...(values.color && { color: values.color }),
         },
+        tipoVehiculo: values.tipoVehiculo,
         motivoId: values.motivoId,
         declaracionJurada: values.declaracionJurada,
         descripcionAdicional: values.justificacion || undefined,

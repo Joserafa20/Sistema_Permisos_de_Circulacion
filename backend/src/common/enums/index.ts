@@ -8,3 +8,4 @@ export { TipoDocumentoIdentidad } from './tipo-documento-identidad.enum';
 export { TipoNotificacion } from './tipo-notificacion.enum';
 export { EstadoEnvioNotificacion } from './estado-envio-notificacion.enum';
 export { ResultadoQrValidacion } from './resultado-qr-validacion.enum';
+export { TipoVehiculo } from './tipo-vehiculo.enum';

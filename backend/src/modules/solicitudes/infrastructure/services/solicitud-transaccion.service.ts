@@ -5,7 +5,7 @@ import { MotocicletaEntity } from '../../../motocicletas/infrastructure/persiste
 import { MotivoEntity } from '../../../motivos/infrastructure/persistence/motivo.entity';
 import { SolicitudEntity } from '../persistence/solicitud.entity';
 import { HistorialEstadoEntity } from '../persistence/historial-estado.entity';
-import { EstadoSolicitud, TipoDocumentoIdentidad } from '../../../../common/enums';
+import { EstadoSolicitud, TipoDocumentoIdentidad, TipoVehiculo } from '../../../../common/enums';
 import { ConflictException } from '../../../../common/exceptions/conflict.exception';
 
 const ESTADOS_ACTIVOS: EstadoSolicitud[] = [
@@ -41,6 +41,7 @@ export interface DatosMotocicletaTransaccion {
 export interface CrearSolicitudTransaccionParams {
   ciudadanoData: DatosCiudadanoTransaccion;
   motocicletaData: DatosMotocicletaTransaccion;
+  tipoVehiculo: TipoVehiculo;
   motivoId: string;
   fechaInicio: string;
   fechaFin: string;
@@ -76,10 +77,11 @@ export class SolicitudTransaccionService {
         );
       }
 
-      const numeroRadicado = await this.generarRadicado(em);
+      const numeroRadicado = await this.generarRadicado(em, params.tipoVehiculo);
 
       const solicitudEntity = em.create(SolicitudEntity, {
         numeroRadicado,
+        tipoVehiculo: params.tipoVehiculo,
         estado: EstadoSolicitud.RECIBIDA,
         fechaInicio: params.fechaInicio,
         fechaFin: params.fechaFin,
@@ -191,11 +193,22 @@ export class SolicitudTransaccionService {
   // ─── Generación de radicado (RN-14) ───────────────────────────────────────
 
   /**
-   * Formato: AAAAMMDD-PYP-XXXXXX
-   * La fecha se toma en zona horaria COT (America/Bogota, UTC-5).
-   * El consecutivo es diario y se calcula contando radicados del mismo día.
+   * Moto:      AAAAMMDD-PYP-XXXXXX  (consecutivo diario)
+   * Motocarro: AAAA-PYP-MTC-XXXXXX  (consecutivo anual global)
    */
-  private async generarRadicado(em: EntityManager): Promise<string> {
+  private async generarRadicado(em: EntityManager, tipoVehiculo: TipoVehiculo): Promise<string> {
+    if (tipoVehiculo === TipoVehiculo.MOTOCARRO) {
+      const anio = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota', year: 'numeric' })
+        .format(new Date())
+        .slice(0, 4);
+      const prefijo = `${anio}-PYP-MTC-`;
+      const count = await em
+        .createQueryBuilder(SolicitudEntity, 's')
+        .where('s.numeroRadicado LIKE :prefijo', { prefijo: `${prefijo}%` })
+        .getCount();
+      return `${prefijo}${String(count + 1).padStart(6, '0')}`;
+    }
+
     const fechaCOT = new Intl.DateTimeFormat('es-CO', {
       timeZone: 'America/Bogota',
       year: 'numeric',
@@ -203,18 +216,14 @@ export class SolicitudTransaccionService {
       day: '2-digit',
     })
       .format(new Date())
-      .replace(/\//g, ''); // "04/08/2026" → "04082026"
+      .replace(/\//g, '');
 
-    // Reordenar de DD/MM/YYYY a YYYYMMDD
     const datePart = `${fechaCOT.slice(4)}${fechaCOT.slice(2, 4)}${fechaCOT.slice(0, 2)}`;
     const prefijo = `${datePart}-PYP-`;
-
     const count = await em
       .createQueryBuilder(SolicitudEntity, 's')
       .where('s.numeroRadicado LIKE :prefijo', { prefijo: `${prefijo}%` })
       .getCount();
-
-    const consecutivo = String(count + 1).padStart(6, '0');
-    return `${prefijo}${consecutivo}`;
+    return `${prefijo}${String(count + 1).padStart(6, '0')}`;
   }
 }

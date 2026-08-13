@@ -15,7 +15,7 @@ import {
 import { CiudadanoEntity } from '../../../ciudadanos/infrastructure/persistence/ciudadano.entity';
 import { MotocicletaEntity } from '../../../motocicletas/infrastructure/persistence/motocicleta.entity';
 import { MotivoEntity } from '../../../motivos/infrastructure/persistence/motivo.entity';
-import { EstadoSolicitud } from '../../../../common/enums';
+import { EstadoSolicitud, TipoVehiculo } from '../../../../common/enums';
 import { HistorialEstadoEntity } from './historial-estado.entity';
 import { DocumentoEntity } from './documento.entity';
 import { PermisoEntity } from '../../../permisos/infrastructure/persistence/permiso.entity';
@@ -30,7 +30,15 @@ export class SolicitudEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  /** Formato: 20260802-PYP-001234. Generado en la capa de aplicación. */
+  @Column({
+    name: 'tipo_vehiculo',
+    type: 'varchar',
+    length: 20,
+    default: TipoVehiculo.MOTO,
+  })
+  tipoVehiculo: TipoVehiculo;
+
+  /** Formato moto: 20260802-PYP-001234 | motocarro: 2026-PYP-MTC-000001 */
   @Column({ name: 'numero_radicado', type: 'varchar', length: 25, unique: true })
   numeroRadicado: string;
 

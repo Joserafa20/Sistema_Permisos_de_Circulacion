@@ -11,6 +11,11 @@ const SERVICIO_OPTIONS: SelectOption[] = [
   { value: 'publico', label: 'Público' },
 ];
 
+const TIPO_VEHICULO_OPTIONS: SelectOption[] = [
+  { value: 'moto', label: 'Moto' },
+  { value: 'motocarro', label: 'Motocarro' },
+];
+
 function em(msg: string | undefined): string | undefined {
   return msg;
 }
@@ -24,21 +29,44 @@ export function Paso2Motocicleta() {
   } = useFormContext<SolicitudFormValues>();
 
   const tipoServicio = watch('tipoServicio');
+  const tipoVehiculo = watch('tipoVehiculo');
+  const esMotocarro = tipoVehiculo === 'motocarro';
 
   return (
     <fieldset className="space-y-5">
       <legend className="text-base font-semibold text-neutral-800 mb-4">
-        Información de la motocicleta
+        Información del vehículo
       </legend>
+
+      <Select<string>
+        id="tipoVehiculo"
+        label="Tipo de vehículo"
+        required
+        options={TIPO_VEHICULO_OPTIONS}
+        value={tipoVehiculo}
+        onChange={(val: string) => {
+          setValue('tipoVehiculo', val as SolicitudFormValues['tipoVehiculo'], {
+            shouldValidate: true,
+          });
+          // Reset placa when switching type
+          setValue('placa', '', { shouldValidate: false });
+        }}
+        error={em(errors.tipoVehiculo?.message)}
+        placeholder="Seleccione..."
+      />
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Input
           id="placa"
           label="Placa"
           required
-          placeholder="ABC12D"
+          placeholder={esMotocarro ? 'ABC123' : 'ABC12D'}
           maxLength={6}
-          hint="Formato: 3 letras, 2 números, 1 letra"
+          hint={
+            esMotocarro
+              ? 'Motocarro: 3 letras, 3 números (ej. MMM000)'
+              : 'Moto: 3 letras, 2 números, 1 letra (ej. ABC12D)'
+          }
           error={em(errors.placa?.message)}
           {...register('placa', {
             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
