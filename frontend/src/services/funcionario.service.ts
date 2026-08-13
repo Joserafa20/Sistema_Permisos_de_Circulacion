@@ -124,10 +124,8 @@ async function countSolicitudes(params: Record<string, string>): Promise<number>
 
 async function countPermisos(params: Record<string, string>): Promise<number> {
   const query = new URLSearchParams({ page: '1', limit: '1', ...params }).toString();
-  const res = await apiGet<ApiResponse<{ data: unknown[]; pagination: { total: number } }>>(
-    `/permisos?${query}`,
-  );
-  return res.data?.pagination?.total ?? 0;
+  const res = await apiGet<ApiResponse<{ total: number }>>(`/permisos?${query}`);
+  return res.data?.total ?? 0;
 }
 
 async function safeCount(fn: () => Promise<number>): Promise<number> {
