@@ -38,8 +38,8 @@ export const motocicletaSchema = z.object({
     .string()
     .toUpperCase()
     .regex(
-      /^[A-Z]{3}\d{2}[A-Z]$|^[A-Z]{3}\d{3}$/,
-      'Placa inválida. Moto: ABC12D — Motocarro: ABC123',
+      /^[A-Z]{3}\d{2}[A-Z]$|^\d{3}[A-Z]{3}$/,
+      'Placa inválida. Moto: ABC12D — Motocarro: 123ABC',
     ),
   marca: z.string().min(2, 'Ingrese la marca').max(50, 'Máximo 50 caracteres'),
   modelo: z.string().min(2, 'Ingrese el modelo').max(100, 'Máximo 100 caracteres'),
