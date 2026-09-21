@@ -79,8 +79,8 @@ export class MotocicletaEnSolicitudDto {
   @ApiProperty({ description: 'Placa colombiana: AAA00A (moto) o AAA000 (motocarro)' })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[A-Z]{3}[0-9]{2}[A-Z0-9]$|^[A-Z]{3}[0-9]{3}$/, {
-    message: 'placa debe tener formato moto (AAA00A) o motocarro (AAA000)',
+  @Matches(/^[A-Z]{3}[0-9]{2}[A-Z0-9]$|^[0-9]{3}[A-Z]{3}$/, {
+    message: 'placa debe tener formato moto (AAA00A) o motocarro (123ABC)',
   })
   placa: string;
 
