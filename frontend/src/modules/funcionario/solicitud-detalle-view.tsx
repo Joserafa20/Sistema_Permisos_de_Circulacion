@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ArrowLeft,
@@ -161,7 +161,7 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
   /* ── Helpers ───────────────────────────────── */
   function openAprobarModal() {
     aprobarForm.reset({
-      fechaVencimiento: solicitud?.fechaFin ?? '',
+      fechaVencimiento: (solicitud?.fechaFin ?? '').slice(0, 10),
       condicionesRestricciones: '',
     });
     setActiveModal('aprobar');
@@ -679,13 +679,24 @@ export function SolicitudDetalleView({ solicitudId }: Props) {
                 *
               </span>
             </label>
-            <input
-              id="fecha-vencimiento"
-              type="date"
-              min={new Date().toISOString().slice(0, 10)}
-              aria-required="true"
-              {...aprobarForm.register('fechaVencimiento', { required: true })}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600"
+            <Controller
+              control={aprobarForm.control}
+              name="fechaVencimiento"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <input
+                  id="fecha-vencimiento"
+                  type="date"
+                  min={new Date().toISOString().slice(0, 10)}
+                  aria-required="true"
+                  value={field.value ?? ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600"
+                />
+              )}
             />
             {!aprobarForm.watch('fechaVencimiento') && (
               <span className="text-xs text-danger-600">
